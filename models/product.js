@@ -22,12 +22,13 @@ module.exports = {
       price,
       stock,
       category,
-      image_url
+      image_url,
+      brand
     } = product;
 
     const sql = `
-      INSERT INTO products (product_id, name, description, price, stock, category, image_url, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+      INSERT INTO products (product_id, name, description, price, stock, category, image_url, created_at, brand)
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)
     `;
     await db.promise().query(sql, [
       product_id,
@@ -36,7 +37,8 @@ module.exports = {
       price,
       stock,
       category,
-      image_url
+      image_url,
+      brand
     ]);
 
     return { product_id };
@@ -50,12 +52,13 @@ module.exports = {
       price,
       stock,
       category,
-      image_url
+      image_url,
+      brand
     } = product;
 
     const sql = `
       UPDATE products
-      SET name = ?, description = ?, price = ?, stock = ?, category = ?, image_url = ?
+      SET name = ?, description = ?, price = ?, stock = ?, category = ?, image_url = ?, brand = ?
       WHERE product_id = ?
     `;
     await db.promise().query(sql, [
@@ -65,6 +68,7 @@ module.exports = {
       stock,
       category,
       image_url,
+      brand,
       id
     ]);
   },
@@ -73,5 +77,28 @@ module.exports = {
   async remove(id) {
     const sql = `DELETE FROM products WHERE product_id = ?`;
     await db.promise().query(sql, [id]);
+  },
+
+  // Ambil produk berdasarkan brand
+  async getByBrand(brand) {
+    const sql = `SELECT * FROM products WHERE brand = ?`;
+    const [rows] = await db.promise().query(sql, [brand]);
+    return rows;
+  },
+
+  async getTopSellers() {
+  const [rows] = await db.promise().query(
+    'SELECT * FROM products WHERE is_top_seller = TRUE'
+  );
+  return rows;
+  },
+
+  // Ambil produk berdasarkan kategori
+  async getByCategory(category) {
+    const sql = `SELECT * FROM products WHERE category = ?`;
+    const [rows] = await db.promise().query(sql, [category]);
+    return rows;
   }
 };
+
+

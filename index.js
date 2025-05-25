@@ -4,9 +4,9 @@ const cors = require('cors');
 require('dotenv').config();
 
 // Middleware bawaan
-app.use(cors(
-  origin = 'https://localhost:5173'
-));
+app.use(cors({
+  origin: 'http://localhost:5173'
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -14,12 +14,12 @@ app.use(express.urlencoded({ extended: false }));
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 app.use('/api', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
-app.use(express.json())
-
+app.use('/api', profileRoutes);
 
 // 404 handler
 app.use((req, res) => {

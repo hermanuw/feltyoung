@@ -15,6 +15,5 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Ignore build outputs (jika pakai TypeScript)
 dist/
 build/

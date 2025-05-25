@@ -62,5 +62,24 @@ async setVerified(email) {
     ]);
 
     return { user_id }; // kembalikan user_id agar bisa digunakan untuk JWT atau lainnya
+  },
+
+    // Ubah nama dan nomor telepon
+  async updateProfile(user_id, { name, phone_number }) {
+    const sql = `UPDATE users SET name = ?, phone_number = ? WHERE user_id = ?`;
+    await db.promise().query(sql, [name, phone_number, user_id]);
+  },
+
+  // Ubah password
+  async updatePassword(user_id, hashedPassword) {
+    const sql = `UPDATE users SET password = ? WHERE user_id = ?`;
+    await db.promise().query(sql, [hashedPassword, user_id]);
+  },
+
+  // Ubah atau tambah alamat
+  async updateAddress(user_id, address) {
+    const sql = `UPDATE users SET address = ? WHERE user_id = ?`;
+    await db.promise().query(sql, [address, user_id]);
   }
+
 };

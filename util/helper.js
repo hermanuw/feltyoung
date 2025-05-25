@@ -55,7 +55,7 @@ async function sendVerificationEmail(email, token, url) {
     return await bcrypt.compare(password, hashPassword);
   }
   function issueAccessToken(payload) {
-    return jwt.sign(payload, config.SECRET, { expiresIn: 60 * 2}); //2 mins validity 
+    return jwt.sign(payload, config.SECRET, { expiresIn: 60 * 5}); //5 mins validity 
   }
   
   async function createRefreshToken(user_id) {

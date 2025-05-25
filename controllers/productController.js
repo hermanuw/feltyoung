@@ -35,7 +35,8 @@ async function addProducts(req, res) {
       description,
       price,
       stock,
-      category
+      category,
+      brand
     } = req.body;
 
     const file = req.file;
@@ -51,11 +52,10 @@ async function addProducts(req, res) {
       Body: file.buffer,
       ContentType: file.mimetype,
     };
-    console.log('BUCKET:', process.env.R2_BUCKET_NAME);
-
     await r2.send(new PutObjectCommand(uploadParams));
 
-    const imageUrl = `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET_NAME}/${fileName}`;
+    const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
+
 
     // Simpan produk ke database
     const product_id = uuidv4();
@@ -67,6 +67,7 @@ async function addProducts(req, res) {
       stock,
       category,
       image_url: imageUrl,
+      brand
     });
 
     return res.status(201).json({
@@ -87,7 +88,7 @@ async function updateProducts(req, res) {
     const existing = await Product.getById(id);
     if (!existing) return res.status(404).json({ message: 'Product not found' });
 
-    const { name, price, stock, description, category } = req.body;
+    const { name, price, stock, description, category, brand } = req.body;
     let image_url = existing.image_url; // default: tetap pakai gambar lama
 
     // Jika file gambar dikirim, upload ke Cloudflare R2
@@ -102,7 +103,7 @@ async function updateProducts(req, res) {
 
       await r2.send(new PutObjectCommand(uploadParams));
 
-      image_url = `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${process.env.R2_BUCKET_NAME}/${fileName}`;
+      image_url = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
     }
 
     await Product.update(id, {
@@ -111,7 +112,8 @@ async function updateProducts(req, res) {
       stock,
       description,
       category,
-      image_url
+      image_url,
+      brand
     });
 
     return res.json({ message: 'Product updated' });
@@ -150,10 +152,45 @@ async function deleteProducts(req, res) {
   }
 }
 
+async function getByBrand(req, res) {
+  const { brand } = req.params;
+
+  try {
+    const products = await Product.getByBrand(brand);
+    return res.json(products);
+  } catch (err) {
+    console.error('Get by brand failed:', err);
+    return res.status(500).json({ message: 'Failed to fetch products by brand' });
+  }
+}
+async function getTopSellerProducts(req, res) {
+  try {
+    const products = await Product.getTopSellers();
+    return res.json(products);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to fetch top seller products' });
+  }
+}
+
+async function getByCategory(req, res) {
+  const { category } = req.params;
+  try {
+    const products = await Product.getByCategory(category);
+    return res.json(products);
+  } catch (err) {
+    console.error('Get by category failed:', err);
+    return res.status(500).json({ message: 'Failed to fetch products by category' });
+  }
+}
+
 module.exports = {
   getAllProducts,
   getById,
   addProducts,
   updateProducts,
   deleteProducts,
+  getByBrand,
+  getTopSellerProducts,
+  getByCategory
 };
