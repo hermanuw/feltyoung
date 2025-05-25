@@ -1,33 +1,41 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import AuthPage from '../views/AuthPage.vue'
 import DefaultLayout from '@/components/layout/DefaultLayout.vue'
+import CartView from '@/views/CartView.vue'
+import ProfileView from '@/views/ProfileView.vue'
+import BrandView from '@/views/BrandView.vue'
+import CategoryView from '@/views/CategoryView.vue'
 
 const routes = [
   {
-    path: "/",
+    path: '/',
     component: DefaultLayout,
     children: [
       {
-        path: "",
-        name: "home",
+        path: '',
+        name: 'home',
         component: HomeView,
       },
       {
-        path: "/login",
-        name: "login",
-        component: AuthPage,
+        path: '/cart',
+        name: 'cart',
+        component: CartView,
       },
-      // {
-      //   path: "/services",
-      //   name: "services",
-      //   component: ServicesPage,
-      // },
-      // {
-      //   path: "/cars",
-      //   name: "cars",
-      //   component: CarsPage,
-      // },
+      {
+        path: '/profile',
+        name: 'profile',
+        component: ProfileView,
+      },
+      {
+        path: "/brand/:slug",
+        name: "brand",
+        component: BrandView,
+      },
+      {
+        path: "/products/:category",
+        name: "category",
+        component: CategoryView,
+      },
       // {
       //   path: "/car/:id",
       //   name: "carDetails",
@@ -55,15 +63,25 @@ const routes = [
       // },
     ],
   },
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior() {
-    return { top: 0 }; // scroll to the top on page navigation
+    return { top: 0 } // scroll to the top on page navigation
   },
-});
+})
 
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('accessToken')
+  const protectedRoutes = ['/profile', '/cart']
+
+  if (protectedRoutes.includes(to.path) && !token) {
+    next('/') // Atau redirect ke halaman login
+  } else {
+    next()
+  }
+})
 
 export default router

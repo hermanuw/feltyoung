@@ -1,76 +1,83 @@
 <template>
-      <div class="w-full h-full flex items-center justify-center font-poppins">
-        <div
-          class="container"
-          :class="{ 'right-panel-active': isRegister }"
-          id="container"
-        >
-          <!-- Register Form -->
-          <div class="form-container register-container">
-            <form @submit.prevent="register">
-              <h1>Register here.</h1>
-              <input v-model="name" type="name" placeholder="Name" required>
-              <input v-model="email" type="email" placeholder="Email" required>
-              <input v-model="phone" type="phone" placeholder="Phone" required>
-              <input v-model="password" type="password" placeholder="Password" required>
-              <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
-              <button type="submit" class="btn-primary">Register</button>
-              <!-- <span>or use your account</span>
+  <div class="w-full h-full flex items-center justify-center font-poppins">
+    <div class="container" :class="{ 'right-panel-active': isRegister }" id="container">
+      <!-- Register Form -->
+      <div class="form-container register-container">
+        <form @submit.prevent="register">
+          <h1>Register here.</h1>
+          <input v-model="name" type="name" placeholder="Name" required />
+          <input v-model="email" type="email" placeholder="Email" required />
+          <input v-model="phone" type="phone" placeholder="Phone" required />
+          <input v-model="password" type="password" placeholder="Password" required />
+          <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
+          <button type="submit" class="btn-primary">Register</button>
+          <!-- <span>or use your account</span>
               <div class="social-container">
                 <a href="#" class="social"><i class="lni lni-facebook-fill"></i></a>
                 <a href="#" class="social"><i class="lni lni-google"></i></a>
                 <a href="#" class="social"><i class="lni lni-linkedin-original"></i></a>
               </div> -->
-            </form>
-          </div>
-          <!-- Login Form -->
-          <div class="form-container login-container">
-            <form @submit.prevent="login">
-              <h1>Login here.</h1>
-              <input v-model="email" type="email" placeholder="Email" required>
-              <input v-model="password" type="password" placeholder="Password" required>
-              <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
-              <div class="content">
-                <!-- <div class="checkbox">
+        </form>
+      </div>
+      <!-- Login Form -->
+      <div class="form-container login-container">
+        <form @submit.prevent="login">
+          <h1>Login here.</h1>
+          <input v-model="email" type="email" placeholder="Email" required />
+          <input v-model="password" type="password" placeholder="Password" required />
+          <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
+          <div class="content">
+            <!-- <div class="checkbox">
                   <input type="checkbox" id="checkbox" />
                   <label for="checkbox">Remember me</label>
                 </div> -->
-                <div class="pass-link">
-                  <a href="#">Forgot password?</a>
-                </div>
-              </div>
-              <button type="submit" class="btn-primary">Login</button>
-            </form>
-          </div>
-          <!-- Overlay -->
-          <div class="overlay-container">
-            <div class="overlay" :style="{ backgroundImage: `url(${bgImage})` }">
-              <div class="overlay-panel overlay-left">
-                <h1 class="title">Hello <br /> friends</h1>
-                <p><b>If you have an account, login here and have fun</b></p>
-                <button class="ghost" @click="isRegister = false">
-                  Login
-                  <i class="lni lni-arrow-left login"></i>
-                </button>
-              </div>
-              <div class="overlay-panel overlay-right">
-                <h1 class="title">Start your <br /> journey now</h1>
-                <p><b>If you don't have an account yet, join us and start your journey.</b></p>
-                <button class="ghost" @click="isRegister = true">
-                  Register
-                  <i class="lni lni-arrow-right register"></i>
-                </button>
-              </div>
+            <div class="pass-link">
+              <a href="#">Forgot password?</a>
             </div>
+          </div>
+          <button type="submit" class="btn-primary">Login</button>
+        </form>
+      </div>
+      <!-- Overlay -->
+      <div class="overlay-container">
+        <div class="overlay" :style="{ backgroundImage: `url(${bgImage})` }">
+          <div class="overlay-panel overlay-left">
+            <h1 class="title">
+              Hello <br />
+              friends
+            </h1>
+            <p><b>If you have an account, login here and have fun</b></p>
+            <button class="ghost" @click="isRegister = false">
+              Login
+              <i class="lni lni-arrow-left login"></i>
+            </button>
+          </div>
+          <div class="overlay-panel overlay-right">
+            <h1 class="title">
+              Start your <br />
+              journey now
+            </h1>
+            <p><b>If you don't have an account yet, join us and start your journey.</b></p>
+            <button class="ghost" @click="isRegister = true">
+              Register
+              <i class="lni lni-arrow-right register"></i>
+            </button>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axiosInstance from '@/axios'
 import bgImage from '@/assets/Feltyoung.jpg'
+
+// Emit ke parent
+const emit = defineEmits(['close', 'login-success'])
+
 const router = useRouter()
 const name = ref('')
 const phone = ref('')
@@ -78,47 +85,42 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const isRegister = ref(false)
-const emit = defineEmits(['close', 'login-success'])
 
 async function login() {
   try {
     error.value = ''
-    const res = await fetch('http://localhost:3000/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value })
+    const res = await axiosInstance.post('/login', {
+      email: email.value,
+      password: password.value,
     })
-    const data = await res.json()
-    if (!res.ok) {
-      error.value = data.message || 'Login gagal'
-      return
-    }
-    // Simpan token agar bisa dipakai ke halaman lain
-    localStorage.setItem('accessToken', data.accessToken)
-    localStorage.setItem('refreshToken', data.refreshToken)
-    emit('login-success');
-    emit('close');
-    router.push('/');// Ganti sesuai halaman tujuan setelah login
+
+    // Simpan token
+    localStorage.setItem('accessToken', res.data.accessToken)
+    localStorage.setItem('refreshToken', res.data.refreshToken)
+
+    // Beri tahu parent dan tutup modal
+    emit('login-success')
+    emit('close')
+
+    // Redirect dan refresh ke home
+    window.location.href = '/'
   } catch (err) {
-    console.error(err)
+    error.value = err.response?.data?.message || 'Login gagal'
   }
 }
 
 async function register() {
-  try{
-    const res = await fetch('http://localhost:3000/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.value, email: email.value, phone_number: phone.value, password: password.value })
+  try {
+    const res = await axiosInstance.post('/register', {
+      name: name.value,
+      email: email.value,
+      phone_number: phone.value,
+      password: password.value,
     })
-    const data = await res.json()
-    if (!res.ok) {
-      error.value = data.message || 'Register gagal'
-      return
-    }
-    isRegister.value = false
+
+    isRegister.value = false // Berhasil, kembali ke form login
   } catch (err) {
-    console.error(err)
+    error.value = err.response?.data?.message || 'Register gagal'
   }
 }
 </script>
@@ -137,7 +139,7 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
   overflow: hidden;
   height: 100vh;
 }
@@ -242,26 +244,26 @@ button.ghost {
   color: #fff;
 }
 
-button.ghost i{
+button.ghost i {
   position: absolute;
   opacity: 0;
   transition: 0.3s ease-in-out;
 }
 
-button.ghost i.register{
+button.ghost i.register {
   right: 70px;
 }
 
-button.ghost i.login{
+button.ghost i.login {
   left: 70px;
 }
 
-button.ghost:hover i.register{
+button.ghost:hover i.register {
   right: 40px;
   opacity: 1;
 }
 
-button.ghost:hover i.login{
+button.ghost:hover i.login {
   left: 40px;
   opacity: 1;
 }
@@ -289,7 +291,9 @@ input {
 .container {
   background-color: #fff;
   border-radius: 25px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.25),
+    0 10px 10px rgba(0, 0, 0, 0.22);
   position: relative;
   overflow: hidden;
   width: 768px;
@@ -372,17 +376,13 @@ input {
 }
 
 .overlay::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  background: linear-gradient(
-    to top,
-    rgba(46, 94, 109, 0.4) 40%,
-    rgba(46, 94, 109, 0)
-  );
+  background: linear-gradient(to top, rgba(46, 94, 109, 0.4) 40%, rgba(46, 94, 109, 0));
 }
 
 .container.right-panel-active .overlay {

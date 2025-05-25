@@ -1,74 +1,116 @@
-<!-- <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="w-full max-w-sm p-8 bg-white rounded-lg shadow">
-      <h2 class="text-2xl font-bold mb-6 text-center">Register</h2>
-      <form @submit.prevent="register">
-        <input v-model="name" placeholder="Nama Lengkap" class="input" required />
-        <input v-model="email" type="email" placeholder="Email" class="input" required />
-        <input v-model="phone" placeholder="No Telepon" class="input" />
-        <input v-model="password" type="password" placeholder="Password" class="input" required />
-        <button class="btn">Daftar</button>
-      </form>
-      <p class="mt-4 text-center text-sm">
-        Sudah punya akun?
-        <router-link to="/login" class="text-blue-500 underline">Login</router-link>
-      </p>
-    </div>
+<template>
+  <div class="max-w-3xl mx-auto py-10 px-4 pt-30">
+    <h2 class="text-2xl font-bold mb-6">Kelola Profil</h2>
+
+    <form @submit.prevent="handleSubmit" class="bg-white rounded-xl shadow-lg p-6 space-y-5">
+      <!-- Nama dan Telepon -->
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Nama Lengkap</label>
+          <input v-model="form.name" class="form-input" type="text" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">No. Telepon</label>
+          <input v-model="form.phone_number" class="form-input" type="text" />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Password Saat Ini</label>
+          <input v-model="form.current_password" class="form-input" type="password" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Password Baru</label>
+          <input v-model="form.new_password" class="form-input" type="password" />
+        </div>
+      </div>
+
+      <!-- Alamat -->
+      <div>
+        <label class="block text-sm font-medium mb-1">Alamat</label>
+        <textarea v-model="form.address" class="form-input h-24"></textarea>
+      </div>
+
+      <button class="btn-black w-full">Simpan Semua Perubahan</button>
+    </form>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-const name = ref('')
-const email = ref('')
-const phone = ref('')
-const password = ref('')
+import { ref, onMounted } from 'vue'
+import axiosInstance from '@/axios'
 
-async function register() {
-  console.log('Register:', name.value, email.value, phone.value, password.value)
-  try{
-    const res = await fetch('http://localhost:3000/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.value, email: email.value, phone: phone.value, password: password.value })
+const form = ref({
+  name: '',
+  phone_number: '',
+  current_password: '',
+  new_password: '',
+  address: '',
+  email: '',
+})
+
+onMounted(async () => {
+  try {
+    const res = await axiosInstance.get('/profile')
+    console.log('Profil:', res.data)
+    Object.assign(form.value, res.data)
+  } catch (err) {
+    console.error('Gagal load profil:', err)
+  }
+})
+
+async function handleSubmit() {
+  try {
+    await axiosInstance.put('/profile', {
+      name: form.value.name,
+      phone_number: form.value.phone_number,
     })
-    const data = await res.json()
-    if (!res.ok) {
-      alert(data.message || 'Register gagal')
-      return
+
+    if (form.value.current_password && form.value.new_password) {
+      await axiosInstance.put('/profile/password', {
+        current_password: form.value.current_password,
+        new_password: form.value.new_password,
+      })
     }
-    alert('Register berhasil! Silakan login.')
-    router.push('/login')
+
+    await axiosInstance.put('/profile/address', {
+      address: form.value.address,
+    })
+
+    alert('Semua data berhasil diperbarui')
+    form.value.current_password = ''
+    form.value.new_password = ''
   } catch (err) {
     console.error(err)
-    alert('Terjadi kesalahan saat mendaftar.')
+    alert('Gagal menyimpan perubahan')
   }
 }
 </script>
 
 <style scoped>
-.input {
+.form-input {
   width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-  border-width: 1px;
-  border-radius: 0.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: box-shadow 0.2s;
 }
-.btn {
-  width: 100%;
-  background-color: #22c55e;
+.form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px black;
+}
+.btn-black {
+  background-color: #000;
   color: #fff;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  border-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
   transition: background-color 0.2s;
 }
-.btn:hover {
-  background-color: #16a34a;
+.btn-black:hover {
+  background-color: #1f2937;
 }
-</style> -->
+</style>

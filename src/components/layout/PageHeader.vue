@@ -19,7 +19,13 @@
         </div>
 
         <!-- NAV DESKTOP -->
-        <nav :class="{ 'scrolled-nav': isScrolled }" class="space-x-6 hidden md:flex items-center">
+        <nav
+          :class="[
+            { 'scrolled-nav': isScrolled },
+            route.path !== '/' ? 'route-not-home' : '',
+            'space-x-6 hidden md:flex items-center',
+          ]"
+        >
           <router-link
             v-for="link in links"
             :key="link.path"
@@ -33,7 +39,7 @@
             to="/cart"
             class="text-[#5C4033] hover:text-[#402a1e] transition"
             title="Cart"
-            >
+          >
             <BsCart3 class="text-2xl" />
           </router-link>
 
@@ -43,7 +49,7 @@
             to="/profile"
             class="text-[#5C4033] hover:text-[#402a1e] transition"
             title="Profile"
-            >
+          >
             <CgProfile class="text-2xl" />
           </router-link>
 
@@ -67,7 +73,11 @@
 
         <!-- NAV MOBILE -->
         <div class="flex md:hidden">
-          <button @click="toggleMenu" class="text-gray-800 focus:outline-none" aria-label="Toggle mobile menu">
+          <button
+            @click="toggleMenu"
+            class="text-gray-800 focus:outline-none"
+            aria-label="Toggle mobile menu"
+          >
             <FaBarsStaggered />
           </button>
 
@@ -88,17 +98,18 @@
             <router-link
               v-if="!isAuthenticated"
               to="#"
-              @click.prevent="() => { showAuthForm = true; closeMenu(); }"
+              @click.prevent="
+                () => {
+                  showAuthForm = true
+                  closeMenu()
+                }
+              "
               class="px-4 py-2 border border-black text-[#5C4033] hover:bg-[#5C4033] hover:text-white font-semibold rounded-full text-center transition"
             >
               Login
             </router-link>
 
-            <button
-              v-else
-              @click="logout"
-              class="text-left text-red-500 font-semibold"
-            >
+            <button v-else @click="logout" class="text-left text-red-500 font-semibold">
               Logout
             </button>
           </div>
@@ -108,111 +119,109 @@
 
     <!-- MODAL AUTH FORM -->
     <transition name="slide-down">
-  <div
-  v-if="showAuthForm"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
->
-  <!-- WRAPPER tombol dan konten auth -->
-  <div class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]">
+      <div
+        v-if="showAuthForm"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+      >
+        <!-- WRAPPER tombol dan konten auth -->
+        <div class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]">
+          <!-- Tombol Close harus di sini, dalam wrapper -->
+          <button
+            class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999]"
+            @click="showAuthForm = false"
+            aria-label="Close"
+          >
+            ×
+          </button>
 
-    <!-- Tombol Close harus di sini, dalam wrapper -->
-    <button
-      class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999]"
-      @click="showAuthForm = false"
-      aria-label="Close"
-    >
-      ×
-    </button>
-
-    <!-- AuthForm harus berada di bawah tombol -->
-    <AuthForm @close="showAuthForm = false" @login-success="handleLoginSuccess" />
-  </div>
-</div>
-
-</transition>
-
+          <!-- AuthForm harus berada di bawah tombol -->
+          <AuthForm @close="showAuthForm = false" @login-success="handleLoginSuccess" />
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import PageLogo from "../composables/PageLogo.vue";
-import AuthForm from "../composables/AuthForm.vue";
-import { useRoute, useRouter } from "vue-router";
-import { computed, onMounted, onBeforeUnmount, ref } from "vue";
-import { FaBarsStaggered } from "@kalimahapps/vue-icons";
-import { CgProfile } from '@kalimahapps/vue-icons';
-import { BsCart3 } from '@kalimahapps/vue-icons';
-import axios from "axios";
+import PageLogo from '../composables/PageLogo.vue'
+import AuthForm from '../composables/AuthForm.vue'
+import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { FaBarsStaggered } from '@kalimahapps/vue-icons'
+import { CgProfile } from '@kalimahapps/vue-icons'
+import { BsCart3 } from '@kalimahapps/vue-icons'
+import axios from 'axios'
 
-const route = useRoute();
-const router = useRouter();
-const isScrolled = ref(false);
-const menuVisible = ref(false);
-const isAuthenticated = ref(!!localStorage.getItem("accessToken"));
+const route = useRoute()
+const router = useRouter()
+const isScrolled = ref(false)
+const menuVisible = ref(false)
+const isAuthenticated = ref(!!localStorage.getItem('accessToken'))
 onMounted(() => {
-  window.addEventListener("storage", syncAuth);
-  handleScroll();
-});
+  window.addEventListener('storage', syncAuth)
+  handleScroll()
+})
 
 onBeforeUnmount(() => {
-  window.removeEventListener("storage", syncAuth);
-});
+  window.removeEventListener('storage', syncAuth)
+})
 
 function syncAuth() {
-  isAuthenticated.value = !!localStorage.getItem("accessToken");
+  isAuthenticated.value = !!localStorage.getItem('accessToken')
 }
 
-const searchQuery = ref("");
-const showAuthForm = ref(false);
+const searchQuery = ref('')
+const showAuthForm = ref(false)
 
 const links = [
-  { name: "Featured", path: "/" },
-  { name: "Sale", path: "/about" },
-  { name: "Men", path: "/services" },
-  { name: "Women", path: "/pricing" },
-];
+  { name: 'Featured', path: '/' },
+  { name: 'Sale', path: '/sale' },
+  { name: 'Men', path: '/products/men' },
+  { name: 'Women', path: '/products/women' },
+]
 
 const logout = async () => {
   try {
-    await axios.post("/api/logout");
+    await axios.post('/api/logout')
   } catch (e) {
-    console.warn("Logout failed, forcing logout");
+    console.warn('Logout failed, forcing logout')
   } finally {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    isAuthenticated.value = false;
-    router.push("/");
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    isAuthenticated.value = false
+    router.push('/')
   }
-};
+}
 function handleLoginSuccess() {
-  isAuthenticated.value = true;
+  isAuthenticated.value = true
 }
 const headerClass = computed(() => ({
-  "sm:bg-transparent": !isScrolled.value,
-  "sm:bg-white": isScrolled.value,
-  "shadow-md": isScrolled.value,
-  "p-4": true,
-  "sm:py-10": !isScrolled.value,
-}));
+  // 'bg-white': route.path !== '/',
+  'sm:bg-transparent': !isScrolled.value,
+  'sm:bg-white': isScrolled.value,
+  'shadow-md': isScrolled.value,
+  'p-4': true,
+  'sm:py-10': !isScrolled.value,
+}))
 
 const handleScroll = () => {
-  isScrolled.value = window.scrollY > 50;
-};
+  isScrolled.value = window.scrollY > 50
+}
 
 const toggleMenu = () => {
-  menuVisible.value = !menuVisible.value;
-};
+  menuVisible.value = !menuVisible.value
+}
 
 const closeMenu = () => {
-  menuVisible.value = false;
-};
+  menuVisible.value = false
+}
 
 onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
-});
+  window.addEventListener('scroll', handleScroll)
+})
 onBeforeUnmount(() => {
-  window.removeEventListener("scroll", handleScroll);
-});
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style scoped>
@@ -222,6 +231,10 @@ nav a {
 }
 
 nav.scrolled-nav a {
+  color: black !important;
+}
+
+nav.route-not-home a {
   color: black !important;
 }
 
