@@ -24,10 +24,12 @@
       <div
         v-for="(product, index) in products"
         :key="index"
-        class="flex-shrink-0 w-64 bg-white rounded-xl shadow-md p-4 snap-center transition-transform hover:scale-105 duration-300 flex flex-col justify-between h-[370px]"
+        class="flex-shrink-0 w-64 bg-white rounded-lg shadow-lg p-4 snap-center transition-transform hover:scale-105 duration-300 flex flex-col justify-between h-[350px]"
       >
         <!-- Gambar -->
-        <div class="aspect-[4/3] w-full flex items-center justify-center bg-white rounded-lg overflow-hidden mb-4">
+        <div
+          class="aspect-[4/3] w-full flex items-center justify-center bg-white rounded-lg overflow-hidden mb-4"
+        >
           <img
             :src="product.image_url"
             :alt="product.name"
@@ -37,15 +39,17 @@
 
         <!-- Info produk -->
         <div class="flex flex-col justify-between flex-grow">
-          <h3 class="text-lg font-semibold leading-snug break-words mb-1 line-clamp-2 min-h-[3rem]">
+          <h3 class="text-lg font-semibold leading-snug break-words mb-1 line-clamp-3 min-h-[4rem]">
             {{ product.name }}
           </h3>
-          <p class="text-sm text-gray-500 mb-1">{{ product.category }}</p>
+          <p class="text-md text-gray-500 mb-1">{{ product.category }}</p>
           <p class="text-md font-bold text-gray-800">{{ formatPrice(product.price) }}</p>
         </div>
 
         <!-- Tombol -->
-        <button class="mt-3 w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 transition">
+        <button
+          class="mt-3 w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
+        >
           Lihat Produk
         </button>
       </div>
@@ -54,57 +58,60 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { CaPreviousFilled, CaNextFilled } from '@kalimahapps/vue-icons';
-import axios from '@/axios';
+import { ref, onMounted, onUnmounted } from 'vue'
+import { CaPreviousFilled, CaNextFilled } from '@kalimahapps/vue-icons'
+import axios from '@/axios'
 
-const products = ref([]);
-const carousel = ref(null);
-let autoSlideInterval = null;
+const products = ref([])
+const carousel = ref(null)
+let autoSlideInterval = null
 
 async function fetchProducts() {
   try {
-    const res = await axios.get('/products/top-sellers');
-    products.value = res.data;
-    console.log(products.value);
+    const res = await axios.get('/products/top-sellers')
+    products.value = res.data
+    console.log(products.value)
   } catch (err) {
-    console.error('Failed to fetch products:', err);
+    console.error('Failed to fetch products:', err)
   }
 }
 
 function scrollLeft() {
-  carousel.value.scrollBy({ left: -300, behavior: 'smooth' });
+  carousel.value.scrollBy({ left: -300, behavior: 'smooth' })
 }
 
 function scrollRight() {
-  carousel.value.scrollBy({ left: 300, behavior: 'smooth' });
+  carousel.value.scrollBy({ left: 300, behavior: 'smooth' })
 }
 
 onMounted(() => {
-  fetchProducts();
+  fetchProducts()
   autoSlideInterval = setInterval(() => {
-    const el = carousel.value;
-    if (!el) return;
+    const el = carousel.value
+    if (!el) return
 
-    const maxScrollLeft = el.scrollWidth - el.clientWidth;
+    const maxScrollLeft = el.scrollWidth - el.clientWidth
 
     if (el.scrollLeft >= maxScrollLeft - 5) {
-      el.scrollTo({ left: 0, behavior: 'smooth' });
+      el.scrollTo({ left: 0, behavior: 'smooth' })
     } else {
-      scrollRight();
+      scrollRight()
     }
-  }, 3000);
-});
+  }, 3000)
+})
 
 onUnmounted(() => {
-  clearInterval(autoSlideInterval);
-});
+  clearInterval(autoSlideInterval)
+})
 
 function formatPrice(value) {
-  const number = typeof value === 'string' ? parseFloat(value) : value;
-  return 'Rp ' + number.toLocaleString('id-ID', {
-    maximumFractionDigits: 0,
-  });
+  const number = typeof value === 'string' ? parseFloat(value) : value
+  return (
+    'Rp ' +
+    number.toLocaleString('id-ID', {
+      maximumFractionDigits: 0,
+    })
+  )
 }
 </script>
 

@@ -1,6 +1,6 @@
 <template>
-  <section class="py-10 container-layout">
-    <h2 class="text-xl font-bold mb-6 capitalize pt-30">Produk dari {{ brandSlug }}</h2>
+  <section class="py-10 px-4 xl:px-10 max-w-screen-xl mx-auto">
+    <h2 class="text-xl font-bold mb-6 capitalize pt-30">Search Result: "{{ keyword }}"</h2>
 
     <div v-if="loading" class="text-center">Loading...</div>
 
@@ -43,35 +43,50 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from '@/axios'
 
 const route = useRoute()
-const brandSlug = route.params.slug
-
+const keyword = ref(route.query.keyword || '')
 const products = ref([])
 const loading = ref(true)
 
-// Format harga ke "Rp 1.500.000"
 function formatPrice(price) {
   if (price == null || isNaN(price)) return 'Rp -'
-  return (
-    'Rp ' +
-    Number(price).toLocaleString('id-ID', {
-      maximumFractionDigits: 0,
-    })
-  )
+  return 'Rp ' + Number(price).toLocaleString('id-ID', { maximumFractionDigits: 0 })
 }
 
-onMounted(async () => {
+async function fetchSearchResult(word) {
+  if (!word || word === 'undefined') {
+    console.warn('Keyword kosong, tidak fetch')
+    products.value = []
+    loading.value = false
+    return
+  }
+
+  console.log('Mencari produk dengan keyword:', word)
+  loading.value = true
   try {
-    const res = await axios.get(`/products/brand/${brandSlug}`)
+    const res = await axios.get(`/products/search?keyword=${encodeURIComponent(word)}`)
     products.value = res.data
+    console.log('Produk ditemukan:', res.data)
   } catch (err) {
-    console.error('Failed to fetch products by brand:', err)
+    console.error('Search Failed:', err)
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  fetchSearchResult(keyword.value)
 })
+
+watch(
+  () => route.query.keyword,
+  (newKeyword) => {
+    keyword.value = newKeyword
+    fetchSearchResult(newKeyword)
+  },
+)
 </script>

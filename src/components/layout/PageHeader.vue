@@ -12,8 +12,9 @@
         <div class="hidden md:flex flex-1 mx-8">
           <input
             v-model="searchQuery"
+            @keyup.enter="handleSearch"
             type="text"
-            placeholder="Search sneakers..."
+            placeholder="Search sneakers"
             class="w-full px-4 py-2 border border-black rounded-full focus:outline-none focus:ring-2 focus:ring-black text-sm text-black"
           />
         </div>
@@ -146,7 +147,7 @@
 import PageLogo from '../composables/PageLogo.vue'
 import AuthForm from '../composables/AuthForm.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { FaBarsStaggered } from '@kalimahapps/vue-icons'
 import { CgProfile } from '@kalimahapps/vue-icons'
 import { BsCart3 } from '@kalimahapps/vue-icons'
@@ -175,10 +176,16 @@ const showAuthForm = ref(false)
 
 const links = [
   { name: 'Featured', path: '/' },
-  { name: 'Sale', path: '/sale' },
+  { name: 'Kids', path: '/products/kids' },
   { name: 'Men', path: '/products/men' },
   { name: 'Women', path: '/products/women' },
 ]
+
+function handleSearch() {
+  if (searchQuery.value.trim()) {
+    router.push({ name: 'SearchResults', query: { keyword: searchQuery.value } })
+  }
+}
 
 const logout = async () => {
   try {
@@ -192,6 +199,7 @@ const logout = async () => {
     router.push('/')
   }
 }
+
 function handleLoginSuccess() {
   isAuthenticated.value = true
 }
@@ -215,6 +223,13 @@ const toggleMenu = () => {
 const closeMenu = () => {
   menuVisible.value = false
 }
+
+watch(
+  () => route.path,
+  () => {
+    searchQuery.value = ''
+  }
+)
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
