@@ -98,7 +98,17 @@ module.exports = {
     const sql = `SELECT * FROM products WHERE category = ?`;
     const [rows] = await db.promise().query(sql, [category]);
     return rows;
-  }
+  },
+
+  async search(keyword) {
+  const sql = `
+    SELECT * FROM products
+    WHERE name LIKE ? OR brand LIKE ?
+  `;
+  const [rows] = await db.promise().query(sql, [`%${keyword}%`, `%${keyword}%`]);
+  return rows;
+}
+
 };
 
 

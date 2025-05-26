@@ -1,7 +1,7 @@
-const { v4: uuidv4 } = require('uuid');
-const { PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-const r2 = require('../config/r2');
-const Product = require('../models/product');
+const { v4: uuidv4 } = require("uuid");
+const { PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const r2 = require("../config/r2");
+const Product = require("../models/product");
 
 // GET all products
 async function getAllProducts(req, res) {
@@ -10,7 +10,7 @@ async function getAllProducts(req, res) {
     return res.json(products);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Failed to fetch products' });
+    return res.status(500).json({ message: "Failed to fetch products" });
   }
 }
 
@@ -19,29 +19,22 @@ async function getById(req, res) {
   try {
     const { id } = req.params;
     const product = await Product.getById(id);
-    if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ message: "Product not found" });
     return res.json(product);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Failed to fetch product' });
+    return res.status(500).json({ message: "Failed to fetch product" });
   }
 }
 
 // CREATE new product
 async function addProducts(req, res) {
   try {
-    const {
-      name,
-      description,
-      price,
-      stock,
-      category,
-      brand
-    } = req.body;
+    const { name, description, price, stock, category, brand } = req.body;
 
     const file = req.file;
     if (!file) {
-      return res.status(400).json({ message: 'Image file is required' });
+      return res.status(400).json({ message: "Image file is required" });
     }
 
     // Upload ke Cloudflare R2
@@ -56,7 +49,6 @@ async function addProducts(req, res) {
 
     const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
 
-
     // Simpan produk ke database
     const product_id = uuidv4();
     await Product.create({
@@ -67,17 +59,17 @@ async function addProducts(req, res) {
       stock,
       category,
       image_url: imageUrl,
-      brand
+      brand,
     });
 
     return res.status(201).json({
-      message: 'Product created successfully',
+      message: "Product created successfully",
       product_id,
-      image_url: imageUrl
+      image_url: imageUrl,
     });
   } catch (err) {
-    console.error('Add product failed:', err);
-    return res.status(500).json({ message: 'Failed to add product' });
+    console.error("Add product failed:", err);
+    return res.status(500).json({ message: "Failed to add product" });
   }
 }
 
@@ -86,7 +78,8 @@ async function updateProducts(req, res) {
   try {
     const { id } = req.params;
     const existing = await Product.getById(id);
-    if (!existing) return res.status(404).json({ message: 'Product not found' });
+    if (!existing)
+      return res.status(404).json({ message: "Product not found" });
 
     const { name, price, stock, description, category, brand } = req.body;
     let image_url = existing.image_url; // default: tetap pakai gambar lama
@@ -113,13 +106,13 @@ async function updateProducts(req, res) {
       description,
       category,
       image_url,
-      brand
+      brand,
     });
 
-    return res.json({ message: 'Product updated' });
+    return res.json({ message: "Product updated" });
   } catch (err) {
-    console.error('Update failed:', err);
-    return res.status(500).json({ message: 'Failed to update product' });
+    console.error("Update failed:", err);
+    return res.status(500).json({ message: "Failed to update product" });
   }
 }
 
@@ -128,7 +121,8 @@ async function deleteProducts(req, res) {
   try {
     const { id } = req.params;
     const existing = await Product.getById(id);
-    if (!existing) return res.status(404).json({ message: 'Product not found' });
+    if (!existing)
+      return res.status(404).json({ message: "Product not found" });
 
     // Ambil nama file dari URL R2 (karena Key = nama file)
     const imageUrl = existing.image_url;
@@ -145,10 +139,10 @@ async function deleteProducts(req, res) {
     }
 
     await Product.remove(id);
-    return res.json({ message: 'Product deleted, including image if present' });
+    return res.json({ message: "Product deleted, including image if present" });
   } catch (err) {
-    console.error('Delete product failed:', err);
-    return res.status(500).json({ message: 'Failed to delete product' });
+    console.error("Delete product failed:", err);
+    return res.status(500).json({ message: "Failed to delete product" });
   }
 }
 
@@ -159,8 +153,10 @@ async function getByBrand(req, res) {
     const products = await Product.getByBrand(brand);
     return res.json(products);
   } catch (err) {
-    console.error('Get by brand failed:', err);
-    return res.status(500).json({ message: 'Failed to fetch products by brand' });
+    console.error("Get by brand failed:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch products by brand" });
   }
 }
 async function getTopSellerProducts(req, res) {
@@ -169,7 +165,9 @@ async function getTopSellerProducts(req, res) {
     return res.json(products);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Failed to fetch top seller products' });
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch top seller products" });
   }
 }
 
@@ -179,8 +177,24 @@ async function getByCategory(req, res) {
     const products = await Product.getByCategory(category);
     return res.json(products);
   } catch (err) {
-    console.error('Get by category failed:', err);
-    return res.status(500).json({ message: 'Failed to fetch products by category' });
+    console.error("Get by category failed:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch products by category" });
+  }
+}
+
+async function searchProducts(req, res) {
+  const keyword = req.query.keyword?.trim() || "";
+  console.log("Keyword masuk ke backend:", keyword);
+
+  try {
+    const products = await Product.search(keyword);
+    console.log("Hasil query:", products);
+    return res.json(products);
+  } catch (err) {
+    console.error("Search products failed:", err);
+    return res.status(500).json({ message: "Failed to search products" });
   }
 }
 
@@ -192,5 +206,6 @@ module.exports = {
   deleteProducts,
   getByBrand,
   getTopSellerProducts,
-  getByCategory
+  getByCategory,
+  searchProducts,
 };

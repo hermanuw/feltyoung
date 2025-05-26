@@ -7,10 +7,12 @@ const authenticate = require('../middleware/authenticate');
 
 // Public routes
 router.get('/', productController.getAllProducts);
+router.get('/search', productController.searchProducts);
 router.get('/top-sellers', productController.getTopSellerProducts);
 router.get('/:category', productController.getByCategory);
 router.get('/:id', productController.getById);
 router.get('/brand/:brand', productController.getByBrand);
+
 
 // Admin only routes (authenticated + role: admin)
 router.post('/', authenticate, isAdmin, upload.single('image'), productController.addProducts);
