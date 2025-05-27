@@ -148,9 +148,10 @@ async function deleteProducts(req, res) {
 
 async function getByBrand(req, res) {
   const { brand } = req.params;
+  const { sort } = req.query;
 
   try {
-    const products = await Product.getByBrand(brand);
+    const products = await Product.getByBrand(brand, sort);
     return res.json(products);
   } catch (err) {
     console.error("Get by brand failed:", err);
@@ -173,8 +174,9 @@ async function getTopSellerProducts(req, res) {
 
 async function getByCategory(req, res) {
   const { category } = req.params;
+  const { sort } = req.query;
   try {
-    const products = await Product.getByCategory(category);
+    const products = await Product.getByCategory(category, sort);
     return res.json(products);
   } catch (err) {
     console.error("Get by category failed:", err);
@@ -186,15 +188,25 @@ async function getByCategory(req, res) {
 
 async function searchProducts(req, res) {
   const keyword = req.query.keyword?.trim() || "";
-  console.log("Keyword masuk ke backend:", keyword);
 
   try {
     const products = await Product.search(keyword);
-    console.log("Hasil query:", products);
     return res.json(products);
   } catch (err) {
     console.error("Search products failed:", err);
     return res.status(500).json({ message: "Failed to search products" });
+  }
+}
+
+async function filterProducts(req, res) {
+  const { category, min, max, name, sort } = req.query;
+
+  try {
+    const products = await Product.filter(category, min, max, name, sort);
+    res.json(products);
+  } catch (err) {
+    console.error("Filter Error:", err);
+    res.status(500).json({ message: "Failed to filter products" });
   }
 }
 
@@ -208,4 +220,5 @@ module.exports = {
   getTopSellerProducts,
   getByCategory,
   searchProducts,
+  filterProducts,
 };
