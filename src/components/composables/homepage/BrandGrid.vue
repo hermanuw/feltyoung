@@ -1,7 +1,9 @@
 <template>
   <section class="py-10 px-4 bg-white">
     <h2 class="text-2xl font-bold text-center mb-6">Explore Top Brands</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl mx-auto">
+    <div
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-6xl mx-auto"
+    >
       <router-link
         v-for="brand in brands"
         :key="brand.name"
@@ -16,28 +18,27 @@
 </template>
 
 <script setup>
-import Nike from '@/assets/brands/nike.png';
-import Adidas from '@/assets/brands/adidas.svg';
-import Puma from '@/assets/brands/puma.svg';
-import NewBalance from '@/assets/brands/new-balance.png';
-import Vans from '@/assets/brands/vans.png';
-import Salomon from '@/assets/brands/salomon.png';
-import Converse from '@/assets/brands/converse.png';
-import Asics from '@/assets/brands/asics.png';
-import On from '@/assets/brands/on.svg';
-import Jordan from '@/assets/brands/jordan.svg';
-
+import Nike from '@/assets/brands/nike.png'
+import Adidas from '@/assets/brands/adidas.svg'
+import Puma from '@/assets/brands/puma.svg'
+import NewBalance from '@/assets/brands/new-balance.png'
+import Vans from '@/assets/brands/vans.png'
+import Salomon from '@/assets/brands/salomon.png'
+import Converse from '@/assets/brands/converse.png'
+import Asics from '@/assets/brands/asics.png'
+import On from '@/assets/brands/on.svg'
+import Jordan from '@/assets/brands/jordan.svg'
 
 const brands = [
   { name: 'Nike', slug: 'nike', logo: Nike },
   { name: 'Adidas', slug: 'adidas', logo: Adidas },
   { name: 'Puma', slug: 'puma', logo: Puma },
-  { name: 'New Balance', slug: 'new-balance', logo: NewBalance },
+  { name: 'New Balance', slug: 'new balance', logo: NewBalance },
   { name: 'Vans', slug: 'vans', logo: Vans },
   { name: 'Salomon', slug: 'salomon', logo: Salomon },
   { name: 'Converse', slug: 'converse', logo: Converse },
   { name: 'ASICS', slug: 'asics', logo: Asics },
   { name: 'On', slug: 'on', logo: On },
-  { name: 'Jordan', slug: 'jordan', logo: Jordan }
-];
+  { name: 'Air Jordan', slug: 'air jordan', logo: Jordan },
+]
 </script>

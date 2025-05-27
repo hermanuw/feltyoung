@@ -6,6 +6,7 @@ import ProfileView from '@/views/ProfileView.vue'
 import BrandView from '@/views/BrandView.vue'
 import CategoryView from '@/views/CategoryView.vue'
 import SearchResults from '@/views/SearchResults.vue'
+import DetailView from '@/views/DetailView.vue'
 
 const routes = [
   {
@@ -28,25 +29,25 @@ const routes = [
         component: ProfileView,
       },
       {
-        path: "/brand/:slug",
-        name: "brand",
+        path: '/brand/:slug',
+        name: 'brand',
         component: BrandView,
       },
       {
-        path: "/products/:category",
-        name: "category",
+        path: '/products/:category',
+        name: 'category',
         component: CategoryView,
       },
       {
-        path: "/search",
-        name: "SearchResults",
+        path: '/search',
+        name: 'SearchResults',
         component: SearchResults,
       },
-      // {
-      //   path: "/contact",
-      //   name: "contact",
-      //   component: ContactPage,
-      // },
+      {
+        path: '/products/id/:id',
+        name: 'DetailView',
+        component: DetailView,
+      },
       // {
       //   path: "/blog",
       //   name: "blog",

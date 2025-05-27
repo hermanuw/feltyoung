@@ -44,14 +44,13 @@
           </h3>
           <p class="text-md text-gray-500 mb-1">{{ product.category }}</p>
           <p class="text-md font-bold text-gray-800">{{ formatPrice(product.price) }}</p>
+          <router-link
+            :to="`/products/id/${product.product_id}`"
+            class="mt-3 inline-block bg-black text-white text-center py-2 rounded hover:bg-gray-800 transition"
+          >
+            Lihat Produk
+          </router-link>
         </div>
-
-        <!-- Tombol -->
-        <button
-          class="mt-3 w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
-        >
-          Lihat Produk
-        </button>
       </div>
     </div>
   </section>
