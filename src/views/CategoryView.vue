@@ -1,20 +1,37 @@
 <template>
-  <section class="py-10 container-layout">
-    <h2 class="text-xl font-bold mb-6 capitalize pt-30">Product Category {{ category }}</h2>
+  <section class="py-10 container-layout mt-30">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+      <h2 class="text-xl font-bold capitalize">{{ category }} Products</h2>
+      <SortBy @sort="handleSortChange" />
+    </div>
+    <!-- SKELETON -->
+    <div v-if="loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div
+        v-for="n in 8"
+        :key="n"
+        class="animate-pulse bg-white p-4 rounded-lg shadow h-[290px] flex flex-col justify-between"
+      >
+        <div class="bg-gray-200 h-40 mb-4 rounded"></div>
+        <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div class="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+        <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+      </div>
+    </div>
 
-    <div v-if="loading" class="text-center">Loading...</div>
-
+    <!-- TIDAK ADA PRODUK -->
     <div v-else-if="products.length === 0" class="text-center text-gray-500">
       Tidak ada produk ditemukan.
     </div>
 
+    <!-- PRODUK -->
     <div
+      v-else
       class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 px-4 max-w-screen-xl mx-auto"
     >
       <div
         v-for="(product, index) in products"
         :key="index"
-        class="bg-white rounded-lg shadow-lg p-4 snap-center transition-transform hover:scale-105 duration-300 flex flex-col justify-between h-[330px]"
+        class="bg-white rounded-lg shadow-lg p-4 snap-center transition-transform hover:scale-105 duration-300 flex flex-col justify-between h-[300px]"
       >
         <!-- Gambar -->
         <div
@@ -43,15 +60,17 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from '@/axios'
+import SortBy from '@/components/composables/SortByFilter.vue'
 
 const route = useRoute()
-const category = route.params.category
+const category = ref(route.params.category || '')
 
 const products = ref([])
 const loading = ref(true)
+const sort = ref('new') // Default sort option
 
 // Format harga ke "Rp 1.500.000"
 function formatPrice(price) {
@@ -64,14 +83,38 @@ function formatPrice(price) {
   )
 }
 
-onMounted(async () => {
+// Ambil produk berdasarkan kategori + sort
+async function fetchCategoryProducts() {
+  if (!category.value) return // cegah query jika category belum siap
+
+  loading.value = true
   try {
-    const res = await axios.get(`/products/${category}`)
+    const res = await axios.get(`/products/${category.value}`, {
+      params: { sort: sort.value },
+    })
     products.value = res.data
   } catch (err) {
-    console.error('Failed to fetch products by brand:', err)
+    console.error('Failed to fetch products by category:', err)
   } finally {
-    loading.value = false
+    setTimeout(() => {
+      loading.value = false
+    }, 500) // Simulasi loading
   }
-})
+}
+
+function handleSortChange(value) {
+  sort.value = value
+  fetchCategoryProducts()
+}
+
+onMounted(fetchCategoryProducts)
+
+// Jika ganti kategori via router (tanpa reload)
+watch(
+  () => route.params.category,
+  (newVal) => {
+    category.value = newVal
+    fetchCategoryProducts()
+  },
+)
 </script>

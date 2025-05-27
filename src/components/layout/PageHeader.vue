@@ -228,7 +228,7 @@ watch(
   () => route.path,
   () => {
     searchQuery.value = ''
-  }
+  },
 )
 
 onMounted(() => {
