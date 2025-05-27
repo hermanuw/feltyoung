@@ -10,9 +10,9 @@ router.get("/", productController.getAllProducts);
 router.get("/search", productController.searchProducts);
 router.get("/top-sellers", productController.getTopSellerProducts);
 router.get("/filter", productController.filterProducts);
-router.get("/:category", productController.getByCategory);
-router.get("/:id", productController.getById);
+router.get("/category/:category", productController.getByCategory);
 router.get("/brand/:brand", productController.getByBrand);
+router.get("/id/:id", productController.getById);
 
 // Admin only routes (authenticated + role: admin)
 router.post(
