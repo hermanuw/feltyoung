@@ -9,6 +9,7 @@ const authenticate = require("../middleware/authenticate");
 router.get("/", productController.getAllProducts);
 router.get("/search", productController.searchProducts);
 router.get("/top-sellers", productController.getTopSellerProducts);
+router.get("/similar", productController.getSimilarProducts);
 router.get("/filter", productController.filterProducts);
 router.get("/category/:category", productController.getByCategory);
 router.get("/brand/:brand", productController.getByBrand);

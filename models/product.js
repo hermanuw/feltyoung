@@ -158,4 +158,14 @@ module.exports = {
     const [rows] = await db.promise().query(sql, params);
     return rows;
   },
+  async getSimilarByName(nameBase) {
+    const sql = `
+    SELECT * FROM products
+    WHERE name LIKE ? AND name <> ?
+    ORDER BY created_at DESC
+    LIMIT 8
+  `;
+    const [rows] = await db.promise().query(sql, [`${nameBase}%`, nameBase]);
+    return rows;
+  },
 };

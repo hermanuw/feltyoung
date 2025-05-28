@@ -210,6 +210,26 @@ async function filterProducts(req, res) {
   }
 }
 
+async function getSimilarProducts(req, res) {
+  const { productName } = req.query;
+
+  if (!productName) {
+    return res.status(400).json({ message: "Missing productName parameter" });
+  }
+
+  // Contoh ambil produk yang nama mengandung kata kunci, tapi bukan produk exact sama
+  try {
+    // misal kita cari produk yang namanya LIKE 'productName%' tapi exclude produk yg persis sama
+    const products = await Product.getSimilarByName(productName);
+    return res.json(products);
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch similar products" });
+  }
+}
+
 module.exports = {
   getAllProducts,
   getById,
@@ -221,4 +241,5 @@ module.exports = {
   getByCategory,
   searchProducts,
   filterProducts,
+  getSimilarProducts,
 };
