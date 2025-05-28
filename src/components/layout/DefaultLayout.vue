@@ -5,9 +5,9 @@
 
     <!-- Main Content -->
     <main class="flex-grow">
-        <transition name="fade">
-          <router-view :key="$route.fullPath" />
-        </transition>
+      <transition name="fade">
+        <router-view :key="$route.fullPath" />
+      </transition>
     </main>
 
     <!-- Footer -->

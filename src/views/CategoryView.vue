@@ -89,7 +89,7 @@ async function fetchCategoryProducts() {
 
   loading.value = true
   try {
-    const res = await axios.get(`/products/${category.value}`, {
+    const res = await axios.get(`/products/category/${category.value}`, {
       params: { sort: sort.value },
     })
     products.value = res.data

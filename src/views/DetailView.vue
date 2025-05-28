@@ -1,5 +1,5 @@
 <template>
-  <section class="max-w-7xl mx-auto p-4 mt-30 pb-30">
+  <section class="max-w-7xl mx-auto p-4 pt-30 pb-30">
     <!-- Breadcrumb -->
     <nav class="text-sm text-gray-500 mb-4 ml-3">
       <ol class="flex space-x-1">
@@ -31,7 +31,91 @@
 
         <p class="text-gray-700 text-sm">{{ product.description }}</p>
         <p class="text-sm text-gray-400">Category : {{ product.category }}</p>
-
+        <!-- Select Size (compact) -->
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-2 w-full">
+            <span class="text-sm font-semibold">Select Size</span>
+            <span
+              class="text-sm hover:underline font-medium text-black/50 cursor-pointer ml-120"
+              @click="showSizeChart = true"
+            >
+              Size Chart
+            </span>
+            <!-- Komponen Modal -->
+            <SizeChart
+              v-model:show="showSizeChart"
+              :brand="product.brand"
+              :category="product.category"
+            />
+          </div>
+          <div id="sizesGrid" class="grid grid-cols-3 gap-1">
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 6
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 6.5
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 7
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
+            >
+              UK 7.5
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
+            >
+              UK 8
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 8.5
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 9
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 9.5
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 10
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+            >
+              UK 10.5
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
+            >
+              UK 11
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
+            >
+              UK 11.5
+            </div>
+            <div
+              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
+            >
+              UK 12
+            </div>
+          </div>
+        </div>
         <!-- Tombol -->
         <div class="flex gap-2">
           <button class="bg-black text-white px-6 py-2 rounded">Buy Now</button>
@@ -96,6 +180,7 @@
         </div>
       </div>
     </div>
+    <SimilarProducts :productName="product.name" />
   </section>
 </template>
 
@@ -103,6 +188,8 @@
 import { ref, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from '@/axios'
+import SizeChart from '@/components/composables/SizeChart.vue'
+import SimilarProducts from '@/components/composables/SimilarProducts.vue'
 
 const route = useRoute()
 const product = ref({})
@@ -116,6 +203,7 @@ const maxHeight1 = ref('0px')
 const maxHeight2 = ref('0px')
 const content1 = ref(null)
 const content2 = ref(null)
+const showSizeChart = ref(false)
 
 function toggleAccordion(index) {
   if (index === 1) {
