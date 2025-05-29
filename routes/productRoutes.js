@@ -16,6 +16,21 @@ router.get("/brand/:brand", productController.getByBrand);
 router.get("/id/:id", productController.getById);
 
 // Admin only routes (authenticated + role: admin)
+router.put(
+  "/variant/:variant_id/stock",
+  authenticate,
+  isAdmin,
+  productController.updateVariantStock
+);
+
+// Batch update stok varian produk (opsional)
+router.put(
+  "/:product_id/variants/stock",
+  authenticate,
+  isAdmin,
+  productController.updateProductVariantsStock
+);
+
 router.post(
   "/",
   authenticate,
@@ -29,6 +44,13 @@ router.put(
   isAdmin,
   upload.single("image"),
   productController.updateProducts
+);
+// Tambah varian baru (admin only)
+router.post(
+  "/:product_id/variants",
+  authenticate,
+  isAdmin,
+  productController.addVariant
 );
 router.delete("/:id", authenticate, isAdmin, productController.deleteProducts);
 

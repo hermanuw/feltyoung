@@ -3,9 +3,14 @@ const db = require("../config/db");
 module.exports = {
   // Ambil semua produk
   async getAll() {
-    const [rows] = await db
-      .promise()
-      .query("SELECT * FROM products ORDER BY created_at DESC");
+    const sql = `
+    SELECT p.*, COALESCE(SUM(v.stock), 0) AS total_stock
+    FROM products p
+    LEFT JOIN product_variants v ON p.product_id = v.product_id
+    GROUP BY p.product_id
+    ORDER BY p.created_at DESC
+  `;
+    const [rows] = await db.promise().query(sql);
     return rows;
   },
 
@@ -158,6 +163,7 @@ module.exports = {
     const [rows] = await db.promise().query(sql, params);
     return rows;
   },
+
   async getSimilarByName(nameBase) {
     const sql = `
     SELECT * FROM products
@@ -167,5 +173,72 @@ module.exports = {
   `;
     const [rows] = await db.promise().query(sql, [`${nameBase}%`, nameBase]);
     return rows;
+  },
+
+  // Fungsi untuk mendapatkan semua varian dari satu produk
+  async getVariantsByProductId(product_id) {
+    const [rows] = await db
+      .promise()
+      .query(
+        "SELECT * FROM product_variants WHERE product_id = ? ORDER BY size ASC",
+        [product_id]
+      );
+    return rows;
+  },
+
+  // Fungsi tambah varian baru
+  async addVariant(variant) {
+    const { variant_id, product_id, size, stock } = variant;
+    const sql = `
+      INSERT INTO product_variants (variant_id, product_id, size, stock, created_at, updated_at)
+      VALUES (?, ?, ?, ?, NOW(), NOW())
+    `;
+    await db.promise().query(sql, [variant_id, product_id, size, stock]);
+    return { variant_id };
+  },
+
+  //update stok varian
+  async updateVariantStock(variant_id, stock) {
+    // Update stok varian dulu
+    const sqlUpdateVariant = `
+    UPDATE product_variants
+    SET stock = ?, updated_at = NOW()
+    WHERE variant_id = ?
+  `;
+    await db.promise().query(sqlUpdateVariant, [stock, variant_id]);
+
+    // Cari product_id varian itu
+    const sqlGetProductId = `
+    SELECT product_id FROM product_variants WHERE variant_id = ?
+  `;
+    const [rows] = await db.promise().query(sqlGetProductId, [variant_id]);
+    if (rows.length === 0) return;
+
+    const product_id = rows[0].product_id;
+
+    // Hitung total stok varian produk itu
+    const sqlSumStock = `
+    SELECT COALESCE(SUM(stock), 0) AS total_stock FROM product_variants WHERE product_id = ?
+  `;
+    const [sumRows] = await db.promise().query(sqlSumStock, [product_id]);
+    const totalStock = sumRows[0].total_stock;
+
+    // Update stok total produk
+    const sqlUpdateProductStock = `
+    UPDATE products SET stock = ? WHERE product_id = ?
+  `;
+    await db.promise().query(sqlUpdateProductStock, [totalStock, product_id]);
+  },
+
+  // Hapus varian berdasarkan variant_id
+  async removeVariant(variant_id) {
+    const sql = `DELETE FROM product_variants WHERE variant_id = ?`;
+    await db.promise().query(sql, [variant_id]);
+  },
+
+  // Jika ingin hapus semua varian produk ketika hapus produk
+  async removeVariantsByProductId(product_id) {
+    const sql = `DELETE FROM product_variants WHERE product_id = ?`;
+    await db.promise().query(sql, [product_id]);
   },
 };

@@ -6,7 +6,7 @@ const Product = require("../models/product");
 // GET all products
 async function getAllProducts(req, res) {
   try {
-    const products = await Product.getAll();
+    const products = await Product.getAll(); // sudah include total_stock
     return res.json(products);
   } catch (err) {
     console.error(err);
@@ -20,7 +20,15 @@ async function getById(req, res) {
     const { id } = req.params;
     const product = await Product.getById(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
-    return res.json(product);
+
+    // Ambil varian produk
+    const variants = await Product.getVariantsByProductId(id);
+
+    // Hitung total stok varian (atau ambil dari kolom total_stock kalau ada di produk)
+    // Kalau model getById belum include total_stock, kamu bisa hitung manual:
+    const totalStock = variants.reduce((acc, v) => acc + (v.stock || 0), 0);
+
+    return res.json({ ...product, variants, total_stock: totalStock });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Failed to fetch product" });
@@ -230,6 +238,75 @@ async function getSimilarProducts(req, res) {
   }
 }
 
+async function updateVariantStock(req, res) {
+  try {
+    const { variant_id } = req.params;
+    const { stock } = req.body;
+
+    if (typeof stock !== "number" || stock < 0) {
+      return res.status(400).json({ message: "Invalid stock value" });
+    }
+
+    await Product.updateVariantStock(variant_id, stock);
+
+    return res.json({ message: "Variant stock updated" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to update variant stock" });
+  }
+}
+
+async function updateProductVariantsStock(req, res) {
+  try {
+    const { product_id } = req.params;
+    const { variants } = req.body;
+
+    if (!variants || !Array.isArray(variants)) {
+      return res.status(400).json({ message: "Variants data required" });
+    }
+
+    for (const variant of variants) {
+      if (!variant.variant_id || typeof variant.stock !== "number") {
+        return res.status(400).json({ message: "Invalid variant format" });
+      }
+      await Product.updateVariantStock(variant.variant_id, variant.stock);
+    }
+
+    return res.json({ message: "Variants stock updated successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to update variants stock" });
+  }
+}
+
+async function addVariant(req, res) {
+  try {
+    const { product_id } = req.params;
+    const { size, stock } = req.body;
+
+    if (!size || typeof stock !== "number") {
+      return res.status(400).json({ message: "Size and stock are required" });
+    }
+
+    const variant_id = uuidv4();
+
+    await Product.addVariant({
+      variant_id,
+      product_id,
+      size,
+      stock,
+    });
+
+    // Update stok total produk
+    await Product.updateVariantStock(variant_id, stock);
+
+    return res.status(201).json({ message: "Variant added", variant_id });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Failed to add variant" });
+  }
+}
+
 module.exports = {
   getAllProducts,
   getById,
@@ -242,4 +319,7 @@ module.exports = {
   searchProducts,
   filterProducts,
   getSimilarProducts,
+  addVariant,
+  updateVariantStock,
+  updateProductVariantsStock,
 };
