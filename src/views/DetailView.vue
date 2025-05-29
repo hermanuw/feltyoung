@@ -1,5 +1,5 @@
 <template>
-  <section class="max-w-7xl mx-auto p-4 pt-30 pb-30">
+  <section class="max-w-7xl mx-auto p-4 pt-30 pb-20">
     <!-- Breadcrumb -->
     <nav class="text-sm text-gray-500 mb-4 ml-3">
       <ol class="flex space-x-1">
@@ -50,69 +50,19 @@
           </div>
           <div id="sizesGrid" class="grid grid-cols-3 gap-1">
             <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
+              v-for="variant in variants"
+              :key="variant.variant_id"
+              :class="[
+                'border rounded-md text-center py-2 text-sm font-medium cursor-pointer hover:border-black',
+                variant.stock === 0
+                  ? 'border-0 cursor-not-allowed bg-black/10 opacity-50 hover:border-gray-300'
+                  : selectedSize === variant.size
+                    ? 'border-black bg-gray-200'
+                    : '',
+              ]"
+              @click="variant.stock > 0 && selectSize(variant.size)"
             >
-              UK 6
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
-            >
-              UK 6.5
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
-            >
-              UK 7
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
-            >
-              UK 7.5
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
-            >
-              UK 8
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
-            >
-              UK 8.5
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
-            >
-              UK 9
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
-            >
-              UK 9.5
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
-            >
-              UK 10
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium hover:border-black cursor-pointer"
-            >
-              UK 10.5
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
-            >
-              UK 11
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
-            >
-              UK 11.5
-            </div>
-            <div
-              class="border rounded-md text-center py-2 text-sm font-medium cursor-not-allowed bg-black/10 opacity-50"
-            >
-              UK 12
+              {{ variant.size }}
             </div>
           </div>
         </div>
@@ -204,6 +154,8 @@ const maxHeight2 = ref('0px')
 const content1 = ref(null)
 const content2 = ref(null)
 const showSizeChart = ref(false)
+const variants = ref([])
+const selectedSize = ref(null)
 
 function toggleAccordion(index) {
   if (index === 1) {
@@ -227,6 +179,10 @@ onMounted(async () => {
     const { id } = route.params
     const res = await axios.get(`/products/id/${id}`)
     product.value = res.data
+    variants.value = res.data.variants || []
+    if (variants.value.length > 0) {
+      selectedSize.value = variants.value[0].size // optional: set default size
+    }
   } catch (err) {
     error.value = 'Produk tidak ditemukan.'
     console.error(err)
@@ -234,6 +190,12 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+// Fungsi pilih ukuran
+function selectSize(size) {
+  selectedSize.value = size
+  console.log('Selected size:', size)
+}
 </script>
 
 <style scoped>

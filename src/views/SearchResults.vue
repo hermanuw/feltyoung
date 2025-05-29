@@ -43,15 +43,16 @@
               :key="index"
               class="bg-white rounded-lg shadow-md p-4 snap-center transition-transform hover:scale-105 duration-300 flex flex-col justify-between h-[290px]"
             >
-              <div
+              <router-link
                 class="aspect-[4/3] w-full flex items-center justify-center bg-white rounded-lg overflow-hidden mb-4"
+                :to="`/products/id/${product.product_id}`"
               >
                 <img
                   :src="product.image_url"
                   :alt="product.name"
                   class="max-h-full max-w-full object-contain bg-white"
                 />
-              </div>
+              </router-link>
               <div class="flex flex-col justify-between flex-grow">
                 <h3
                   class="text-md font-semibold leading-snug break-words mb-1 line-clamp-3 min-h-[5rem]"
@@ -75,6 +76,7 @@ import { useRoute } from 'vue-router'
 import axios from '@/axios'
 import ProductFilter from '@/components/composables/ProductFilter.vue'
 import SortBy from '@/components/composables/SortByFilter.vue'
+import router from '@/router'
 
 const route = useRoute()
 const keyword = ref(route.query.keyword || '')
