@@ -1,19 +1,19 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const RefreshToken = require('../models/RefreshToken');
-const config = require('../util/config');
-const { v4: uuidv4 } = require('uuid');
-const helper = require('../util/helper');
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+const RefreshToken = require("../models/RefreshToken");
+const config = require("../util/config");
+const { v4: uuidv4 } = require("uuid");
+const helper = require("../util/helper");
 
 // Register user
 async function register(req, res) {
-  const { email, name, phone_number, password, address, role} = req.body;
+  const { email, name, phone_number, password, address, role } = req.body;
 
   try {
     const existing = await User.findByEmail(email);
-    if (existing) return res.status(400).json({ message: 'Email already used' });
+    if (existing)
+      return res.status(400).json({ message: "Email already used" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user_id = uuidv4(); // Generate unique user_id
@@ -24,35 +24,38 @@ async function register(req, res) {
       phone_number,
       password: hashedPassword,
       address,
-      role: role || 'user',
-      verified: false
+      role: role || "user",
+      verified: false,
     });
 
-    const token = jwt.sign({ id: user.user_id }, config.SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ id: user.user_id }, config.SECRET, {
+      expiresIn: "1d",
+    });
     await helper.sendVerificationEmail(email, token);
 
-    return res.status(201).json({ message: 'Check your email to verify account.' });
+    return res
+      .status(201)
+      .json({ message: "Check your email to verify account." });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Registration failed.' });
+    return res.status(500).json({ message: "Registration failed." });
   }
 }
 
 // Login user
 async function login(req, res) {
-
   const { email, password } = req.body;
 
   try {
     const user = await User.findByEmail(email);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     if (!user.verified) {
-      return res.status(403).json({ message: 'Email not verified' });
+      return res.status(403).json({ message: "Email not verified" });
     }
 
     const isMatch = await helper.comparePassword(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid Password' });
+    if (!isMatch) return res.status(401).json({ message: "Invalid Password" });
 
     const payload = { id: user.user_id, email: user.email, role: user.role };
     const accessToken = helper.issueAccessToken(payload);
@@ -65,7 +68,7 @@ async function login(req, res) {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Login error.' });
+    return res.status(500).json({ message: "Login error." });
   }
 }
 
@@ -76,14 +79,14 @@ async function verifyToken(req, res) {
   try {
     const decoded = jwt.verify(token, config.SECRET);
     const user = await User.findById(decoded.id);
-    if (!user) return res.status(400).json({ message: 'Invalid token' });
+    if (!user) return res.status(400).json({ message: "Invalid token" });
 
-    return res.status(200).json({ token_valid: 'valid' });
+    return res.status(200).json({ token_valid: "valid" });
   } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      return res.status(400).json({ token_valid: 'expired' });
+    if (err.name === "TokenExpiredError") {
+      return res.status(400).json({ token_valid: "expired" });
     }
-    return res.status(400).json({ token_valid: 'not valid' });
+    return res.status(400).json({ token_valid: "not valid" });
   }
 }
 
@@ -93,14 +96,14 @@ async function verifyEmail(req, res) {
 
   try {
     const user = await User.findByEmail(email);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     await User.setVerified(email);
 
-    return res.status(200).json({ message: 'Email berhasil diverifikasi' });
+    return res.status(200).json({ message: "Email berhasil diverifikasi" });
   } catch (err) {
-    console.error('Verification error:', err);
-    return res.status(500).json({ message: 'Verification error' });
+    console.error("Verification error:", err);
+    return res.status(500).json({ message: "Verification error" });
   }
 }
 
@@ -110,15 +113,20 @@ async function refreshToken(req, res) {
 
   try {
     const storedToken = await RefreshToken.findByTokenWithUser(token);
-    if (!storedToken) return res.status(404).json({ message: 'Invalid refresh token' });
+    if (!storedToken)
+      return res.status(404).json({ message: "Invalid refresh token" });
 
     const expired = helper.verifyRefreshTokenExpiration(storedToken);
     if (expired) {
       await RefreshToken.deleteById(storedToken.id);
-      return res.status(403).json({ message: 'Refresh token expired' });
+      return res.status(403).json({ message: "Refresh token expired" });
     }
 
-    const payload = { id: storedToken.user_id, email: storedToken.email, role: storedToken.role };
+    const payload = {
+      id: storedToken.user_id,
+      email: storedToken.email,
+      role: storedToken.role,
+    };
     const newAccessToken = helper.issueAccessToken(payload);
     const newRefreshToken = await helper.createRefreshToken(payload.id);
 
@@ -128,17 +136,19 @@ async function refreshToken(req, res) {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Token refresh failed' });
+    return res.status(500).json({ message: "Token refresh failed" });
   }
 }
 
 // Logout
 async function logout(req, res) {
   try {
-    req.session = null;
-    res.status(200).json({ message: 'Logged out successfully' });
+    await RefreshToken.deleteByUserId(req.user.user_id);
+    req.session = null; // Clear session
+    res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
-    res.status(500).json({ message: 'Logout error' });
+    console.log("Logout error:", err);
+    res.status(500).json({ message: "Logout error" });
   }
 }
 
