@@ -241,4 +241,13 @@ module.exports = {
     const sql = `DELETE FROM product_variants WHERE product_id = ?`;
     await db.promise().query(sql, [product_id]);
   },
+
+  async decreaseVariantStock(product_id, size, quantity) {
+    const sql = `
+    UPDATE product_variants
+    SET stock = stock - ?
+    WHERE product_id = ? AND size = ?
+  `;
+    await db.promise().query(sql, [quantity, product_id, size]);
+  },
 };

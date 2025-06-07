@@ -1,9 +1,9 @@
 const midtransClient = require("midtrans-client");
 const { v4: uuidv4 } = require("uuid");
 const Order = require("../models/order");
-const snap = require("../config/midtrans");
-const coreApi = require("../config/midtrans");
+const { snap, coreApi } = require("../config/midtrans");
 const crypto = require("crypto");
+const Product = require("../models/product");
 require("dotenv").config(); // Load env variables
 
 async function getTransactionStatus(req, res) {
@@ -15,11 +15,9 @@ async function getTransactionStatus(req, res) {
 
     // Cek apakah statusResponse valid dan memiliki transaction_status
     if (!statusResponse || !statusResponse.transaction_status) {
-      return res
-        .status(404)
-        .json({
-          message: "Transaction not found or invalid response from Midtrans",
-        });
+      return res.status(404).json({
+        message: "Transaction not found or invalid response from Midtrans",
+      });
     }
 
     console.log("Transaction Status Response:", statusResponse); // Debugging log
@@ -47,7 +45,14 @@ async function getTransactionStatus(req, res) {
 
 // Buat order dan simpan ke database
 async function createOrder(req, res) {
-  const { total_amount, payment_method, shipping_address, items } = req.body;
+  const {
+    total_amount,
+    payment_method,
+    shipping_address,
+    recipient_name,
+    recipient_phone,
+    items,
+  } = req.body;
   const order_id = uuidv4();
   const order_date = new Date();
   const user_id = req.user.id;
@@ -75,11 +80,9 @@ async function createOrder(req, res) {
       return res.status(400).json({ message: `Item ke-${i + 1} tidak valid` });
     }
     if (item.quantity <= 0 || item.price <= 0) {
-      return res
-        .status(400)
-        .json({
-          message: `Kuantitas dan harga item ke-${i + 1} harus lebih dari 0`,
-        });
+      return res.status(400).json({
+        message: `Kuantitas dan harga item ke-${i + 1} harus lebih dari 0`,
+      });
     }
   }
 
@@ -93,6 +96,8 @@ async function createOrder(req, res) {
       total_amount,
       payment_method,
       shipping_address,
+      recipient_name,
+      recipient_phone,
     });
 
     // Simpan item-item order
@@ -103,6 +108,7 @@ async function createOrder(req, res) {
         product_id: item.product_id,
         quantity: item.quantity,
         price: item.price,
+        size: item.size,
       });
     }
 
@@ -131,54 +137,57 @@ async function createOrder(req, res) {
 
 // Notifikasi webhook dari Midtrans
 
-// Fungsi untuk verifikasi signature webhook dari Midtrans
 function verifyMidtransSignature(payload, serverKey) {
-  const signaturePayload =
-    payload.order_id + payload.status_code + payload.gross_amount + serverKey;
-  const signature = crypto
-    .createHash("sha512")
-    .update(signaturePayload)
-    .digest("hex");
-  return signature === payload.signature_key;
-}
+  const { order_id, status_code, gross_amount, signature_key } = payload;
 
+  const raw = order_id + status_code + gross_amount + serverKey;
+
+  const expectedSignature = crypto
+    .createHash("sha512")
+    .update(raw)
+    .digest("hex");
+
+  return expectedSignature === signature_key;
+}
 // Handle webhook notification dari Midtrans
 async function handleNotification(req, res) {
   try {
     const body = req.body;
+    console.log("📥 Webhook payload:", body); // ← Tambahkan ini
 
-    // Verifikasi signature dengan serverKey dari environment
     if (!verifyMidtransSignature(body, process.env.MIDTRANS_SERVER_KEY)) {
+      console.warn("❌ Invalid signature");
       return res.status(403).json({ message: "Invalid signature" });
     }
 
     const { order_id, transaction_status, payment_type } = body;
 
-    let status = "pending"; // Default status
+    let status = "pending";
     if (transaction_status === "settlement") {
       status = "paid";
+      const items = await Order.getOrderItems(order_id);
+
+      for (const item of items) {
+        await Product.decreaseVariantStock(
+          item.product_id,
+          item.size,
+          item.quantity
+        );
+      }
     } else if (
-      transaction_status === "cancel" ||
-      transaction_status === "expire"
-    ) {
-      status = "cancelled";
-    } else if (transaction_status === "pending") {
-      status = "pending";
-    } else if (
-      transaction_status === "deny" ||
-      transaction_status === "failure"
+      ["cancel", "expire", "deny", "failure"].includes(transaction_status)
     ) {
       status = "cancelled";
     }
 
-    // Update status order dan payment_method ke database
     await Order.updateStatus(order_id, status);
     await Order.updatePaymentMethod(order_id, payment_type);
 
-    // Kirim response sukses
-    return res.status(200).json({ message: "Notification handled" });
+    console.log("✅ Order updated:", order_id, status); // ← Tambahkan ini
+
+    return res.status(200).json({ message: "Notification handled" }); // PENTING: HARUS 200
   } catch (err) {
-    console.error("Notification Error:", err);
+    console.error("❌ Notification Error:", err);
     return res.status(500).json({ message: "Failed to process notification" });
   }
 }
