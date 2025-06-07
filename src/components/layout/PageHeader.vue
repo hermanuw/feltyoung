@@ -3,7 +3,8 @@
     <!-- HEADER -->
     <header
       :class="headerClass"
-      class="flex justify-center px-6 z-50 fixed w-full top-0 p-2 bg-white drop-shadow-sm"
+      :style="headerStyle"
+      class="flex justify-center px-6 z-50 fixed w-full top-0 drop-shadow-sm"
     >
       <div class="flex justify-between items-center w-full md:w-5/6 md:relative">
         <PageLogo />
@@ -151,20 +152,23 @@ import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { FaBarsStaggered } from '@kalimahapps/vue-icons'
 import { CgProfile } from '@kalimahapps/vue-icons'
 import { BsCart3 } from '@kalimahapps/vue-icons'
-import axios from 'axios'
+import axios from '@/axios'
+import bgNavbar from '@/assets/bg-navbar.png'
 
 const route = useRoute()
 const router = useRouter()
 const isScrolled = ref(false)
 const menuVisible = ref(false)
 const isAuthenticated = ref(!!localStorage.getItem('accessToken'))
+
 onMounted(() => {
   window.addEventListener('storage', syncAuth)
   handleScroll()
+  window.addEventListener('scroll', handleScroll)
 })
-
 onBeforeUnmount(() => {
   window.removeEventListener('storage', syncAuth)
+  window.removeEventListener('scroll', handleScroll)
 })
 
 function syncAuth() {
@@ -189,7 +193,7 @@ function handleSearch() {
 
 const logout = async () => {
   try {
-    await axios.post('/api/logout')
+    await axios.post('/logout')
   } catch (e) {
     console.warn('Logout failed, forcing logout')
   } finally {
@@ -203,14 +207,23 @@ const logout = async () => {
 function handleLoginSuccess() {
   isAuthenticated.value = true
 }
+
 const headerClass = computed(() => ({
-  // 'bg-white': route.path !== '/',
   'sm:bg-transparent': !isScrolled.value,
-  'sm:bg-white': isScrolled.value,
   'shadow-md': isScrolled.value,
   'p-4': true,
   'sm:py-10': !isScrolled.value,
 }))
+
+const headerStyle = computed(() =>
+  isScrolled.value
+    ? {
+        backgroundImage: `url(${bgNavbar})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : {},
+)
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 50
@@ -230,13 +243,6 @@ watch(
     searchQuery.value = ''
   },
 )
-
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll)
-})
 </script>
 
 <style scoped>
@@ -244,20 +250,14 @@ nav a {
   color: white;
   transition: color 0.3s ease;
 }
-
-nav.scrolled-nav a {
-  color: black !important;
-}
-
+nav.scrolled-nav a,
 nav.route-not-home a {
   color: black !important;
 }
-
 nav a.active-link {
   color: black !important;
   font-weight: bold;
 }
-
 /* Slide animation */
 .slide-down-enter-active,
 .slide-down-leave-active {

@@ -7,6 +7,8 @@ import BrandView from '@/views/BrandView.vue'
 import CategoryView from '@/views/CategoryView.vue'
 import SearchResults from '@/views/SearchResults.vue'
 import DetailView from '@/views/DetailView.vue'
+import VerifyEmail from '@/components/composables/VerifyEmail.vue'
+import CheckoutView from '@/views/CheckoutView.vue'
 
 const routes = [
   {
@@ -48,16 +50,16 @@ const routes = [
         name: 'DetailView',
         component: DetailView,
       },
-      // {
-      //   path: "/blog",
-      //   name: "blog",
-      //   component: BlogPage,
-      // },
-      // {
-      //   path: "/blog/:id",
-      //   name: "blogDetails",
-      //   component: BlogDetails,
-      // },
+      {
+        path: '/verify-email',
+        name: 'verify-email',
+        component: VerifyEmail,
+      },
+      {
+        path: '/checkout',
+        name: 'CheckOut',
+        component: CheckoutView,
+      },
       // {
       //   path: "/pricing",
       //   name: "pricing",

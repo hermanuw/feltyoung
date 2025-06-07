@@ -1,16 +1,16 @@
 <template>
   <div class="max-w-3xl mx-auto py-10 px-4 pt-30">
-    <h2 class="text-2xl font-bold mb-6">Kelola Profil</h2>
+    <h2 class="text-2xl font-bold mb-6">Manage Profile</h2>
 
     <form @submit.prevent="handleSubmit" class="bg-white rounded-xl shadow-lg p-6 space-y-5">
       <!-- Nama dan Telepon -->
       <div class="grid md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium mb-1">Nama Lengkap</label>
+          <label class="block text-sm font-medium mb-1">Full Name</label>
           <input v-model="form.name" class="form-input" type="text" />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">No. Telepon</label>
+          <label class="block text-sm font-medium mb-1">Phone Number</label>
           <input v-model="form.phone_number" class="form-input" type="text" />
         </div>
       </div>
@@ -18,22 +18,22 @@
       <!-- Password -->
       <div class="grid md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium mb-1">Password Saat Ini</label>
+          <label class="block text-sm font-medium mb-1">Current Password</label>
           <input v-model="form.current_password" class="form-input" type="password" />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Password Baru</label>
+          <label class="block text-sm font-medium mb-1">New Password</label>
           <input v-model="form.new_password" class="form-input" type="password" />
         </div>
       </div>
 
       <!-- Alamat -->
       <div>
-        <label class="block text-sm font-medium mb-1">Alamat</label>
+        <label class="block text-sm font-medium mb-1">Address</label>
         <textarea v-model="form.address" class="form-input h-24"></textarea>
       </div>
 
-      <button class="btn-black w-full">Simpan Semua Perubahan</button>
+      <button class="btn-black w-full">Save Changes</button>
     </form>
   </div>
 </template>

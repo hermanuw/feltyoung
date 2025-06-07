@@ -14,40 +14,44 @@
       </ol>
     </nav>
 
+    <!-- Loading and Error States -->
     <div v-if="loading" class="text-center">Loading...</div>
     <div v-else-if="error" class="text-red-500 text-center">{{ error }}</div>
+
+    <!-- Product Display -->
     <div v-else class="flex flex-col lg:flex-row gap-6">
-      <!-- Gambar -->
+      <!-- Image -->
       <div
         class="flex-1 border border-gray-200 rounded-lg overflow-hidden max-h-[500px] flex items-center justify-center"
       >
         <img :src="product.image_url" class="rounded-xl max-w-md object-contain mx-auto mb-4" />
       </div>
 
-      <!-- Detail -->
+      <!-- Product Details -->
       <div class="flex-1 space-y-4">
         <h1 class="text-3xl font-bold">{{ product.name }}</h1>
         <p class="text-xl font-semibold text-black">Rp {{ formatPrice(product.price) }}</p>
-
         <p class="text-gray-700 text-sm">{{ product.description }}</p>
-        <p class="text-sm text-gray-400">Category : {{ product.category }}</p>
-        <!-- Select Size (compact) -->
+        <p class="text-sm text-gray-400">Category: {{ product.category }}</p>
+
+        <!-- Select Size -->
         <div class="mb-6">
           <div class="flex justify-between items-center mb-2 w-full">
             <span class="text-sm font-semibold">Select Size</span>
             <span
-              class="text-sm hover:underline font-medium text-black/50 cursor-pointer ml-120"
+              class="text-sm hover:underline font-medium text-black/50 cursor-pointer"
               @click="showSizeChart = true"
             >
               Size Chart
             </span>
-            <!-- Komponen Modal -->
             <SizeChart
               v-model:show="showSizeChart"
               :brand="product.brand"
               :category="product.category"
             />
           </div>
+
+          <!-- Size Selection -->
           <div id="sizesGrid" class="grid grid-cols-3 gap-1">
             <div
               v-for="variant in variants"
@@ -56,9 +60,8 @@
                 'border rounded-md text-center py-2 text-sm font-medium cursor-pointer hover:border-black',
                 variant.stock === 0
                   ? 'border-0 cursor-not-allowed bg-black/10 opacity-50 hover:border-gray-300'
-                  : selectedSize === variant.size
-                    ? 'border-black bg-gray-200'
-                    : '',
+                  : '',
+                selectedSize === variant.size ? 'border-black bg-gray-200' : '',
               ]"
               @click="variant.stock > 0 && selectSize(variant.size)"
             >
@@ -66,10 +69,46 @@
             </div>
           </div>
         </div>
-        <!-- Tombol -->
+
+        <!-- Buy Now Button -->
         <div class="flex gap-2">
-          <button class="bg-black text-white px-6 py-2 rounded">Buy Now</button>
-          <button class="border p-3 rounded"><span>Add To Cart</span></button>
+          <button
+            @click="handleBuyNow"
+            class="bg-black text-white px-6 py-2 rounded text-center flex items-center justify-center cursor-pointer"
+          >
+            Buy Now
+          </button>
+          <!-- MODAL AUTH FORM -->
+          <transition name="slide-down">
+            <div
+              v-if="showAuthForm"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+            >
+              <!-- WRAPPER tombol dan konten auth -->
+              <div
+                class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]"
+              >
+                <!-- Tombol Close harus di sini, dalam wrapper -->
+                <button
+                  class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999]"
+                  @click="showAuthForm = false"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+
+                <!-- AuthForm harus berada di bawah tombol -->
+                <AuthForm @close="showAuthForm = false" @login-success="handleLoginSuccess" />
+              </div>
+            </div>
+          </transition>
+          <button
+            class="border p-3 rounded cursor-pointer"
+            :disabled="!selectedVariant"
+            @click="addToCart"
+          >
+            <span>Add To Cart</span>
+          </button>
         </div>
 
         <!-- Accordion FAQ -->
@@ -83,7 +122,6 @@
               <h6 class="font-semibold text-xs">Exchange Size Warranty</h6>
               <span class="text-sm">{{ open1 ? '−' : '+' }}</span>
             </button>
-
             <transition name="accordion">
               <div
                 v-if="open1"
@@ -91,12 +129,7 @@
                 class="px-4 pb-4 text-sm text-gray-700 overflow-hidden"
                 :style="{ maxHeight: maxHeight1 }"
               >
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                deserunt mollit anim id est laborum."
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."
               </div>
             </transition>
           </div>
@@ -110,7 +143,6 @@
               <h6 class="font-semibold text-xs">Authentic. Trusted. Best Price.</h6>
               <span class="text-sm">{{ open2 ? '−' : '+' }}</span>
             </button>
-
             <transition name="accordion">
               <div
                 v-if="open2"
@@ -118,44 +150,44 @@
                 class="px-4 pb-4 text-sm text-gray-700 overflow-hidden"
                 :style="{ maxHeight: maxHeight2 }"
               >
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-                irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
-                deserunt mollit anim id est laborum."
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."
               </div>
             </transition>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Similar Products -->
     <SimilarProducts :productName="product.name" />
   </section>
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, nextTick, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import axios from '@/axios'
 import SizeChart from '@/components/composables/SizeChart.vue'
 import SimilarProducts from '@/components/composables/SimilarProducts.vue'
 
+import Swal from 'sweetalert2'
+import AuthForm from '../components/composables/AuthForm.vue'
 const route = useRoute()
+const router = useRouter()
 const product = ref({})
-const loading = ref(true)
-const error = ref(null)
-
-// Accordion state
+const variants = ref([])
+const showAuthForm = ref(false)
+const selectedSize = ref(null)
+const isAuthenticated = ref(!!localStorage.getItem('accessToken'))
+const showSizeChart = ref(false)
 const open1 = ref(false)
 const open2 = ref(false)
 const maxHeight1 = ref('0px')
 const maxHeight2 = ref('0px')
 const content1 = ref(null)
 const content2 = ref(null)
-const showSizeChart = ref(false)
-const variants = ref([])
-const selectedSize = ref(null)
+const loading = ref(true)
+const error = ref(null)
 
 function toggleAccordion(index) {
   if (index === 1) {
@@ -172,6 +204,12 @@ function toggleAccordion(index) {
   }
 }
 
+const handleLoginSuccess = () => {
+  isAuthenticated.value = true
+  showAuthForm.value = false
+  // Setelah login, arahkan ke halaman checkout
+  window.location.reload()
+}
 const formatPrice = (price) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price)
 
 onMounted(async () => {
@@ -181,7 +219,7 @@ onMounted(async () => {
     product.value = res.data
     variants.value = res.data.variants || []
     if (variants.value.length > 0) {
-      selectedSize.value = variants.value[0].size // optional: set default size
+      selectedSize.value = variants.value[0].size
     }
   } catch (err) {
     error.value = 'Produk tidak ditemukan.'
@@ -191,10 +229,84 @@ onMounted(async () => {
   }
 })
 
-// Fungsi pilih ukuran
 function selectSize(size) {
   selectedSize.value = size
   console.log('Selected size:', size)
+}
+
+const selectedVariant = computed(() => {
+  return variants.value.find((v) => v.size === selectedSize.value)
+})
+const handleBuyNow = () => {
+  if (!isAuthenticated.value) {
+    Swal.fire({
+      title: 'Login Required',
+      text: 'You need to login to buy this product.',
+      icon: 'warning',
+      confirmButtonText: 'Login',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        showAuthForm.value = true
+      }
+    })
+  } else {
+    router.push({
+      path: '/checkout',
+      query: { productId: product.value.product_id, size: selectedSize.value },
+    })
+  }
+}
+
+async function addToCart() {
+  if (!isAuthenticated.value) {
+    Swal.fire({
+      title: 'Login Required',
+      text: 'You need to login to add this product to your cart.',
+      icon: 'warning',
+      confirmButtonText: 'Login',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        showAuthForm.value = true
+      }
+    })
+  } else {
+    if (!selectedVariant.value) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Pilih ukuran terlebih dahulu!',
+      })
+      return
+    }
+
+    try {
+      await axios.post(
+        '/cart',
+        {
+          variant_id: selectedVariant.value.variant_id,
+          quantity: 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        },
+      )
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Added to Cart',
+        showConfirmButton: false,
+        timer: 1200,
+      })
+    } catch (err) {
+      console.error('Gagal tambah ke cart:', err)
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal menambahkan ke cart.',
+        text: err.response?.data?.message || 'Terjadi kesalahan.',
+      })
+    }
+  }
 }
 </script>
 

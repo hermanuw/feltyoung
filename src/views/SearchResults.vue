@@ -83,7 +83,12 @@ const keyword = ref(route.query.keyword || '')
 const products = ref([])
 const loading = ref(true)
 const sort = ref('new')
-const currentFilter = ref({ category: '', min: null, max: null, name: '' })
+const currentFilter = ref({
+  category: '',
+  min: null,
+  max: null,
+  name: keyword.value || '',
+})
 
 function formatPrice(price) {
   if (price == null || isNaN(price)) return 'Rp -'
@@ -98,6 +103,7 @@ async function fetchSearchResult(word) {
     loading.value = false
     return
   }
+  currentFilter.value.name = word
 
   loading.value = true
   try {

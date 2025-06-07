@@ -74,6 +74,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axiosInstance from '@/axios'
 import bgImage from '@/assets/Feltyoung.jpg'
+import Swal from 'sweetalert2'
 
 // Emit ke parent
 const emit = defineEmits(['close', 'login-success'])
@@ -101,9 +102,9 @@ async function login() {
     // Beri tahu parent dan tutup modal
     emit('login-success')
     emit('close')
-
     // Redirect dan refresh ke home
-    window.location.href = '/'
+    // window.location.href = '/'
+    console.log('RESPON:', res.data)
   } catch (err) {
     error.value = err.response?.data?.message || 'Login gagal'
   }
@@ -116,6 +117,14 @@ async function register() {
       email: email.value,
       phone_number: phone.value,
       password: password.value,
+    })
+
+    await Swal.fire({
+      title: 'Registrasi Berhasil!',
+      text: 'Silahkan verifikasi melalui email yang Anda daftarkan.',
+      icon: 'success',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#5C4033', // warna cokelat
     })
 
     isRegister.value = false // Berhasil, kembali ke form login
@@ -214,8 +223,8 @@ a:hover {
 button {
   position: relative;
   border-radius: 20px;
-  border: 1px solid #4bb6b7;
-  background-color: #4bb6b7;
+  border: 1px solid #5c4033;
+  background-color: #5c4033;
   color: #fff;
   font-size: 15px;
   font-weight: 700;
