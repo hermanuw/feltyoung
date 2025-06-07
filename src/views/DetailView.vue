@@ -74,7 +74,13 @@
         <div class="flex gap-2">
           <button
             @click="handleBuyNow"
-            class="bg-black text-white px-6 py-2 rounded text-center flex items-center justify-center cursor-pointer"
+            :disabled="!selectedVariant || selectedVariant.stock === 0"
+            :class="[
+              'px-6 py-2 rounded text-center flex items-center justify-center',
+              selectedVariant && selectedVariant.stock > 0
+                ? 'bg-black text-white cursor-pointer'
+                : 'bg-gray-300 text-white cursor-not-allowed',
+            ]"
           >
             Buy Now
           </button>
@@ -103,8 +109,13 @@
             </div>
           </transition>
           <button
-            class="border p-3 rounded cursor-pointer"
-            :disabled="!selectedVariant"
+            class="border p-3 rounded"
+            :disabled="!selectedVariant || selectedVariant.stock === 0"
+            :class="[
+              !selectedVariant || selectedVariant.stock === 0
+                ? 'bg-gray-200 cursor-not-allowed text-gray-400'
+                : 'cursor-pointer',
+            ]"
             @click="addToCart"
           >
             <span>Add To Cart</span>
@@ -240,8 +251,8 @@ const selectedVariant = computed(() => {
 const handleBuyNow = () => {
   if (!isAuthenticated.value) {
     Swal.fire({
-      title: 'Login Required',
-      text: 'You need to login to buy this product.',
+      title: 'Login Diperlukan',
+      text: 'Silakan login terlebih dahulu untuk membeli produk.',
       icon: 'warning',
       confirmButtonText: 'Login',
     }).then((result) => {
@@ -249,12 +260,33 @@ const handleBuyNow = () => {
         showAuthForm.value = true
       }
     })
-  } else {
-    router.push({
-      path: '/checkout',
-      query: { productId: product.value.product_id, size: selectedSize.value },
-    })
+    return
   }
+
+  if (!selectedVariant.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Pilih ukuran terlebih dahulu!',
+    })
+    return
+  }
+
+  if (selectedVariant.value.stock === 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Stok Habis',
+      text: 'Ukuran yang dipilih tidak tersedia.',
+    })
+    return
+  }
+
+  router.push({
+    path: '/checkout',
+    query: {
+      productId: product.value.product_id,
+      size: selectedSize.value,
+    },
+  })
 }
 
 async function addToCart() {

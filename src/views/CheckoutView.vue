@@ -120,7 +120,10 @@
         <p class="font-bold text-lg text-right">Rp {{ formatPrice(total) }}</p>
       </div>
 
-      <button class="mt-4 bg-green-600 text-white px-6 py-2 rounded-xl flex items-center gap-2">
+      <button
+        @click="handlePayment"
+        class="mt-4 bg-green-600 text-white px-6 py-2 rounded-xl flex items-center gap-2 cursor-pointer"
+      >
         Choose Payment
       </button>
     </div>
@@ -172,11 +175,11 @@ onMounted(async () => {
           product_id: data.product_id,
           name: data.name,
           image_url: data.image_url,
-          price: data.price,
+          price: Number(data.price),
           size: selectedSize,
         },
       ]
-      productTotal.value = data.price
+      productTotal.value = Number(data.price)
     } else {
       // Checkout dari Cart (semua produk user)
       const res = await axios.get('/cart', {
@@ -219,5 +222,54 @@ const cancelShippingChanges = () => {
   shippingPhone.value = originalShippingData.value.phone
   shippingAddress.value = originalShippingData.value.address
   isEditingShipping.value = false
+}
+
+const handlePayment = async () => {
+  try {
+    const res = await axios.post(
+      '/orders',
+      {
+        total_amount: total.value,
+        payment_method: 'midtrans',
+        shipping_address: shippingAddress.value,
+        recipient_name: shippingName.value,
+        recipient_phone: shippingPhone.value,
+        items: items.value.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity || 1,
+          price: item.price,
+          size: item.size || selectedSize,
+        })),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      },
+    )
+
+    // Panggil Midtrans Snap
+    window.snap.pay(res.data.token, {
+      onSuccess: function (result) {
+        console.log('Payment success:', result)
+        alert('Pembayaran berhasil!')
+        window.location.href = '/' // redirect jika ingin
+      },
+      onPending: function (result) {
+        console.log('Payment pending:', result)
+        alert('Menunggu pembayaran...')
+      },
+      onError: function (result) {
+        console.error('Payment failed:', result)
+        alert('Pembayaran gagal!')
+      },
+      onClose: function () {
+        console.log('Payment popup closed')
+      },
+    })
+  } catch (err) {
+    console.error('Gagal membuat order:', err)
+    alert('Gagal membuat order')
+  }
 }
 </script>
