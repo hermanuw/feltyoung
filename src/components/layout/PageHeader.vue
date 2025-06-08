@@ -36,14 +36,27 @@
           >
             {{ link.name }}
           </router-link>
-          <router-link
-            v-if="isAuthenticated"
-            to="/cart"
-            class="text-[#5C4033] hover:text-[#402a1e] transition"
-            title="Cart"
-          >
-            <BsCart3 class="text-2xl" />
-          </router-link>
+          <!-- Dropdown Cart -->
+          <div v-if="isAuthenticated" ref="cartDropdownRef" class="relative">
+            <div class="cursor-pointer flex items-center" @click="toggleCartDropdown">
+              <BsCart3 class="text-2xl" />
+            </div>
+
+            <!-- DROPDOWN MENU -->
+            <div
+              v-if="showCartDropdown"
+              class="absolute right-0 mt-3 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 animate-fade"
+            >
+              <div class="py-2">
+                <router-link to="/cart" class="dropdown-item" @click="closeCartDropdown">
+                  Lihat Keranjang
+                </router-link>
+                <router-link to="/transactions" class="dropdown-item" @click="closeCartDropdown">
+                  Transaksi Saya
+                </router-link>
+              </div>
+            </div>
+          </div>
 
           <!-- Tampilkan ikon profil jika sudah login -->
           <router-link
@@ -155,6 +168,8 @@ import { BsCart3 } from '@kalimahapps/vue-icons'
 import axios from '@/axios'
 import bgNavbar from '@/assets/bg-navbar.png'
 
+const showCartDropdown = ref(false)
+const cartDropdownRef = ref(null)
 const route = useRoute()
 const router = useRouter()
 const isScrolled = ref(false)
@@ -165,10 +180,12 @@ onMounted(() => {
   window.addEventListener('storage', syncAuth)
   handleScroll()
   window.addEventListener('scroll', handleScroll)
+  document.addEventListener('click', handleClickOutside)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('storage', syncAuth)
   window.removeEventListener('scroll', handleScroll)
+  document.removeEventListener('click', handleClickOutside)
 })
 
 function syncAuth() {
@@ -243,6 +260,20 @@ watch(
     searchQuery.value = ''
   },
 )
+
+function toggleCartDropdown() {
+  showCartDropdown.value = !showCartDropdown.value
+}
+
+function closeCartDropdown() {
+  showCartDropdown.value = false
+}
+
+function handleClickOutside(event) {
+  if (cartDropdownRef.value && !cartDropdownRef.value.contains(event.target)) {
+    showCartDropdown.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -272,5 +303,33 @@ nav a.active-link {
 .slide-down-leave-from {
   transform: translateY(0);
   opacity: 1;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade {
+  animation: fade 0.2s ease-out;
+}
+
+/* Tambahkan style default dropdown item agar tetap terlihat */
+nav .dropdown-item {
+  color: #1f2937; /* Tailwind: text-gray-800 */
+  padding: 0.5rem 1rem;
+  display: block;
+  font-size: 0.875rem; /* text-sm */
+  transition: background-color 0.2s ease;
+}
+
+nav .dropdown-item:hover {
+  background-color: #f3f4f6; /* Tailwind: hover:bg-gray-100 */
 }
 </style>

@@ -9,6 +9,7 @@ import SearchResults from '@/views/SearchResults.vue'
 import DetailView from '@/views/DetailView.vue'
 import VerifyEmail from '@/components/composables/VerifyEmail.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
+import TrasactionsView from '@/views/TransactionView.vue'
 
 const routes = [
   {
@@ -60,11 +61,11 @@ const routes = [
         name: 'CheckOut',
         component: CheckoutView,
       },
-      // {
-      //   path: "/pricing",
-      //   name: "pricing",
-      //   component: PricingPage,
-      // },
+      {
+        path: '/transactions',
+        name: 'Transactions',
+        component: TrasactionsView,
+      },
     ],
   },
 ]
