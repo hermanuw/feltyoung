@@ -138,6 +138,9 @@ import { ref, onMounted } from 'vue'
 const route = useRoute()
 const bgImage = '/images/payment-bg.jpg'
 const processingFee = 73000
+const productId = route.query.productId
+const size = route.query.size
+const fromRequest = route.query.fromRequest === 'true'
 const selectedSize = route.query.size || '-'
 
 const items = ref([]) // array agar mendukung banyak produk

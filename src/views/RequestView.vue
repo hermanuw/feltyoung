@@ -13,13 +13,12 @@
 
     <!-- List Request -->
     <div v-if="requests.length" class="flex justify-between items-center mb-4">
-      <component
+      <div
         v-for="item in requests"
         :key="item.request_id"
-        :is="item.status === 'accepted' ? 'router-link' : 'div'"
-        :to="item.status === 'accepted' ? `/product/${item.linked_product_id}` : null"
-        class="border border-gray-300 rounded-lg p-4 shadow bg-white hover:shadow-md transition duration-300"
-        :class="item.status === 'accepted' ? 'cursor-pointer' : ''"
+        @click="handleCardClick(item)"
+        class="border border-gray-300 rounded-lg p-4 shadow bg-white hover:shadow-md transition duration-300 cursor-pointer"
+        :class="item.status === 'accepted' ? 'cursor-pointer' : 'cursor-default'"
       >
         <img
           v-if="item.image_url"
@@ -33,7 +32,15 @@
         <p class="text-xs px-3 py-1 inline-block rounded-full" :class="statusClass(item.status)">
           Status: {{ item.status }}
         </p>
-      </component>
+
+        <!-- Tampilkan harga jika accepted -->
+        <p
+          v-if="item.status === 'accepted' && item.price"
+          class="text-sm font-bold text-green-700 mt-2"
+        >
+          ${{ item.price }}
+        </p>
+      </div>
     </div>
 
     <p v-else class="text-center text-gray-500 mt-10">Belum ada permintaan sepatu.</p>
@@ -43,6 +50,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from '@/axios'
+import Swal from 'sweetalert2'
 
 const requests = ref([])
 
@@ -70,6 +78,26 @@ const statusClass = (status) => {
       return 'bg-red-100 text-red-800'
     default:
       return 'bg-gray-100 text-gray-800'
+  }
+}
+
+const handleCardClick = (item) => {
+  if (item.status === 'requested') {
+    Swal.fire({
+      icon: 'info',
+      title: 'Processing...',
+      text: 'Your request is being processed. Please wait for further updates.',
+      confirmButtonColor: '#5C4033',
+    })
+  } else if (item.status === 'accepted' && item.linked_product_id) {
+    router.push({
+      path: '/checkout',
+      query: {
+        productId: item.linked_product_id,
+        size: item.size,
+        fromRequest: true, // opsional, biar kamu tahu asalnya dari request
+      },
+    })
   }
 }
 
