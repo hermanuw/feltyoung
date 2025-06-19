@@ -74,6 +74,8 @@ module.exports = {
       o.total_amount,
       o.payment_method,
       o.shipping_address,
+      o.recipient_name,
+      o.recipient_phone,
 
       oi.product_id,
       oi.quantity,
@@ -101,6 +103,8 @@ module.exports = {
           total_amount: row.total_amount,
           payment_method: row.payment_method,
           shipping_address: row.shipping_address,
+          recipient_name: row.recipient_name,
+          recipient_phone: row.recipient_phone,
           items: [],
         };
       }

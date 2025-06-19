@@ -259,14 +259,22 @@ module.exports = {
     size,
     image_url,
     status,
+    linked_product_id, // Tambahkan ini
   }) {
     const sql = `
-    INSERT INTO product_requests (request_id, user_id, name, brand, size, status, created_at, image_url)
-    VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
+    INSERT INTO product_requests (request_id, user_id, name, brand, size, status, created_at, image_url, linked_product_id)
+    VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?)
   `;
-    await db
-      .promise()
-      .query(sql, [request_id, user_id, name, brand, size, status, image_url]);
+    await db.promise().query(sql, [
+      request_id,
+      user_id,
+      name,
+      brand,
+      size,
+      status,
+      image_url,
+      linked_product_id, // dan ini juga
+    ]);
   },
 
   async getRequestsByUserId(user_id) {
@@ -291,7 +299,7 @@ module.exports = {
   },
 
   // Update status request oleh admin
-  async updateRequestStatusWithProduct(request_id, status, product_id) {
+  async updateRequestStatus(request_id, status, product_id) {
     const sql = `
     UPDATE product_requests
     SET status = ?, linked_product_id = ?
