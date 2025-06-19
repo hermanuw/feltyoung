@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col relative">
+  <div class="min-h-screen flex flex-col relative font-poppins">
     <!-- Header -->
     <PageHeader />
 
@@ -28,6 +28,7 @@ export default {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins');
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;

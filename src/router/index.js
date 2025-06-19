@@ -10,6 +10,8 @@ import DetailView from '@/views/DetailView.vue'
 import VerifyEmail from '@/components/composables/VerifyEmail.vue'
 import CheckoutView from '@/views/CheckoutView.vue'
 import TrasactionsView from '@/views/TransactionView.vue'
+import RequestView from '@/views/RequestView.vue'
+import RequestCreateView from '@/views/RequestCreateView.vue'
 
 const routes = [
   {
@@ -35,6 +37,16 @@ const routes = [
         path: '/brand/:slug',
         name: 'brand',
         component: BrandView,
+      },
+      {
+        path: '/product/request/me',
+        name: 'ProductRequest',
+        component: RequestView,
+      },
+      {
+        path: '/product/request/create',
+        name: 'CreateProductRequest',
+        component: RequestCreateView,
       },
       {
         path: '/products/:category',

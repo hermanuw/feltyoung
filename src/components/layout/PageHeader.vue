@@ -28,14 +28,32 @@
             'space-x-6 hidden md:flex items-center',
           ]"
         >
-          <router-link
-            v-for="link in links"
-            :key="link.path"
-            :to="link.path"
-            :class="{ 'active-link': route.path === link.path }"
-          >
-            {{ link.name }}
-          </router-link>
+          <template v-for="link in links" :key="link.path">
+            <router-link
+              v-if="link.name !== 'Request Product'"
+              :to="link.path"
+              :class="{ 'active-link': route.path === link.path }"
+            >
+              {{ link.name }}
+            </router-link>
+
+            <!-- Untuk Request Product, pakai <a> jika belum login -->
+            <a
+              v-else-if="!isAuthenticated"
+              href="#"
+              @click.prevent="alertLoginRequired"
+              class="text-gray-700 hover:text-blue-600"
+            >
+              Request Product
+            </a>
+            <router-link
+              v-else
+              :to="link.path"
+              :class="{ 'active-link': route.path === link.path }"
+            >
+              Request Product
+            </router-link>
+          </template>
           <!-- Dropdown Cart -->
           <div v-if="isAuthenticated" ref="cartDropdownRef" class="relative">
             <div class="cursor-pointer flex items-center" @click="toggleCartDropdown">
@@ -167,6 +185,7 @@ import { CgProfile } from '@kalimahapps/vue-icons'
 import { BsCart3 } from '@kalimahapps/vue-icons'
 import axios from '@/axios'
 import bgNavbar from '@/assets/bg-navbar.png'
+import Swal from 'sweetalert2'
 
 const showCartDropdown = ref(false)
 const cartDropdownRef = ref(null)
@@ -200,6 +219,7 @@ const links = [
   { name: 'Kids', path: '/products/kids' },
   { name: 'Men', path: '/products/men' },
   { name: 'Women', path: '/products/women' },
+  { name: 'Request Product', path: '/product/request/me' },
 ]
 
 function handleSearch() {
@@ -273,6 +293,19 @@ function handleClickOutside(event) {
   if (cartDropdownRef.value && !cartDropdownRef.value.contains(event.target)) {
     showCartDropdown.value = false
   }
+}
+
+function alertLoginRequired() {
+  Swal.fire({
+    icon: 'warning',
+    title: 'Login Diperlukan',
+    text: 'Silakan login terlebih dahulu untuk melakukan permintaan produk.',
+    confirmButtonText: 'Login',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      showAuthForm.value = true
+    }
+  })
 }
 </script>
 
