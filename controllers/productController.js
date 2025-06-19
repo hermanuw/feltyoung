@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require("uuid");
 const { PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const r2 = require("../config/r2");
 const Product = require("../models/product");
-
+const upload = require("../middleware/multer");
 // GET all products
 async function getAllProducts(req, res) {
   try {
@@ -21,6 +21,15 @@ async function getById(req, res) {
     const product = await Product.getById(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
+    // Validasi khusus untuk produk request
+    if (product.category === "request") {
+      const request = await Product.getRequestByLinkedProductId(id);
+      if (!request || request.user_id !== req.user.id) {
+        return res
+          .status(403)
+          .json({ message: "You are not allowed to view this product" });
+      }
+    }
     // Ambil varian produk
     const variants = await Product.getVariantsByProductId(id);
 
@@ -307,6 +316,144 @@ async function addVariant(req, res) {
   }
 }
 
+async function createProductRequests(req, res) {
+  const { name, brand, size } = req.body;
+  console.log("Authenticated User:", req.user);
+  const user_id = req.user.id; // Pastikan user_id ada di req.user
+
+  console.log("Authenticated User ID:", user_id); // Debugging log untuk melihat apakah user_id ada
+
+  // Validasi data
+  if (!name || !brand || !size || !user_id) {
+    return res
+      .status(400)
+      .json({ message: "Name, brand, size, and user_id are required" });
+  }
+
+  // Gunakan multer untuk menangani file upload
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error("Multer error:", err);
+      return res
+        .status(400)
+        .json({ message: err.message || "File size must be less than 5MB" });
+    }
+
+    console.log("Request Body:", req.body); // Log form data (name, brand, size)
+    console.log("Uploaded File:", req.file); // Log file yang di-upload
+
+    try {
+      const file = req.file;
+      if (!file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileName = `${uuidv4()}-${file.originalname}`; // Membuat nama file unik
+      const uploadParams = {
+        Bucket: process.env.R2_BUCKET_NAME, // Nama bucket R2
+        Key: fileName,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      };
+
+      // Upload ke Cloudflare R2
+      await r2.send(new PutObjectCommand(uploadParams));
+
+      const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
+      console.log("Generated Image URL:", imageUrl);
+
+      // Simpan data produk request ke database
+      const request_id = uuidv4();
+      await Product.createRequest({
+        request_id,
+        user_id, // Pastikan user_id diteruskan dengan benar
+        name,
+        brand,
+        size,
+        status: "requested",
+        image_url: imageUrl, // Menyimpan URL gambar ke database
+      });
+
+      return res.status(201).json({
+        message: "Product request created successfully",
+        request_id,
+        image_url: imageUrl, // Kembalikan URL gambar
+      });
+    } catch (err) {
+      console.error("Error processing request:", err);
+      return res
+        .status(500)
+        .json({ message: "Failed to create product request" });
+    }
+  });
+}
+
+async function getRequestsByUserId(req, res) {
+  try {
+    const user_id = req.user.id;
+    const requests = await Product.getRequestsByUserId(user_id);
+    return res.json(requests);
+  } catch (err) {
+    console.error("Get user request error:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch product requests" });
+  }
+}
+
+async function getAllRequests(req, res) {
+  try {
+    const requests = await Product.getAllRequestsWithUser();
+    return res.json(requests);
+  } catch (err) {
+    console.error("Get all requests error:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch all product requests" });
+  }
+}
+// Admin: update status permintaan produk
+async function updateStatusRequest(req, res) {
+  const { request_id } = req.params;
+  const { status } = req.body;
+
+  if (!["accepted", "declined"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  try {
+    const request = await Product.getRequestById(request_id);
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    if (status === "accepted") {
+      const product_id = uuidv4();
+
+      await Product.create({
+        product_id,
+        name: request.name,
+        brand: request.brand,
+        description,
+        price,
+        stock,
+        category,
+        image_url: request.image_url,
+      });
+
+      await Product.updateRequestStatus(request_id, status, product_id);
+    } else {
+      // declined: hanya update status, product_id null
+      await Product.updateRequestStatus(request_id, status, null);
+    }
+
+    res.json({ message: `Status updated to ${status}` });
+  } catch (err) {
+    console.error("Update status error:", err);
+    res.status(500).json({ message: "Failed to update request status" });
+  }
+}
+
 module.exports = {
   getAllProducts,
   getById,
@@ -322,4 +469,8 @@ module.exports = {
   addVariant,
   updateVariantStock,
   updateProductVariantsStock,
+  createProductRequests,
+  getRequestsByUserId,
+  getAllRequests,
+  updateStatusRequest,
 };

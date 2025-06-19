@@ -250,4 +250,58 @@ module.exports = {
   `;
     await db.promise().query(sql, [quantity, product_id, size]);
   },
+
+  async createRequest({
+    request_id,
+    user_id,
+    name,
+    brand,
+    size,
+    image_url,
+    status,
+  }) {
+    const sql = `
+    INSERT INTO product_requests (request_id, user_id, name, brand, size, status, created_at, image_url)
+    VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
+  `;
+    await db
+      .promise()
+      .query(sql, [request_id, user_id, name, brand, size, status, image_url]);
+  },
+
+  async getRequestsByUserId(user_id) {
+    const sql = `
+      SELECT * FROM product_requests
+      WHERE user_id = ?
+      ORDER BY created_at DESC
+    `;
+    const [rows] = await db.promise().query(sql, [user_id]);
+    return rows;
+  },
+
+  // Ambil semua request untuk admin
+  async getAllRequestsWithUser() {
+    const [rows] = await db.promise().query(
+      `SELECT pr.*, u.name AS user_name 
+     FROM product_requests pr 
+     JOIN users u ON pr.user_id = u.user_id 
+     ORDER BY pr.created_at DESC`
+    );
+    return rows;
+  },
+
+  // Update status request oleh admin
+  async updateRequestStatusWithProduct(request_id, status, product_id) {
+    const sql = `
+    UPDATE product_requests
+    SET status = ?, linked_product_id = ?
+    WHERE request_id = ?
+  `;
+    await db.promise().query(sql, [status, product_id, request_id]);
+  },
+  async getRequestByLinkedProductId(product_id) {
+    const sql = `SELECT * FROM product_requests WHERE linked_product_id = ?`;
+    const [rows] = await db.promise().query(sql, [product_id]);
+    return rows[0];
+  },
 };

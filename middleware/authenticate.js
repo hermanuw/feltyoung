@@ -1,19 +1,20 @@
 // middleware/authenticate.js
-const jwt = require('jsonwebtoken');
-const config = require('../util/config');
+const jwt = require("jsonwebtoken");
+const config = require("../util/config");
 
 module.exports = function (req, res, next) {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'No token provided' });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token provided" });
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, config.SECRET);
     req.user = decoded;
+    console.log("Authenticated User:", req.user);
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };

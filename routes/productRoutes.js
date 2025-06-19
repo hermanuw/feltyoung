@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
 const isAdmin = require("../middleware/isAdmin");
-const upload = require("../middleware/multer");
 const authenticate = require("../middleware/authenticate");
+const upload = require("../middleware/multer");
 
 // Public routes
 router.get("/", productController.getAllProducts);
@@ -15,6 +15,25 @@ router.get("/category/:category", productController.getByCategory);
 router.get("/brand/:brand", productController.getByBrand);
 router.get("/id/:id", productController.getById);
 
+// User request produk (butuh login)
+router.post(
+  "/request",
+  authenticate,
+  upload,
+  productController.createProductRequests
+);
+// Lihat semua permintaan produk user sendiri
+router.get("/request/me", authenticate, productController.getRequestsByUserId);
+
+router.get("/request", authenticate, isAdmin, productController.getAllRequests);
+
+router.put(
+  "/request/:request_id",
+  authenticate,
+  isAdmin,
+  productController.updateStatusRequest
+);
+
 // Admin only routes (authenticated + role: admin)
 router.put(
   "/variant/:variant_id/stock",
@@ -23,7 +42,7 @@ router.put(
   productController.updateVariantStock
 );
 
-// Batch update stok varian produk (opsional)
+// Batch update stok varian produk
 router.put(
   "/:product_id/variants/stock",
   authenticate,
@@ -31,21 +50,16 @@ router.put(
   productController.updateProductVariantsStock
 );
 
-router.post(
-  "/",
-  authenticate,
-  isAdmin,
-  upload.single("image"),
-  productController.addProducts
-);
+router.post("/", authenticate, isAdmin, upload, productController.addProducts);
 router.put(
   "/:id",
   authenticate,
   isAdmin,
-  upload.single("image"),
+  upload,
   productController.updateProducts
 );
-// Tambah varian baru (admin only)
+
+// Tambah varian baru
 router.post(
   "/:product_id/variants",
   authenticate,
