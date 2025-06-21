@@ -55,36 +55,37 @@
             </router-link>
           </template>
           <!-- Dropdown Cart -->
+          <router-link
+            v-if="isAuthenticated"
+            to="/cart"
+            class="text-[#5C4033] hover:text-[#402a1e] transition"
+            title="Cart"
+          >
+            <BsCart3 class="text-2xl" />
+          </router-link>
+
           <div v-if="isAuthenticated" ref="cartDropdownRef" class="relative">
-            <div class="cursor-pointer flex items-center" @click="toggleCartDropdown">
-              <BsCart3 class="text-2xl" />
+            <div class="cursor-pointer flex items-center" @click="toggleProfileDropdown">
+              <CgProfile class="text-2xl" />
             </div>
 
             <!-- DROPDOWN MENU -->
             <div
-              v-if="showCartDropdown"
+              v-if="showProfileDropdown"
               class="absolute right-0 mt-3 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 animate-fade"
             >
               <div class="py-2">
-                <router-link to="/cart" class="dropdown-item" @click="closeCartDropdown">
-                  Lihat Keranjang
+                <router-link to="/profile" class="dropdown-item" @click="closeProfileDropdown">
+                  Manage Profile
                 </router-link>
-                <router-link to="/transactions" class="dropdown-item" @click="closeCartDropdown">
-                  Transaksi Saya
+                <router-link to="/transactions" class="dropdown-item" @click="closeProfileDropdown">
+                  Transactions
                 </router-link>
               </div>
             </div>
           </div>
 
           <!-- Tampilkan ikon profil jika sudah login -->
-          <router-link
-            v-if="isAuthenticated"
-            to="/profile"
-            class="text-[#5C4033] hover:text-[#402a1e] transition"
-            title="Profile"
-          >
-            <CgProfile class="text-2xl" />
-          </router-link>
 
           <router-link
             v-if="!isAuthenticated"
@@ -187,8 +188,8 @@ import axios from '@/axios'
 import bgNavbar from '@/assets/bg-navbar.png'
 import Swal from 'sweetalert2'
 
-const showCartDropdown = ref(false)
-const cartDropdownRef = ref(null)
+const showProfileDropdown = ref(false)
+const profileDropdownRef = ref(null)
 const route = useRoute()
 const router = useRouter()
 const isScrolled = ref(false)
@@ -237,7 +238,7 @@ const logout = async () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     isAuthenticated.value = false
-    router.push('/')
+    window.location.href = '/'
   }
 }
 
@@ -281,17 +282,17 @@ watch(
   },
 )
 
-function toggleCartDropdown() {
-  showCartDropdown.value = !showCartDropdown.value
+function toggleProfileDropdown() {
+  showProfileDropdown.value = !showProfileDropdown.value
 }
 
-function closeCartDropdown() {
-  showCartDropdown.value = false
+function closeProfileDropdown() {
+  showProfileDropdown.value = false
 }
 
 function handleClickOutside(event) {
-  if (cartDropdownRef.value && !cartDropdownRef.value.contains(event.target)) {
-    showCartDropdown.value = false
+  if (profileDropdownRef.value && !profileDropdownRef.value.contains(event.target)) {
+    showProfileDropdown.value = false
   }
 }
 

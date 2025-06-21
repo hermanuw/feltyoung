@@ -103,8 +103,7 @@ async function login() {
     emit('login-success')
     emit('close')
     // Redirect dan refresh ke home
-    // window.location.href = '/'
-    console.log('RESPON:', res.data)
+    window.location.href = '/'
   } catch (err) {
     error.value = err.response?.data?.message || 'Login gagal'
   }

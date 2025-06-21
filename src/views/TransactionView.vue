@@ -85,7 +85,7 @@
           </p>
 
           <!-- Info Umum -->
-          <div class="mb-4 flex justify-between items-start">
+          <div class="mb-4 flex justify-between items-start p-4">
             <!-- Info kiri -->
             <div>
               <p class="text-sm text-gray-600">
@@ -96,7 +96,6 @@
                 {{ formatDate(selectedOrder.order_date) }}
               </p>
             </div>
-
             <!-- Tombol kanan -->
             <a
               :href="`https://wa.me/6289614307299`"
@@ -109,7 +108,7 @@
           </div>
 
           <!-- Info Pengiriman -->
-          <div class="mb-4">
+          <div class="shadow-md rounded-lg p-4 mb-4">
             <h4 class="text-sm font-bold mb-2">Info Pengiriman</h4>
             <p class="text-sm text-gray-600">
               <span class="font-medium">Nama:</span> {{ selectedOrder.recipient_name }}
@@ -128,7 +127,7 @@
           </div>
 
           <!-- Daftar Produk -->
-          <div>
+          <div class="shadow-md rounded-lg p-4 mb-4">
             <h4 class="text-sm font-bold mb-2">Detail Produk</h4>
             <div
               v-for="item in selectedOrder.items"

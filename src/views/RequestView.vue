@@ -12,7 +12,7 @@
     </div>
 
     <!-- List Request -->
-    <div v-if="requests.length" class="flex justify-between items-center mb-4">
+    <div v-if="requests.length" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
       <div
         v-for="item in requests"
         :key="item.request_id"
