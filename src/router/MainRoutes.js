@@ -1,0 +1,47 @@
+const MainRoutes = {
+  path: '/main',
+  meta: {
+    requiresAuth: false // semua di bawah ini butuh login
+  },
+  redirect: '/main/dashboard/default',
+  component: () => import('../layouts/full/FullLayout.vue'),
+  children: [
+    {
+      path: 'dashboard/default',
+      name: 'Dashboard',
+      component: () => import('../views/dashboards/default/DefaultDashboard.vue')
+    },
+    {
+      path: 'starter',
+      name: 'Starter',
+      component: () => import('../views/StarterPage.vue')
+    },
+    {
+      path: 'icons/tabler',
+      name: 'Tabler Icons',
+      component: () => import('../views/utilities/icons/TablerIcons.vue')
+    },
+    {
+      path: 'icons/material',
+      name: 'Material Icons',
+      component: () => import('../views/utilities/icons/MaterialIcons.vue')
+    },
+    {
+      path: 'utils/typography',
+      name: 'Typography',
+      component: () => import('../views/utilities/typography/TypographyPage.vue')
+    },
+    {
+      path: 'utils/shadows',
+      name: 'Shadows',
+      component: () => import('../views/utilities/shadows/ShadowPage.vue')
+    },
+    {
+      path: 'utils/colors',
+      name: 'Colors',
+      component: () => import('../views/utilities/colors/ColorPage.vue')
+    }
+  ]
+};
+
+export default MainRoutes;
