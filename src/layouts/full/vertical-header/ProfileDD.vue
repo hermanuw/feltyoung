@@ -11,39 +11,12 @@ const authStore = useAuthStore();
 <template>
   <!-- Profile Dropdown -->
   <div class="pa-4">
-    <h4 class="mb-n1">Good Morning, <span class="font-weight-regular">John Doe</span></h4>
-    <span class="text-subtitle-2 text-medium-emphasis">Project admin</span>
-
-    <v-text-field persistent-placeholder placeholder="Search" class="my-3" color="primary" variant="outlined" hide-details>
-      <template v-slot:prepend-inner>
-        <SearchIcon stroke-width="1.5" size="20" class="text-lightText SearchIcon" />
-      </template>
-    </v-text-field>
+    <h4 class="mb-n1">Good Morning, <span class="font-weight-regular">Admin</span></h4>
+    <span class="text-subtitle-2 text-medium-emphasis">Feltyoung Admin</span>
 
     <v-divider />
 
-    <perfect-scrollbar style="height: calc(100vh - 300px); max-height: 515px">
-      <!-- Upgrade Box -->
-      <div class="bg-lightwarning rounded-md pa-5 my-3 circle sm-circle lg-circle">
-        <h4>Upgrade your plan</h4>
-        <h6 class="text-subtitle-2 text-medium-emphasis mr-11 pr-11 mb-3 mt-2">70% discount for 1 years subscriptions.</h6>
-        <v-btn color="warning" variant="flat" target="_" href="https://codedthemes.com/item/berry-vue-admin-dashboard/"> Go Premium </v-btn>
-      </div>
-
-      <v-divider />
-
-      <!-- Switch Settings -->
-      <div class="bg-lightprimary rounded-md px-5 py-3 my-3">
-        <div class="d-flex align-center justify-space-between">
-          <h5 class="text-h5">Start DND Mode</h5>
-          <v-switch v-model="swt1" color="primary" hide-details />
-        </div>
-        <div class="d-flex align-center justify-space-between">
-          <h5 class="text-h5">Allow Notifications</h5>
-          <v-switch v-model="swt2" color="primary" hide-details />
-        </div>
-      </div>
-
+    <perfect-scrollbar style="height: calc(60vh - 300px)">
       <v-divider />
 
       <!-- Profile Links -->
@@ -53,16 +26,6 @@ const authStore = useAuthStore();
             <SettingsIcon size="20" class="mr-2" />
           </template>
           <v-list-item-title class="text-subtitle-2">Account Settings</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item color="secondary" rounded="md">
-          <template v-slot:prepend>
-            <UserIcon size="20" class="mr-2" />
-          </template>
-          <v-list-item-title class="text-subtitle-2">Social Profile</v-list-item-title>
-          <template v-slot:append>
-            <v-chip color="warning" class="text-white" text="02" variant="flat" size="small" />
-          </template>
         </v-list-item>
 
         <v-list-item @click="authStore.logout()" color="secondary" rounded="md">

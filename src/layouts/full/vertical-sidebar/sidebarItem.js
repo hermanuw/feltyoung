@@ -1,4 +1,5 @@
-import { BuildingStoreIcon, DashboardIcon } from 'vue-tabler-icons';
+import { divide } from 'lodash';
+import { BuildingStoreIcon, DashboardIcon, ShoppingCartIcon, UserCircleIcon } from 'vue-tabler-icons';
 
 const sidebarItem = [
   { header: 'Home' },
@@ -14,22 +15,25 @@ const sidebarItem = [
     icon: BuildingStoreIcon,
     children: [
       {
-        title: 'Manage Products',
+        title: 'Products',
         to: '/manage-product'
       },
       {
-        title: 'Manage Requests Products',
+        title: 'Requests Products',
         to: '/request-product'
       }
     ]
+  },
+  {
+    title: 'Manage Orders',
+    icon: ShoppingCartIcon,
+    to: '/manage-orders'
+  },
+  {
+    title: 'Manage Users',
+    icon: UserCircleIcon,
+    to: '/manage-users'
   }
-  // { divider: true },
-  // { header: 'Utilities' },
-  // {
-  //   title: 'Typography',
-  //   icon: TypographyIcon,
-  //   to: '/utils/typography'
-  // },
   // {
   //   title: 'Shadows',
   //   icon: ShadowIcon,

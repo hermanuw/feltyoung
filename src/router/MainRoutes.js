@@ -12,14 +12,14 @@ const MainRoutes = {
       component: () => import('../views/dashboards/default/DefaultDashboard.vue')
     },
     {
-      path: 'starter',
-      name: 'Starter',
-      component: () => import('../views/StarterPage.vue')
+      path: '/manage-product',
+      name: 'Manage Products',
+      component: () => import('../views/ManageProduct.vue')
     },
     {
-      path: 'icons/tabler',
-      name: 'Tabler Icons',
-      component: () => import('../views/utilities/icons/TablerIcons.vue')
+      path: '/request-product',
+      name: 'Request Products',
+      component: () => import('../views/RequestProduct.vue')
     },
     {
       path: 'icons/material',

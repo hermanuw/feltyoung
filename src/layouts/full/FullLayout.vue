@@ -3,7 +3,6 @@ import { RouterView } from 'vue-router';
 import VerticalSidebarVue from './vertical-sidebar/VerticalSidebar.vue';
 import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
 import FooterPanel from './footer/FooterPanel.vue';
-import { SettingsIcon } from 'vue-tabler-icons';
 </script>
 
 <template>
@@ -16,8 +15,6 @@ import { SettingsIcon } from 'vue-tabler-icons';
       <v-main>
         <v-container fluid class="page-wrapper">
           <RouterView />
-
-          <SettingsIcon class="icon" />
         </v-container>
         <v-container fluid class="pt-0">
           <FooterPanel />
