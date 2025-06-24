@@ -1,5 +1,5 @@
 <script setup>
-import { SearchIcon, AdjustmentsHorizontalIcon, XIcon } from 'vue-tabler-icons';
+import { SearchIcon, XIcon } from 'vue-tabler-icons';
 
 const props = defineProps({
   closesearch: {
@@ -19,10 +19,6 @@ const props = defineProps({
 
     <!-- Icon kanan -->
     <template v-slot:append-inner>
-      <v-btn color="lightsecondary" icon rounded="sm" variant="flat" size="small" class="text-secondary SearchSetting">
-        <AdjustmentsHorizontalIcon stroke-width="1.5" size="20" />
-      </v-btn>
-
       <!-- Tombol close hanya di mobile -->
       <v-btn
         color="lighterror"

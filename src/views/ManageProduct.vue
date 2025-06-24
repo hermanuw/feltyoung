@@ -1,11 +1,11 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from '../axios';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
 import { EditCircleIcon, TrashIcon } from 'vue-tabler-icons';
-
-// Data produk
+const formatPrice = (price) => 'Rp ' + new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price);
 const page = ref({ title: 'Manage Products' });
 const breadcrumbs = ref([
   { title: 'Products', disabled: false },
@@ -13,65 +13,77 @@ const breadcrumbs = ref([
 ]);
 
 const router = useRouter();
+const products = ref([]);
+const loading = ref(false);
 
-// Daftar produk
-const products = ref([
-  { id: 1, name: 'Product A', price: 50, description: 'Description of product A', lastUpdated: '2023-08-30' },
-  { id: 2, name: 'Product B', price: 30, description: 'Description of product B', lastUpdated: '2023-08-28' },
-  { id: 3, name: 'Product C', price: 70, description: 'Description of product C', lastUpdated: '2023-08-25' },
-  { id: 4, name: 'Product D', price: 100, description: 'Description of product D', lastUpdated: '2023-08-20' },
-  { id: 5, name: 'Product E', price: 150, description: 'Description of product E', lastUpdated: '2023-08-15' }
-]);
+// Fungsi ambil data dari backend
+async function fetchProducts() {
+  loading.value = true;
+  try {
+    const res = await axios.get('/products/'); // sesuaikan URL jika beda
+    products.value = res.data;
+  } catch (error) {
+    console.error('Gagal ambil produk:', error);
+  } finally {
+    loading.value = false;
+  }
+}
 
-// Fungsi untuk mengarahkan ke halaman tambah produk
+// Fungsi hapus produk
+async function deleteProduct(productId) {
+  try {
+    await axios.delete(`/products/${productId}`);
+    products.value = products.value.filter((p) => p.id !== productId);
+  } catch (error) {
+    console.error('Gagal hapus produk:', error);
+  }
+}
+
 function goToAddProduct() {
   router.push('/add-product');
 }
 
-// Fungsi untuk edit produk (dapat diubah sesuai kebutuhan)
-function editProduct(productId) {
-  console.log('Edit product with ID:', productId);
+function editProduct(product_id) {
+  router.push(`/manage-product/edit/${product_id}`);
 }
 
-// Fungsi untuk hapus produk (dapat diubah sesuai kebutuhan)
-function deleteProduct(productId) {
-  products.value = products.value.filter((product) => product.id !== productId);
-}
+// Fetch data saat komponen dimount
+onMounted(() => {
+  fetchProducts();
+});
 </script>
 
 <template>
   <BaseBreadcrumb :title="page.title" :breadcrumbs="breadcrumbs" />
 
   <v-row>
-    <!-- Tombol untuk Add Product -->
-    <v-col cols="12" md="12">
+    <v-col cols="12">
       <UiParentCard title="Product List">
-        <!-- Tombol Add New -->
         <v-btn color="primary" @click="goToAddProduct" class="mb-4">Add New Product</v-btn>
 
-        <!-- Tabel Data Produk -->
         <v-data-table
+          :loading="loading"
           :headers="[
-            { text: 'Name', align: 'start', value: 'name' },
-            { text: 'Price', value: 'price' },
-            { text: 'Last Update', value: 'lastUpdated' },
+            { text: 'Name', value: 'name' },
+            { text: 'Price', value: 'price', sortable: true },
+            { text: 'Brand', value: 'brand' },
+            { text: 'Category', value: 'category', sortable: true },
+            { text: 'Stock', value: 'stock' },
             { text: 'Actions', value: 'actions', sortable: false }
           ]"
           :items="products"
           item-key="id"
-          :pagination="{
-            page: 1,
-            itemsPerPage: 5
-          }"
         >
-          <template v-slot:[`item.actions`]="{ item }">
-            <!-- Tombol Edit -->
-            <v-btn icon @click="editProduct(item.id)">
-              <EditCircleIcon />
+          <!-- Format harga -->
+          <template #item.price="{ item }">
+            {{ formatPrice(item.price) }}
+          </template>
+          <template #item.actions="{ item }">
+            <v-btn icon class="mr-3" @click="editProduct(item.id)">
+              <EditCircleIcon class="text-success" />
             </v-btn>
-            <!-- Tombol Hapus -->
             <v-btn icon @click="deleteProduct(item.id)">
-              <TrashIcon />
+              <TrashIcon class="text-error" />
             </v-btn>
           </template>
         </v-data-table>
@@ -79,7 +91,3 @@ function deleteProduct(productId) {
     </v-col>
   </v-row>
 </template>
-
-<style scoped>
-/* Custom styles for the page */
-</style>

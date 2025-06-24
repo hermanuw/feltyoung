@@ -17,9 +17,14 @@ const MainRoutes = {
       component: () => import('../views/ManageProduct.vue')
     },
     {
+      path: '/manage-product/edit/:productId',
+      name: 'Edit Product',
+      component: () => import('../views/EditProduct.vue')
+    },
+    {
       path: '/request-product',
       name: 'Request Products',
-      component: () => import('../views/RequestProduct.vue')
+      component: () => import('../views/utilities/colors/ColorPage.vue')
     },
     {
       path: 'icons/material',
