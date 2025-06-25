@@ -1,48 +1,65 @@
 <script setup>
 import { ref } from 'vue';
-import { useAuthStore } from '../../../stores/auth';
 import { Form } from 'vee-validate';
 import { useRouter } from 'vue-router';
+import axios from '@/axios';
+import { useAuthStore } from '@/stores/auth'; // pastikan path sesuai
+
 const router = useRouter();
-const valid = ref(false);
+const authStore = useAuthStore();
+
 const show1 = ref(false);
-const password = ref();
-const username = ref();
+const email = ref('');
+const password = ref('');
+const errorMsg = ref('');
+const loading = ref(false);
 
-const passwordRules = ref([
-  (v) => !!v || 'Password is required',
-  (v) => (v && v.length <= 10) || 'Password must be less than 10 characters'
-]);
-
+const passwordRules = ref([(v) => !!v || 'Password is required', (v) => (v && v.length <= 20) || 'Max 20 characters']);
 const emailRules = ref([(v) => !!v || 'E-mail is required', (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid']);
 
-function validate() {
-  // Simpan data user dummy ke localStorage dan authStore kalau mau
-  const authStore = useAuthStore();
-  authStore.user = {
-    id: 1,
-    username: username.value,
-    token: 'dummy-token'
-  };
-  localStorage.setItem('user', JSON.stringify(authStore.user));
+const login = async () => {
+  loading.value = true;
+  errorMsg.value = '';
 
-  // Langsung redirect ke dashboard
-  router.push('main/dashboard/default');
-}
+  try {
+    const res = await axios.post('/login', {
+      email: email.value,
+      password: password.value
+    });
+
+    const { accessToken, user } = res.data;
+
+    if (user.role !== 'admin') {
+      errorMsg.value = 'Only Admin Can Access This Page';
+      return;
+    }
+
+    // ✅ Simpan ke pinia + localStorage
+    authStore.setAuth(user, accessToken);
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('accessToken', accessToken);
+
+    router.push('/main/dashboard');
+  } catch (err) {
+    errorMsg.value = 'Email atau password salah';
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <template>
-  <Form @submit="validate" class="mt-7 loginForm" v-slot="{ errors, isSubmitting }">
+  <Form @submit="login" class="mt-7 loginForm" v-slot="{ isSubmitting }">
     <v-text-field
-      v-model="username"
+      v-model="email"
       :rules="emailRules"
       label="Email Address"
-      class="mt-4 mb-8"
+      class="mt-4 mb-4"
       required
       density="comfortable"
-      hide-details="auto"
       variant="outlined"
       color="primary"
+      hide-details="auto"
     />
 
     <v-text-field
@@ -60,39 +77,21 @@ function validate() {
       class="pwdInput"
     />
 
-    <div class="d-sm-flex align-center mt-2 mb-7 mb-sm-0">
+    <div class="d-sm-flex align-center mt-2 mb-6">
       <div class="ml-auto">
-        <a href="javascript:void(0)" class="text-primary text-decoration-none">Forgot password?</a>
+        <a href="#" class="text-primary text-decoration-none">Forgot password?</a>
       </div>
     </div>
 
-    <v-btn color="secondary" :loading="isSubmitting" block class="mt-2" variant="flat" size="large" :disabled="valid" type="submit">
-      Sign In
-    </v-btn>
+    <v-btn :loading="loading" block class="mt-2" variant="flat" size="large" color="secondary" type="submit"> Sign In </v-btn>
 
-    <div v-if="errors.apiError" class="mt-2">
-      <v-alert color="error">{{ errors.apiError }}</v-alert>
-    </div>
+    <v-alert v-if="errorMsg" class="mt-4" color="error" variant="tonal" density="comfortable">
+      {{ errorMsg }}
+    </v-alert>
   </Form>
 </template>
 
 <style lang="scss">
-.custom-devider {
-  border-color: rgba(0, 0, 0, 0.08) !important;
-}
-.googleBtn {
-  border-color: rgba(0, 0, 0, 0.08);
-  margin: 30px 0 20px 0;
-}
-.outlinedInput .v-field {
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: none;
-}
-.orbtn {
-  padding: 2px 40px;
-  border-color: rgba(0, 0, 0, 0.08);
-  margin: 20px 15px;
-}
 .pwdInput {
   position: relative;
   .v-input__append {
@@ -100,11 +99,6 @@ function validate() {
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-  }
-}
-.loginForm {
-  .v-text-field .v-field--active input {
-    font-weight: 500;
   }
 }
 </style>

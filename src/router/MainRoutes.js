@@ -3,11 +3,11 @@ const MainRoutes = {
   meta: {
     requiresAuth: true // semua di bawah ini butuh login
   },
-  redirect: '/main/dashboard/default',
+  redirect: '/main/dashboard',
   component: () => import('../layouts/full/FullLayout.vue'),
   children: [
     {
-      path: 'dashboard/default',
+      path: '/main/dashboard',
       name: 'Dashboard',
       component: () => import('../views/dashboards/default/DefaultDashboard.vue')
     },
