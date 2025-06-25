@@ -70,7 +70,7 @@
         <div class="w-full p-6 overflow-y-auto max-h-[90vh]">
           <!-- Header -->
           <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-bold">Detail Transaksi</h3>
+            <h3 class="text-xl font-bold">Detail Transaction</h3>
             <button
               class="text-gray-400 text-xl hover:bg-gray-100 rounded cursor-pointer"
               @click="selectedOrder = null"
@@ -81,7 +81,7 @@
 
           <!-- Status -->
           <p class="text-sm font-semibold text-green-600 mb-2">
-            {{ selectedOrder.status === 'done' ? 'Pesanan Selesai' : 'Pesanan Diproses' }}
+            {{ selectedOrder.status === 'done' ? 'Order Completed' : 'Order in Process' }}
           </p>
 
           <!-- Info Umum -->
@@ -89,10 +89,10 @@
             <!-- Info kiri -->
             <div>
               <p class="text-sm text-gray-600">
-                <span class="font-medium">No. Pesanan:</span> {{ selectedOrder.order_id }}
+                <span class="font-medium">Order Number:</span> {{ selectedOrder.order_id }}
               </p>
               <p class="text-sm text-gray-600">
-                <span class="font-medium">Tanggal Pembelian:</span>
+                <span class="font-medium">Order Date:</span>
                 {{ formatDate(selectedOrder.order_date) }}
               </p>
             </div>
@@ -103,7 +103,7 @@
               rel="noopener noreferrer"
               class="px-4 py-2 bg-[#6b4c3b] text-white rounded-md hover:bg-[#5a3f30] transition"
             >
-              Chat Penjual
+              Contact Admin
             </a>
           </div>
 
@@ -111,10 +111,10 @@
           <div class="shadow-md rounded-lg p-4 mb-4">
             <h4 class="text-sm font-bold mb-2">Info Pengiriman</h4>
             <p class="text-sm text-gray-600">
-              <span class="font-medium">Nama:</span> {{ selectedOrder.recipient_name }}
+              <span class="font-medium">Name:</span> {{ selectedOrder.recipient_name }}
             </p>
             <p class="text-sm text-gray-600">
-              <span class="font-medium">Alamat:</span>
+              <span class="font-medium">Address:</span>
               {{ selectedOrder.shipping_address }}
             </p>
             <p class="text-sm text-gray-600">
@@ -122,13 +122,13 @@
               {{ selectedOrder.recipient_phone }}
             </p>
             <p class="text-sm text-gray-600">
-              <span class="font-medium">Kurir:</span> {{ selectedOrder.courier || 'Standard' }}
+              <span class="font-medium">Courier:</span> {{ selectedOrder.courier || 'Standard' }}
             </p>
           </div>
 
           <!-- Daftar Produk -->
           <div class="shadow-md rounded-lg p-4 mb-4">
-            <h4 class="text-sm font-bold mb-2">Detail Produk</h4>
+            <h4 class="text-sm font-bold mb-2">Product Detail</h4>
             <div
               v-for="item in selectedOrder.items"
               :key="item.product_id"
@@ -145,7 +145,7 @@
 
           <!-- Total -->
           <div class="mt-6 text-right">
-            <p class="text-sm text-gray-500">Total Belanja</p>
+            <p class="text-sm text-gray-500">Total Price</p>
             <p class="text-2xl font-bold">Rp {{ formatPrice(selectedOrder.total_amount) }}</p>
           </div>
         </div>
@@ -173,12 +173,23 @@ const fetchOrders = async () => {
   }
 }
 
-const formatDate = (str) =>
-  new Date(str).toLocaleDateString('id-ID', {
-    day: 'numeric',
+const formatDate = (str) => {
+  const date = new Date(str)
+
+  const datePart = date.toLocaleDateString('en-GB', {
+    day: '2-digit',
     month: 'long',
     year: 'numeric',
   })
+
+  const timePart = date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+
+  return `${datePart} ${timePart}`
+}
 
 const formatPrice = (price) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price)
 

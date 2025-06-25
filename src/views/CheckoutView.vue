@@ -99,7 +99,7 @@
     <!-- Ringkasan Pembayaran -->
     <div
       v-if="items.length > 0"
-      class="bg-white bg-cover bg-no-repeat bg-center shadow-sm p-4 rounded-lg mb-20"
+      class="bg-white bg-contain bg-no-repeat bg-center shadow-sm p-4 rounded-lg mb-20"
       :style="`background-image: url('${bgImage}')`"
     >
       <p class="font-medium mb-2">Payment Summary</p>
@@ -136,8 +136,8 @@ import axios from '@/axios'
 import { ref, onMounted } from 'vue'
 
 const route = useRoute()
-const bgImage = '/images/payment-bg.jpg'
-const processingFee = 73000
+const bgImage = '../src/assets/payment.png'
+const processingFee = 30000
 const productId = route.query.productId
 const size = route.query.size
 const fromRequest = route.query.fromRequest === 'true'
