@@ -3,16 +3,16 @@ import { ref } from 'vue';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 
-const page = ref({ title: 'Colors Page' });
+const page = ref({ title: 'Requests Product' });
 const breadcrumbs = ref([
   {
-    title: 'Utilities',
+    title: 'Products',
     disabled: false,
     href: '#'
   },
   {
-    title: 'Colors',
-    disabled: true,
+    title: 'Requests Product',
+    disabled: false,
     href: '#'
   }
 ]);

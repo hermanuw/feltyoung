@@ -3,13 +3,15 @@ import router from '../router';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    accessToken: null
+    user: JSON.parse(localStorage.getItem('user')) || null,
+    accessToken: localStorage.getItem('accessToken') || null
   }),
   actions: {
     setAuth(user, token) {
       this.user = user;
       this.accessToken = token;
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('accessToken', token);
     },
     logout() {
       this.user = null;

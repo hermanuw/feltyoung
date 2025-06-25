@@ -29,7 +29,7 @@ const MainRoutes = {
     {
       path: '/request-product',
       name: 'Request Products',
-      component: () => import('../views/utilities/colors/ColorPage.vue')
+      component: () => import('../views/ColorPage.vue')
     },
     {
       path: 'icons/material',
@@ -49,7 +49,7 @@ const MainRoutes = {
     {
       path: 'utils/colors',
       name: 'Colors',
-      component: () => import('../views/utilities/colors/ColorPage.vue')
+      component: () => import('../views/ColorPage.vue')
     }
   ]
 };
