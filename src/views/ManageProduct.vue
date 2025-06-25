@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from '../axios';
+import Swal from 'sweetalert2';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
@@ -30,12 +31,38 @@ async function fetchProducts() {
 }
 
 // Fungsi hapus produk
-async function deleteProduct(productId) {
-  try {
-    await axios.delete(`/products/${productId}`);
-    products.value = products.value.filter((p) => p.id !== productId);
-  } catch (error) {
-    console.error('Gagal hapus produk:', error);
+async function deleteProduct(product_id) {
+  const result = await Swal.fire({
+    title: 'Are you sure delete this product?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`/products/${product_id}`);
+      products.value = products.value.filter((p) => p.product_id !== product_id);
+
+      Swal.fire({
+        title: 'Deleted!',
+        text: 'Product has been deleted.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Gagal hapus produk:', error);
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to delete product.',
+        icon: 'error'
+      });
+    }
   }
 }
 
@@ -79,10 +106,10 @@ onMounted(() => {
             {{ formatPrice(item.price) }}
           </template>
           <template #item.actions="{ item }">
-            <v-btn icon class="mr-3" @click="editProduct(item.id)">
+            <v-btn icon class="mr-3" @click="editProduct(item.product_id)">
               <EditCircleIcon class="text-success" />
             </v-btn>
-            <v-btn icon @click="deleteProduct(item.id)">
+            <v-btn icon @click="deleteProduct(item.product_id)">
               <TrashIcon class="text-error" />
             </v-btn>
           </template>

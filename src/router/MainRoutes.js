@@ -22,6 +22,11 @@ const MainRoutes = {
       component: () => import('../views/EditProduct.vue')
     },
     {
+      path: '/add-product',
+      name: 'Add Product',
+      component: () => import('../views/AddProduct.vue')
+    },
+    {
       path: '/request-product',
       name: 'Request Products',
       component: () => import('../views/utilities/colors/ColorPage.vue')

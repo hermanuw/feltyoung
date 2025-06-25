@@ -1,14 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from '@/axios';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { FileUploadIcon } from 'vue-tabler-icons';
 import Swal from 'sweetalert2';
 
 const router = useRouter();
-const route = useRoute();
-const productId = route.params.productId;
 
 const name = ref('');
 const brand = ref('');
@@ -20,31 +18,10 @@ const image = ref(null);
 const previewImage = ref('');
 const loading = ref(false);
 const variants = ref([]);
-const selectedSize = ref('');
-const selectedStock = ref(null);
-const selectedVariantId = ref(null);
 const newSize = ref('');
 const newStock = ref(0);
 
 const formatPrice = (val) => 'Rp ' + new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(val);
-
-// Ambil data produk
-onMounted(async () => {
-  try {
-    const res = await axios.get(`/products/id/${productId}`);
-    const product = res.data;
-    name.value = product.name;
-    brand.value = product.brand;
-    price.value = product.price;
-    category.value = product.category;
-    is_top_seller.value = product.is_top_seller ? 'Yes' : 'No';
-    description.value = product.description;
-    previewImage.value = product.image_url;
-    variants.value = product.variants;
-  } catch (err) {
-    console.error('Gagal fetch produk', err);
-  }
-});
 
 function handleFileUpload(e) {
   image.value = e.target.files[0];
@@ -53,11 +30,11 @@ function handleFileUpload(e) {
 
 async function submit() {
   const confirm = await Swal.fire({
-    title: 'Save Product?',
-    text: 'Are you sure you want to update this product?',
+    title: 'Add Product?',
+    text: 'Are you sure you want to create this product?',
     icon: 'question',
     showCancelButton: true,
-    confirmButtonText: 'Yes, Save',
+    confirmButtonText: 'Yes, Create',
     cancelButtonText: 'Cancel'
   });
 
@@ -71,14 +48,24 @@ async function submit() {
     formData.append('price', price.value);
     formData.append('category', category.value);
     formData.append('description', description.value);
-    if (image.value) formData.append('image', image.value);
     formData.append('is_top_seller', is_top_seller.value === 'Yes' ? 1 : 0);
+    formData.append('stock', 0);
+    if (image.value) formData.append('image', image.value);
 
-    await axios.put(`/products/${productId}`, formData);
+    const res = await axios.post('/products', formData);
+    const product_id = res.data.product_id;
+
+    // Tambahkan semua varian setelah produk dibuat
+    for (const v of variants.value) {
+      await axios.post(`/products/${product_id}/variants`, {
+        size: v.size,
+        stock: Number(v.stock)
+      });
+    }
 
     await Swal.fire({
       title: 'Success!',
-      text: 'Product updated successfully.',
+      text: 'Product created successfully.',
       icon: 'success',
       timer: 2000,
       showConfirmButton: false
@@ -86,75 +73,33 @@ async function submit() {
 
     router.push('/manage-product');
   } catch (err) {
-    console.error('Gagal update', err);
-    Swal.fire('Error', 'Failed to update product.', 'error');
+    console.error('Gagal tambah produk', err);
+    Swal.fire('Error', 'Failed to add product.', 'error');
   } finally {
     loading.value = false;
   }
 }
 
-function handleSelectSize(size) {
-  const found = variants.value.find((v) => v.size === size);
-  if (found) {
-    selectedVariantId.value = found.variant_id;
-    selectedStock.value = found.stock;
-    selectedSize.value = found.size;
-  }
-}
-
-async function updateSelectedStock() {
-  if (!selectedVariantId.value) return;
-
-  if (selectedStock.value < 0) {
-    alert('Stock tidak boleh kurang dari 0');
-    return;
-  }
-
-  try {
-    await axios.put(`/products/variant/${selectedVariantId.value}/stock`, {
-      stock: Number(selectedStock.value)
-    });
-
-    const match = variants.value.find((v) => v.variant_id === selectedVariantId.value);
-    if (match) match.stock = selectedStock.value;
-
-    selectedSize.value = '';
-    selectedStock.value = null;
-    selectedVariantId.value = null;
-  } catch (err) {
-    console.error('Gagal update stok', err);
-  }
-}
-async function addNewVariant() {
+function addNewVariant() {
   if (!newSize.value || newStock.value < 0) {
-    alert('Size harus diisi dan stock tidak boleh kurang dari 0');
+    alert('Size is required and stock must be 0 or greater');
     return;
   }
 
-  try {
-    const res = await axios.post(`/products/${productId}/variants`, {
-      size: newSize.value,
-      stock: Number(newStock.value)
-    });
+  variants.value.push({
+    size: newSize.value,
+    stock: newStock.value
+  });
 
-    variants.value.push({
-      size: newSize.value,
-      stock: newStock.value,
-      variant_id: res.data.variant_id
-    });
-
-    newSize.value = '';
-    newStock.value = 0;
-  } catch (err) {
-    console.error('Gagal tambah variant', err);
-  }
+  newSize.value = '';
+  newStock.value = 0;
 }
 </script>
 
 <template>
   <v-row>
     <v-col cols="12">
-      <UiParentCard title="Edit Product">
+      <UiParentCard title="Add New Product">
         <v-card flat>
           <v-card-text>
             <v-form @submit.prevent="submit">
@@ -186,29 +131,8 @@ async function addNewVariant() {
 
               <v-textarea v-model="description" label="Product Description" auto-grow rows="3" required variant="solo" />
 
-              <!-- Variant section -->
-              <v-divider class="my-4" />
-              <p class="text-subtitle-1 font-weight-medium mb-2">Stock per Size</p>
-              <v-list dense>
-                <v-list-item v-for="v in variants" :key="v.variant_id" class="px-0">
-                  <v-list-item-content>Size {{ v.size }} — {{ v.stock }} pairs</v-list-item-content>
-                </v-list-item>
-              </v-list>
-
-              <v-select
-                v-model="selectedSize"
-                :items="variants.map((v) => v.size)"
-                label="Choose Size to Edit"
-                class="mt-5"
-                @update:modelValue="handleSelectSize"
-                variant="solo"
-              />
-              <v-text-field v-if="selectedSize" v-model="selectedStock" label="Stock Size" type="number" class="mt-2" variant="solo" />
-              <v-btn v-if="selectedSize" class="mt-2 mb-4" color="primary" @click="updateSelectedStock">Save Size Stock</v-btn>
-
-              <!-- Tambah size baru -->
               <v-divider class="my-6" />
-              <p class="text-subtitle-1 font-weight-medium mb-2">Add New Size</p>
+              <p class="text-subtitle-1 font-weight-medium mb-2">Add Size Variants</p>
               <v-row>
                 <v-col cols="6" md="3">
                   <v-text-field v-model="newSize" label="Size (ex: 39)" variant="solo" />
@@ -221,9 +145,15 @@ async function addNewVariant() {
                 </v-col>
               </v-row>
 
+              <v-list dense class="mt-4">
+                <v-list-item v-for="(v, i) in variants" :key="i" class="px-0">
+                  <v-list-item-content>Size {{ v.size }} — {{ v.stock }} pairs</v-list-item-content>
+                </v-list-item>
+              </v-list>
+
               <v-row class="mt-6" justify="end" align="center" style="gap: 1rem">
                 <v-btn variant="outlined" color="primary" @click="router.back()">Cancel</v-btn>
-                <v-btn :loading="loading" color="primary" type="submit">Save Product</v-btn>
+                <v-btn :loading="loading" color="primary" type="submit">Create Product</v-btn>
               </v-row>
             </v-form>
           </v-card-text>
