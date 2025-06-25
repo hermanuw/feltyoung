@@ -33,48 +33,58 @@ module.exports = {
       category,
       image_url,
       brand,
+      is_top_seller,
     } = product;
 
     const sql = `
-      INSERT INTO products (product_id, name, description, price, stock, category, image_url, created_at, brand)
-      VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)
-    `;
-    await db
-      .promise()
-      .query(sql, [
-        product_id,
-        name,
-        description,
-        price,
-        stock,
-        category,
-        image_url,
-        brand,
-      ]);
+    INSERT INTO products (
+      product_id, name, description, price, stock, category, image_url, created_at, brand, is_top_seller
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+  `;
+
+    await db.promise().query(sql, [
+      product_id,
+      name,
+      description,
+      price,
+      stock,
+      category,
+      image_url,
+      brand,
+      is_top_seller, // ini penting!
+    ]);
 
     return { product_id };
   },
 
   // Perbarui produk
   async update(id, product) {
-    const { name, description, price, stock, category, image_url, brand } =
-      product;
+    const {
+      name,
+      description,
+      price,
+      category,
+      image_url,
+      brand,
+      is_top_seller,
+    } = product;
 
     const sql = `
-      UPDATE products
-      SET name = ?, description = ?, price = ?, stock = ?, category = ?, image_url = ?, brand = ?
-      WHERE product_id = ?
-    `;
+    UPDATE products
+    SET name = ?, description = ?, price = ?, category = ?, image_url = ?, brand = ?, is_top_seller = ?
+    WHERE product_id = ?
+  `;
+
     await db
       .promise()
       .query(sql, [
         name,
         description,
         price,
-        stock,
         category,
         image_url,
         brand,
+        is_top_seller ?? 0,
         id,
       ]);
   },

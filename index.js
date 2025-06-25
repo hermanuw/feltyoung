@@ -6,9 +6,18 @@ const multer = require("multer"); // Impor Multer untuk mengakses MulterError
 const bodyParser = require("body-parser");
 
 // Middleware bawaan
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // hanya kalau kamu pakai cookie
   })
 );
 // Middleware ini untuk memparsing JSON dan URL-encoded data.

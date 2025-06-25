@@ -47,7 +47,8 @@ async function getById(req, res) {
 // CREATE new product
 async function addProducts(req, res) {
   try {
-    const { name, description, price, stock, category, brand } = req.body;
+    const { name, description, price, stock, category, brand, is_top_seller } =
+      req.body;
 
     const file = req.file;
     if (!file) {
@@ -77,6 +78,7 @@ async function addProducts(req, res) {
       category,
       image_url: imageUrl,
       brand,
+      is_top_seller: Number(is_top_seller),
     });
 
     return res.status(201).json({
@@ -98,8 +100,9 @@ async function updateProducts(req, res) {
     if (!existing)
       return res.status(404).json({ message: "Product not found" });
 
-    const { name, price, stock, description, category, brand } = req.body;
-    let image_url = existing.image_url; // default: tetap pakai gambar lama
+    const { name, price, stock, description, category, brand, is_top_seller } =
+      req.body;
+    let image_url = existing.image_url;
 
     // Jika file gambar dikirim, upload ke Cloudflare R2
     if (req.file) {
@@ -124,6 +127,7 @@ async function updateProducts(req, res) {
       category,
       image_url,
       brand,
+      is_top_seller: Number(is_top_seller),
     });
 
     return res.json({ message: "Product updated" });
@@ -318,10 +322,7 @@ async function addVariant(req, res) {
 
 async function createProductRequests(req, res) {
   const { name, brand, size } = req.body;
-  console.log("Authenticated User:", req.user);
-  const user_id = req.user.id; // Pastikan user_id ada di req.user
-
-  console.log("Authenticated User ID:", user_id); // Debugging log untuk melihat apakah user_id ada
+  const user_id = req.user.id;
 
   // Validasi data
   if (!name || !brand || !size || !user_id) {
@@ -338,9 +339,6 @@ async function createProductRequests(req, res) {
         .status(400)
         .json({ message: err.message || "File size must be less than 5MB" });
     }
-
-    console.log("Request Body:", req.body); // Log form data (name, brand, size)
-    console.log("Uploaded File:", req.file); // Log file yang di-upload
 
     try {
       const file = req.file;
