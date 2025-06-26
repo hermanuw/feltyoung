@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from '../axios';
+import axios from '@/axios';
 import Swal from 'sweetalert2';
 import BaseBreadcrumb from '@/components/shared/BaseBreadcrumb.vue';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
 import { EditCircleIcon, TrashIcon } from 'vue-tabler-icons';
+
 const formatPrice = (price) => 'Rp ' + new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price);
+
 const page = ref({ title: 'Manage Products' });
 const breadcrumbs = ref([
   { title: 'Products', disabled: false },
@@ -88,33 +90,53 @@ onMounted(() => {
       <UiParentCard title="Product List">
         <v-btn color="primary" @click="goToAddProduct" class="mb-4">Add New Product</v-btn>
 
-        <v-data-table
-          :loading="loading"
-          :headers="[
-            { text: 'Name', value: 'name' },
-            { text: 'Price', value: 'price', sortable: true },
-            { text: 'Brand', value: 'brand' },
-            { text: 'Category', value: 'category', sortable: true },
-            { text: 'Stock', value: 'stock' },
-            { text: 'Actions', value: 'actions', sortable: false }
-          ]"
-          :items="products"
-          item-key="id"
-        >
-          <!-- Format harga -->
-          <template #item.price="{ item }">
-            {{ formatPrice(item.price) }}
-          </template>
-          <template #item.actions="{ item }">
-            <v-btn icon class="mr-3" @click="editProduct(item.product_id)">
-              <EditCircleIcon class="text-success" />
-            </v-btn>
-            <v-btn icon @click="deleteProduct(item.product_id)">
-              <TrashIcon class="text-error" />
-            </v-btn>
-          </template>
-        </v-data-table>
+        <!-- Tabel produk dengan struktur thead, tr, th -->
+        <v-card flat>
+          <v-card-text>
+            <v-table density="comfortable" fixed-header>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Brand</th>
+                  <th>Category</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(product, index) in products" :key="product.product_id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ product.name }}</td>
+                  <td>{{ formatPrice(product.price) }}</td>
+                  <td>{{ product.brand }}</td>
+                  <td>{{ product.category }}</td>
+                  <td>{{ product.stock }}</td>
+                  <td>
+                    <v-chip :color="product.is_top_seller ? 'green' : 'red'" size="small">
+                      {{ product.is_top_seller ? 'Top Seller' : 'Regular' }}
+                    </v-chip>
+                  </td>
+                  <td>
+                    <v-btn icon class="mr-3" @click="editProduct(product.product_id)">
+                      <EditCircleIcon class="text-success" />
+                    </v-btn>
+                    <v-btn icon @click="deleteProduct(product.product_id)">
+                      <TrashIcon class="text-error" />
+                    </v-btn>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-card>
       </UiParentCard>
     </v-col>
   </v-row>
 </template>
+
+<style scoped>
+/* Custom styles for the page */
+</style>

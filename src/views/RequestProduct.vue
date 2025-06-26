@@ -1,0 +1,136 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from '@/axios';
+import Swal from 'sweetalert2';
+import UiParentCard from '@/components/shared/UiParentCard.vue';
+import { useRouter } from 'vue-router';
+import { EditCircleIcon, TrashIcon } from 'vue-tabler-icons';
+
+const requests = ref([]);
+const loading = ref(false);
+const router = useRouter();
+
+// Fungsi untuk mengambil semua data request produk
+onMounted(fetchRequests);
+
+async function fetchRequests() {
+  loading.value = true;
+  try {
+    const res = await axios.get('/products/request');
+    requests.value = res.data;
+  } catch (err) {
+    console.error('Failed to fetch requests:', err);
+  } finally {
+    loading.value = false;
+  }
+}
+
+// Fungsi untuk mengubah status permintaan produk (accepted/declined)
+async function updateStatus(requestId, status) {
+  const confirm = await Swal.fire({
+    title: `Set status to ${status}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: `Yes, ${status}`,
+    cancelButtonText: 'Cancel'
+  });
+
+  if (!confirm.isConfirmed) return;
+
+  try {
+    await axios.put(`/products/request/${requestId}`, { status });
+    const target = requests.value.find((r) => r.request_id === requestId);
+    if (target) target.status = status;
+
+    if (status === 'accepted') {
+      await Swal.fire({
+        title: 'Accepted!',
+        text: 'Please proceed to add the product manually.',
+        icon: 'success'
+      });
+    } else {
+      Swal.fire('Declined', 'Request has been declined.', 'info');
+    }
+  } catch (err) {
+    console.error('Failed to update status:', err);
+    Swal.fire('Error', 'Failed to update request status.', 'error');
+  }
+}
+
+// Fungsi untuk mengedit request produk
+function editProduct(requestId) {
+  router.push(`/request-product/edit/${requestId}`);
+}
+</script>
+
+<template>
+  <v-row>
+    <v-col cols="12">
+      <UiParentCard title="Product Requests">
+        <v-card flat>
+          <v-card-text>
+            <!-- Tabel untuk menampilkan data permintaan produk -->
+            <v-table density="comfortable" fixed-header>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>User</th>
+                  <th>Product Name</th>
+                  <th>Brand</th>
+                  <th>Size</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(req, index) in requests" :key="req.request_id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ req.user_name }}</td>
+                  <td>{{ req.name }}</td>
+                  <td>{{ req.brand }}</td>
+                  <td>{{ req.size }}</td>
+                  <td>
+                    <v-chip :color="req.status === 'pending' ? 'grey' : req.status === 'accepted' ? 'green' : 'red'" size="small">
+                      {{ req.status }}
+                    </v-chip>
+                  </td>
+                  <td>
+                    <!-- Tombol untuk menerima permintaan -->
+                    <v-btn
+                      v-if="req.status === 'pending'"
+                      size="small"
+                      color="green"
+                      variant="flat"
+                      @click="updateStatus(req.request_id, 'accepted')"
+                    >
+                      Accept
+                    </v-btn>
+                    <!-- Tombol untuk menolak permintaan -->
+                    <v-btn
+                      v-if="req.status === 'pending'"
+                      size="small"
+                      color="red"
+                      variant="outlined"
+                      @click="updateStatus(req.request_id, 'declined')"
+                    >
+                      Decline
+                    </v-btn>
+
+                    <!-- Tombol Edit (untuk mengedit request produk) -->
+                    <v-btn size="small" color="blue" icon @click="editProduct(req.request_id)">
+                      <EditCircleIcon />
+                    </v-btn>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-card>
+      </UiParentCard>
+    </v-col>
+  </v-row>
+</template>
+
+<style scoped>
+/* Sesuaikan dengan kebutuhan Anda */
+</style>

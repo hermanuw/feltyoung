@@ -29,12 +29,12 @@ const MainRoutes = {
     {
       path: '/request-product',
       name: 'Request Products',
-      component: () => import('../views/ColorPage.vue')
+      component: () => import('../views/RequestProduct.vue')
     },
     {
-      path: 'icons/material',
-      name: 'Material Icons',
-      component: () => import('../views/utilities/icons/MaterialIcons.vue')
+      path: '/request-product/edit/:requestId',
+      name: 'Edit Request',
+      component: () => import('../views/EditRequest.vue')
     },
     {
       path: 'utils/typography',
