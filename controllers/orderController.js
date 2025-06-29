@@ -6,6 +6,17 @@ const crypto = require("crypto");
 const Product = require("../models/product");
 require("dotenv").config(); // Load env variables
 
+// Ambil semua order (khusus admin)
+async function getAllOrders(req, res) {
+  try {
+    const orders = await Order.findAll(); // Pastikan model sudah punya method ini
+    res.json(orders);
+  } catch (err) {
+    console.error("Get all orders error:", err);
+    res.status(500).json({ message: "Gagal mengambil semua order" });
+  }
+}
+
 async function getTransactionStatus(req, res) {
   const { order_id } = req.params; // Ambil order_id dari parameter URL
 
@@ -276,4 +287,5 @@ module.exports = {
   getOrderById,
   completeOrder,
   updateOrderStatus,
+  getAllOrders,
 };

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/orderController");
 const authenticate = require("../middleware/authenticate");
+const isAdmin = require("../middleware/isAdmin");
 
 router.post("/webhook", orderController.handleNotification);
 
@@ -13,7 +14,7 @@ router.post("/", orderController.createOrder);
 
 // 2. Ambil semua order milik user login
 router.get("/", orderController.getUserOrders);
-
+router.get("/admin/all", authenticate, isAdmin, orderController.getAllOrders);
 // 3. Ambil detail order tertentu + item-nya
 router.get("/:order_id", orderController.getOrderById);
 

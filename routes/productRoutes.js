@@ -24,7 +24,12 @@ router.post(
 );
 // Lihat semua permintaan produk user sendiri
 router.get("/request/me", authenticate, productController.getRequestsByUserId);
-
+// Ambil satu request berdasarkan ID (admin atau pemilik)
+router.get(
+  "/request/:request_id",
+  authenticate,
+  productController.getRequestById
+);
 router.get("/request", authenticate, isAdmin, productController.getAllRequests);
 
 router.put(
@@ -51,6 +56,14 @@ router.put(
 );
 
 router.post("/", authenticate, isAdmin, upload, productController.addProducts);
+router.post(
+  "/from-request",
+  authenticate,
+  isAdmin,
+  upload,
+  productController.addProductFromRequest
+);
+
 router.put(
   "/:id",
   authenticate,

@@ -63,6 +63,15 @@ module.exports = {
     const sql = `UPDATE orders SET status = ? WHERE order_id = ?`;
     await db.promise().query(sql, [status, order_id]);
   },
+  async findAll() {
+    const [rows] = await db.promise().query(`
+    SELECT o.*, u.name AS user_name, u.email
+    FROM orders o
+    JOIN users u ON o.user_id = u.user_id
+    ORDER BY o.order_date DESC
+  `);
+    return rows;
+  },
 
   // Ambil semua order milik user
   async findOrdersByUserId(user_id) {

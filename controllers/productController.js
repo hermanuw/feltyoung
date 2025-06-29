@@ -47,8 +47,16 @@ async function getById(req, res) {
 // CREATE new product
 async function addProducts(req, res) {
   try {
-    const { name, description, price, stock, category, brand, is_top_seller } =
-      req.body;
+    const {
+      name,
+      description,
+      price,
+      stock,
+      category,
+      brand,
+      is_top_seller,
+      request_id,
+    } = req.body;
 
     const file = req.file;
     if (!file) {
@@ -64,7 +72,6 @@ async function addProducts(req, res) {
       ContentType: file.mimetype,
     };
     await r2.send(new PutObjectCommand(uploadParams));
-
     const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
 
     // Simpan produk ke database
@@ -80,6 +87,11 @@ async function addProducts(req, res) {
       brand,
       is_top_seller: Number(is_top_seller),
     });
+
+    // Jika produk berasal dari request, update status dan linked ID
+    if (request_id) {
+      await Product.updateRequestStatus(request_id, "accepted", product_id);
+    }
 
     return res.status(201).json({
       message: "Product created successfully",
@@ -399,6 +411,27 @@ async function getRequestsByUserId(req, res) {
   }
 }
 
+async function getRequestById(req, res) {
+  const { request_id } = req.params;
+  try {
+    const request = await Product.getRequestById(request_id);
+
+    if (!request) {
+      return res.status(404).json({ message: "Request tidak ditemukan" });
+    }
+
+    // Cegah akses request milik orang lain (kecuali admin)
+    if (req.user.role !== "admin" && request.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Akses ditolak" });
+    }
+
+    return res.json(request);
+  } catch (err) {
+    console.error("Gagal ambil request by id:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 async function getAllRequests(req, res) {
   try {
     const requests = await Product.getAllRequestsWithUser();
@@ -410,6 +443,79 @@ async function getAllRequests(req, res) {
       .json({ message: "Failed to fetch all product requests" });
   }
 }
+
+async function addProductFromRequest(req, res) {
+  try {
+    const {
+      name,
+      brand,
+      price,
+      stock,
+      category,
+      description,
+      is_top_seller,
+      request_id,
+      image_url,
+    } = req.body;
+
+    // 1. Validasi: request_id wajib ada
+    if (!request_id) {
+      return res.status(400).json({ message: "request_id is required" });
+    }
+
+    const request = await Product.getRequestById(request_id);
+    if (!request) {
+      return res.status(404).json({ message: "Product request not found" });
+    }
+
+    // 2. Upload gambar jika ada file, kalau tidak pakai image_url dari request
+    let finalImageUrl;
+    if (req.file) {
+      const fileName = `${uuidv4()}-${req.file.originalname}`;
+      const uploadParams = {
+        Bucket: process.env.R2_BUCKET_NAME,
+        Key: fileName,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      };
+      await r2.send(new PutObjectCommand(uploadParams));
+      finalImageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
+    } else if (image_url) {
+      finalImageUrl = image_url;
+    } else {
+      return res.status(400).json({ message: "Image is required" });
+    }
+
+    // 3. Buat produk baru
+    const product_id = uuidv4();
+    await Product.create({
+      product_id,
+      name,
+      brand,
+      price,
+      stock,
+      category,
+      description,
+      image_url: finalImageUrl,
+      is_top_seller: Number(is_top_seller),
+    });
+
+    // 4. Update status request jadi accepted dan isi linked_product_id
+    await Product.updateRequestStatus(request_id, "accepted", product_id);
+
+    return res.status(201).json({
+      message: "Product created from request",
+      product_id,
+      image_url: finalImageUrl,
+    });
+  } catch (err) {
+    console.error("Add product from request failed:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to add product from request" });
+  }
+}
+
 // Admin: update status permintaan produk
 async function updateStatusRequest(req, res) {
   const { request_id } = req.params;
@@ -420,7 +526,7 @@ async function updateStatusRequest(req, res) {
   }
 
   try {
-    const request = await Product.getRequestById(request_id);
+    const request = await Product.getRequestsByUserId(request_id);
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
     }
@@ -471,4 +577,6 @@ module.exports = {
   getRequestsByUserId,
   getAllRequests,
   updateStatusRequest,
+  getRequestById,
+  addProductFromRequest,
 };

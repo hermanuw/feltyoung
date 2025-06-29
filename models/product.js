@@ -97,7 +97,7 @@ module.exports = {
 
   // Ambil produk berdasarkan brand
   async getByBrand(brand, sort) {
-    let sql = `SELECT * FROM products WHERE brand = ?`;
+    let sql = `SELECT * FROM products WHERE brand = ? AND category != 'Requested'`;
     const params = [brand];
     if (sort === "low") {
       sql += " ORDER BY price ASC";
@@ -113,13 +113,15 @@ module.exports = {
   async getTopSellers() {
     const [rows] = await db
       .promise()
-      .query("SELECT * FROM products WHERE is_top_seller = TRUE");
+      .query(
+        "SELECT * FROM products WHERE is_top_seller = TRUE AND category != 'Requested'"
+      );
     return rows;
   },
 
   // Ambil produk berdasarkan kategori
   async getByCategory(category, sort) {
-    let sql = `SELECT * FROM products WHERE category = ?`;
+    let sql = `SELECT * FROM products WHERE category = ? AND category != 'Requested'`;
     const params = [category];
 
     if (sort === "low") {
@@ -137,7 +139,8 @@ module.exports = {
   async search(keyword) {
     const sql = `
     SELECT * FROM products
-    WHERE name LIKE ? OR brand LIKE ?
+    WHERE category != 'Requested'
+      AND (name LIKE ? OR brand LIKE ?)
   `;
     const [rows] = await db
       .promise()
@@ -295,6 +298,11 @@ module.exports = {
     `;
     const [rows] = await db.promise().query(sql, [user_id]);
     return rows;
+  },
+  async getRequestById(request_id) {
+    const sql = `SELECT * FROM product_requests WHERE request_id = ?`;
+    const [rows] = await db.promise().query(sql, [request_id]);
+    return rows[0];
   },
 
   // Ambil semua request untuk admin
