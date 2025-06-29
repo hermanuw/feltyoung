@@ -80,8 +80,14 @@
           </div>
 
           <!-- Status -->
-          <p class="text-sm font-semibold text-green-600 mb-2">
-            {{ selectedOrder.status === 'done' ? 'Order Completed' : 'Order in Process' }}
+          <p class="text-sm font-semibold" :class="statusTextClass(selectedOrder.status)">
+            {{
+              selectedOrder.status === 'done'
+                ? 'Order Completed'
+                : selectedOrder.status === 'cancelled'
+                  ? 'Order Cancelled'
+                  : 'Order in Process'
+            }}
           </p>
 
           <!-- Info Umum -->
@@ -121,8 +127,12 @@
               <span class="font-medium">Phone Number:</span>
               {{ selectedOrder.recipient_phone }}
             </p>
-            <p class="text-sm text-gray-600">
-              <span class="font-medium">Courier:</span> {{ selectedOrder.courier || 'Standard' }}
+            <p
+              v-if="['shipped', 'done'].includes(selectedOrder.status)"
+              class="text-sm text-gray-600"
+            >
+              <span class="font-medium">Tracking Number:</span>
+              {{ selectedOrder.tracking_number || 'N/A' }}
             </p>
           </div>
 
@@ -199,6 +209,8 @@ const statusClass = (status) => {
       return 'bg-yellow-100 text-yellow-800'
     case 'paid':
       return 'bg-green-100 text-green-800'
+    case 'packing':
+      return 'bg-green-100 text-green-800'
     case 'shipped':
       return 'bg-blue-100 text-blue-800'
     case 'done':
@@ -207,6 +219,24 @@ const statusClass = (status) => {
       return 'bg-red-100 text-red-800'
     default:
       return 'bg-gray-100 text-gray-800'
+  }
+}
+const statusTextClass = (status) => {
+  switch (status) {
+    case 'pending':
+      return ' text-yellow-800'
+    case 'paid':
+      return ' text-green-800'
+    case 'packing':
+      return ' text-green-800'
+    case 'shipped':
+      return ' text-blue-800'
+    case 'done':
+      return ' text-green-800'
+    case 'cancelled':
+      return ' text-red-800'
+    default:
+      return ' text-gray-800'
   }
 }
 
