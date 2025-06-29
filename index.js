@@ -31,12 +31,14 @@ const productRoutes = require("./routes/productRoutes"); // Pastikan path ini be
 const orderRoutes = require("./routes/orderRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const cartRoutes = require("./routes/cartRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 app.use("/api", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api", profileRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Middleware penanganan error Multer (PENTING!)
 // Ini harus ditempatkan setelah semua rute Anda agar dapat menangkap error yang berasal dari Multer.
