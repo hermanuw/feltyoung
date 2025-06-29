@@ -1,116 +1,70 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import axios from '@/axios';
 import { ArrowDownLeftCircleIcon, ShoppingCartIcon, CircleArrowDownLeftIcon } from 'vue-tabler-icons';
 
 const tab = ref('1');
 
+// Total angka
+const monthlyOrder = ref(0);
+const yearlyOrder = ref(0);
+
+// Chart data
+const lineChart1 = ref({
+  series: [{ name: 'Orders This Month', data: [0, 0, 0, 0] }]
+});
+const lineChart2 = ref({
+  series: [{ name: 'Orders This Year', data: Array(12).fill(0) }]
+});
+
+// Label minggu & bulan
+const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Chart options
 const chartOptions1 = computed(() => ({
   chart: {
     type: 'bar',
     height: 90,
     fontFamily: 'inherit',
     foreColor: '#a1aab2',
-    sparkline: {
-      enabled: true
-    }
+    sparkline: { enabled: true }
   },
-  dataLabels: {
-    enabled: false
-  },
+  xaxis: { categories: weekLabels },
+  dataLabels: { enabled: false },
   colors: ['#fff'],
-  fill: {
-    type: 'solid',
-    opacity: 1
-  },
-  stroke: {
-    curve: 'smooth',
-    width: 3
-  },
-  yaxis: {
-    min: 0,
-    max: 100
-  },
+  fill: { type: 'solid', opacity: 1 },
+  stroke: { curve: 'smooth', width: 3 },
   tooltip: {
     theme: 'light',
-    fixed: {
-      enabled: false
-    },
-    x: {
-      show: false
-    },
-    y: {
-      title: {
-        formatter: () => 'Total Order'
-      }
-    },
-    marker: {
-      show: false
-    }
+    x: { show: true },
+    y: { title: { formatter: () => 'Total Orders' } }
   }
 }));
-
-const lineChart1 = {
-  series: [
-    {
-      name: 'series1',
-      data: [45, 66, 41, 89, 25, 44, 9, 54]
-    }
-  ]
-};
 
 const chartOptions2 = computed(() => ({
-  chart: {
-    type: 'bar',
-    height: 90,
-    fontFamily: 'inherit',
-    foreColor: '#a1aab2',
-    sparkline: {
-      enabled: true
-    }
-  },
-  dataLabels: {
-    enabled: false
-  },
-  colors: ['#fff'],
-  fill: {
-    type: 'solid',
-    opacity: 1
-  },
-  stroke: {
-    curve: 'smooth',
-    width: 3
-  },
-  yaxis: {
-    min: 0,
-    max: 100
-  },
-  tooltip: {
-    theme: 'light',
-    fixed: {
-      enabled: false
-    },
-    x: {
-      show: false
-    },
-    y: {
-      title: {
-        formatter: () => 'Total Order'
-      }
-    },
-    marker: {
-      show: false
-    }
-  }
+  ...chartOptions1.value,
+  xaxis: { categories: monthLabels }
 }));
 
-const lineChart2 = {
-  series: [
-    {
-      name: 'series1',
-      data: [35, 44, 9, 54, 45, 66, 41, 69]
-    }
-  ]
-};
+// Fetch data
+onMounted(async () => {
+  try {
+    const [resMonth, resYear, resChart] = await Promise.all([
+      axios.get('/dashboard/orders/monthly'),
+      axios.get('/dashboard/orders/yearly'),
+      axios.get('/dashboard/orders/chart')
+    ]);
+
+    monthlyOrder.value = resMonth.data.count || 0;
+    yearlyOrder.value = resYear.data.count || 0;
+
+    lineChart1.value.series[0].data = resChart.data.weekly || [0, 0, 0, 0];
+    lineChart2.value.series[0].data = resChart.data.monthly || Array(12).fill(0);
+  } catch (err) {
+    console.error('Gagal ambil data order dan chart:', err);
+  }
+});
 </script>
 
 <template>
@@ -127,33 +81,37 @@ const lineChart2 = {
           </v-tabs>
         </div>
       </div>
+
       <v-tabs-window v-model="tab" class="z-1">
+        <!-- Total Orders This Month -->
         <v-tabs-window-item value="1">
           <v-row>
             <v-col cols="6">
               <h2 class="text-h1 font-weight-medium">
-                $108
+                {{ monthlyOrder }}
                 <a href="#">
                   <CircleArrowDownLeftIcon stroke-width="1.5" width="28" class="text-white" />
                 </a>
               </h2>
-              <span class="text-subtitle-1 text-medium-emphasis text-white">Total Order</span>
+              <span class="text-subtitle-1 text-medium-emphasis text-white">Total Orders This Month</span>
             </v-col>
             <v-col cols="6">
               <apexchart type="line" height="90" :options="chartOptions1" :series="lineChart1.series" />
             </v-col>
           </v-row>
         </v-tabs-window-item>
+
+        <!-- Total Orders This Year -->
         <v-tabs-window-item value="2">
           <v-row>
             <v-col cols="6">
               <h2 class="text-h1 font-weight-medium">
-                $961
+                {{ yearlyOrder }}
                 <a href="#">
                   <ArrowDownLeftCircleIcon stroke-width="1.5" width="28" class="text-white" />
                 </a>
               </h2>
-              <span class="text-subtitle-1 text-medium-emphasis text-white">Total Order</span>
+              <span class="text-subtitle-1 text-medium-emphasis text-white">Total Orders This Year</span>
             </v-col>
             <v-col cols="6">
               <apexchart type="line" height="90" :options="chartOptions2" :series="lineChart2.series" />

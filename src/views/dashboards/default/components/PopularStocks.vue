@@ -1,62 +1,41 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import axios from '@/axios';
+import { ChevronUpIcon, ChevronDownIcon, ChevronRightIcon, DotsIcon } from 'vue-tabler-icons';
 
-// import icons
-import { ChevronUpIcon, ChevronDownIcon } from 'vue-tabler-icons';
-
-// chart 1
 const chartOptions1 = computed(() => ({
   chart: {
     type: 'area',
     height: 95,
     fontFamily: 'inherit',
     foreColor: '#a1aab2',
-    sparkline: {
-      enabled: true
-    }
+    sparkline: { enabled: true }
   },
   colors: ['#5e35b1'],
-  dataLabels: {
-    enabled: false
-  },
-  stroke: {
-    curve: 'smooth',
-    width: 1
-  },
+  dataLabels: { enabled: false },
+  stroke: { curve: 'smooth', width: 1 },
   tooltip: {
     theme: 'light',
-    fixed: {
-      enabled: false
-    },
-    x: {
-      show: false
-    },
-    y: {
-      title: {
-        formatter: () => 'Ticket '
-      }
-    },
-    marker: {
-      show: false
-    }
+    x: { show: false },
+    y: { title: { formatter: () => 'Total Sold' } },
+    marker: { show: false }
   }
 }));
 
-const lineChart1 = {
-  series: [
-    {
-      data: [0, 15, 10, 50, 30, 40, 25]
-    }
-  ]
-};
+const lineChart1 = ref({
+  series: [{ data: [0, 15, 10, 50, 30, 40, 25] }]
+});
 
-const revenues = ref([
-  { name: 'Bajaj Finery', price: 145.58, profit: 10 },
-  { name: 'TTML', price: 6.368, profit: 10 },
-  { name: 'Reliance', price: 458.63, profit: 10 },
-  { name: 'TTML', price: 5.631, profit: 10 },
-  { name: 'Stolon', price: 6.368, profit: 10 }
-]);
+const topProducts = ref([]);
+
+onMounted(async () => {
+  try {
+    const res = await axios.get('/dashboard/top-sellers');
+    topProducts.value = res.data || [];
+  } catch (err) {
+    console.error('Failed to fetch top sellers:', err);
+  }
+});
 </script>
 
 <template>
@@ -74,15 +53,9 @@ const revenues = ref([
               </template>
               <v-sheet rounded="md" width="150" class="elevation-10">
                 <v-list>
-                  <v-list-item value="1">
-                    <v-list-item-title>Today</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item value="2">
-                    <v-list-item-title>This Month</v-list-item-title>
-                  </v-list-item>
-                  <v-list-item value="3">
-                    <v-list-item-title>This Year</v-list-item-title>
-                  </v-list-item>
+                  <v-list-item><v-list-item-title>Today</v-list-item-title></v-list-item>
+                  <v-list-item><v-list-item-title>This Month</v-list-item-title></v-list-item>
+                  <v-list-item><v-list-item-title>This Year</v-list-item-title></v-list-item>
                 </v-list>
               </v-sheet>
             </v-menu>
@@ -93,10 +66,12 @@ const revenues = ref([
           <div class="pa-5">
             <div class="d-flex align-start justify-space-between">
               <div>
-                <h6 class="text-secondary text-h5">Bajaj Finery</h6>
-                <span class="text-subtitle-2 text-medium-emphasis font-weight-bold">10% Profit</span>
+                <h6 class="text-secondary text-h5">
+                  {{ topProducts[0]?.name || '—' }}
+                </h6>
+                <span class="text-subtitle-2 text-medium-emphasis font-weight-bold"> {{ topProducts[0]?.total_sold || 0 }} Sold </span>
               </div>
-              <h4 class="text-h4">$1839.00</h4>
+              <h4 class="text-h4">{{ topProducts[0]?.total_sold || 0 }} Sold</h4>
             </div>
           </div>
           <apexchart type="area" height="95" :options="chartOptions1" :series="lineChart1.series" />
@@ -105,27 +80,29 @@ const revenues = ref([
         <div class="mt-4">
           <perfect-scrollbar :style="{ height: '270px' }">
             <v-list lines="two" class="py-0">
-              <v-list-item v-for="(revenue, i) in revenues" :key="i" :value="revenue" color="secondary" rounded="sm">
+              <v-list-item v-for="(item, i) in topProducts" :key="i" color="secondary" rounded="sm">
                 <template v-slot:append>
                   <div
-                    class="bg-lightsuccess rounded-sm d-flex align-center justify-center ml-3"
+                    :class="[
+                      'rounded-sm d-flex align-center justify-center ml-3',
+                      item.total_sold > 10 ? 'bg-lightsuccess' : 'bg-lighterror'
+                    ]"
                     style="width: 20px; height: 20px"
-                    v-if="revenue.price > 145"
                   >
-                    <ChevronUpIcon stroke-width="1.5" width="20" class="text-success" />
-                  </div>
-                  <div v-else class="bg-lighterror rounded-sm d-flex align-center justify-center ml-3" style="width: 20px; height: 20px">
-                    <ChevronDownIcon stroke-width="1.5" width="20" class="text-error" />
+                    <component
+                      :is="item.total_sold > 10 ? ChevronUpIcon : ChevronDownIcon"
+                      stroke-width="1.5"
+                      width="20"
+                      :class="item.total_sold > 10 ? 'text-success' : 'text-error'"
+                    />
                   </div>
                 </template>
                 <div class="d-inline-flex align-center justify-space-between w-100">
                   <div>
-                    <h6 class="text-subtitle-1 text-medium-emphasis font-weight-bold">{{ revenue.name }}</h6>
-                    <span v-if="revenue.price > 145" class="text-success text-subtitle-2">{{ revenue.profit }}% Profit</span>
-                    <span v-else class="text-error text-subtitle-2">{{ revenue.profit }}% Profit</span>
+                    <h6 class="text-subtitle-1 font-weight-bold">{{ item.name }}</h6>
+                    <span :class="item.total_sold > 10 ? 'text-success' : 'text-error'"> {{ item.total_sold }} Sold </span>
                   </div>
-
-                  <div class="ml-auto text-subtitle-1 text-medium-emphasis font-weight-bold">${{ revenue.price }}</div>
+                  <div class="ml-auto text-subtitle-1 text-medium-emphasis font-weight-bold">{{ item.total_sold }} Sold</div>
                 </div>
               </v-list-item>
             </v-list>

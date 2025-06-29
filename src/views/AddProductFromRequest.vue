@@ -13,7 +13,7 @@ const requestId = route.params.requestId;
 const name = ref('');
 const brand = ref('');
 const price = ref('0');
-const category = ref('Requested');
+const category = ref('requested');
 const is_top_seller = ref('No');
 const description = ref('');
 const image = ref(null);
@@ -52,7 +52,11 @@ function addNewVariant() {
     return;
   }
 
-  variants.value.push({ size: newSize.value, stock: newStock.value });
+  variants.value.push({
+    size: newSize.value,
+    stock: newStock.value
+  });
+
   newSize.value = '';
   newStock.value = 0;
 }

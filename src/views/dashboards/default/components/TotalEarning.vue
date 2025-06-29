@@ -1,5 +1,6 @@
 <script setup>
-import { shallowRef } from 'vue';
+import { shallowRef, ref, onMounted } from 'vue';
+import axios from '@/axios'; // pastikan axios sudah dikonfigurasi
 import { ArchiveIcon, CopyIcon, DownloadIcon, FileExportIcon, DotsIcon, CircleArrowUpRightIcon } from 'vue-tabler-icons';
 import iconCard from '../../../../assets/images/icons/icon-card.svg';
 
@@ -9,6 +10,17 @@ const items = shallowRef([
   { title: 'Export', icon: FileExportIcon },
   { title: 'Archive File', icon: ArchiveIcon }
 ]);
+
+const totalEarning = ref(0);
+const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(val);
+onMounted(async () => {
+  try {
+    const res = await axios.get('/dashboard/earning');
+    totalEarning.value = res.data.total || 0;
+  } catch (err) {
+    console.error('Failed to fetch total earning:', err);
+  }
+});
 </script>
 
 <template>
@@ -18,7 +30,7 @@ const items = shallowRef([
         <v-btn icon rounded="sm" color="darksecondary" variant="flat">
           <img :src="iconCard" width="25" />
         </v-btn>
-        <div class="ml-auto z-1">
+        <!-- <div class="ml-auto z-1">
           <v-menu :close-on-content-click="false">
             <template v-slot:activator="{ props }">
               <v-btn icon rounded="sm" color="secondary" variant="flat" size="small" v-bind="props">
@@ -36,11 +48,13 @@ const items = shallowRef([
               </v-list>
             </v-sheet>
           </v-menu>
-        </div>
+        </div> -->
       </div>
       <h2 class="text-h1 font-weight-medium">
-        $500.00 <a href="#"><CircleArrowUpRightIcon stroke-width="1.5" width="28" class="text-white" /></a>
+        Rp {{ formatCurrency(totalEarning) }}
+        <a href="#"><CircleArrowUpRightIcon stroke-width="1.5" width="28" class="text-white" /></a>
       </h2>
+
       <span class="text-subtitle-1 text-medium-emphasis text-white">Total Earning</span>
     </v-card-text>
   </v-card>

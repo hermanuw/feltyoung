@@ -28,12 +28,12 @@ const sidebarItem = [
     title: 'Manage Orders',
     icon: ShoppingCartIcon,
     to: '/manage-orders'
-  },
-  {
-    title: 'Manage Users',
-    icon: UserCircleIcon,
-    to: '/manage-users'
   }
+  // {
+  //   title: 'Manage Users',
+  //   icon: UserCircleIcon,
+  //   to: '/manage-users'
+  // }
   // {
   //   title: 'Shadows',
   //   icon: ShadowIcon,

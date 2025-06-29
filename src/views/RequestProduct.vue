@@ -99,7 +99,12 @@ async function goToAddProductFromRequest(requestId) {
                   <td>{{ req.brand }}</td>
                   <td>{{ req.size }}</td>
                   <td>
-                    <v-chip :color="req.status === 'requested' ? 'primary' : req.status === 'accepted' ? 'green' : 'red'" size="small">
+                    <v-chip
+                      :color="
+                        req.status === 'requested' ? 'primary' : req.status === 'accepted' || req.status === 'ordered' ? 'green' : 'red'
+                      "
+                      size="small"
+                    >
                       {{ req.status }}
                     </v-chip>
                   </td>
@@ -113,7 +118,7 @@ async function goToAddProductFromRequest(requestId) {
                       </v-btn>
                     </template>
 
-                    <template v-else-if="req.status === 'accepted'">
+                    <template v-else-if="req.status === 'accepted' || req.status === 'ordered'">
                       <v-icon color="green">
                         <CheckIcon />
                       </v-icon>
