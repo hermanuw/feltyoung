@@ -325,9 +325,19 @@ module.exports = {
   `;
     await db.promise().query(sql, [status, product_id, request_id]);
   },
+
   async getRequestByLinkedProductId(product_id) {
     const sql = `SELECT * FROM product_requests WHERE linked_product_id = ?`;
     const [rows] = await db.promise().query(sql, [product_id]);
     return rows[0];
+  },
+
+  async updateStatusToOrdered(product_id, user_id) {
+    const sql = `
+    UPDATE product_requests
+    SET status = 'ordered'
+    WHERE linked_product_id = ? AND user_id = ?
+  `;
+    await db.promise().query(sql, [product_id, user_id]);
   },
 };

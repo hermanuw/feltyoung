@@ -22,7 +22,14 @@ router.get("/:order_id", orderController.getOrderById);
 router.put("/:order_id/complete", orderController.completeOrder);
 
 // 5. Admin mengubah status order (packing, shipped, done, cancelled)
-router.put("/:order_id/status", orderController.updateOrderStatus);
+router.put("/:order_id/status", isAdmin, orderController.updateOrderStatus);
+
+// 6. Update nomor resi/tracking
+router.put(
+  "/:order_id/tracking",
+  isAdmin,
+  orderController.updateTrackingNumber
+);
 
 // 6. Cek status transaksi ke Midtrans (opsional tapi bagus untuk debugging)
 router.get("/status/:order_id", orderController.getTransactionStatus);

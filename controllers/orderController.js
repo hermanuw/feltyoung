@@ -164,8 +164,7 @@ function verifyMidtransSignature(payload, serverKey) {
 async function handleNotification(req, res) {
   try {
     const body = req.body;
-    console.log("📥 Webhook payload:", body); // ← Tambahkan ini
-
+    console.log("🔔 Webhook received:", body); // ini penting banget
     if (!verifyMidtransSignature(body, process.env.MIDTRANS_SERVER_KEY)) {
       console.warn("❌ Invalid signature");
       return res.status(403).json({ message: "Invalid signature" });
@@ -176,7 +175,9 @@ async function handleNotification(req, res) {
     let status = "pending";
     if (transaction_status === "settlement") {
       status = "paid";
+
       const items = await Order.getOrderItems(order_id);
+      const order = await Order.findOrderById(order_id); // untuk ambil user_id
 
       for (const item of items) {
         await Product.decreaseVariantStock(
@@ -184,6 +185,11 @@ async function handleNotification(req, res) {
           item.size,
           item.quantity
         );
+
+        const product = await Product.getById(item.product_id);
+        if (product?.category === "requested") {
+          await Product.updateStatusToOrdered(item.product_id, order.user_id);
+        }
       }
     } else if (
       ["cancel", "expire", "deny", "failure"].includes(transaction_status)
@@ -194,16 +200,16 @@ async function handleNotification(req, res) {
     await Order.updateStatus(order_id, status);
     await Order.updatePaymentMethod(order_id, payment_type);
 
-    console.log("✅ Order updated:", order_id, status); // ← Tambahkan ini
+    console.log("Order updated:", order_id, status);
 
-    return res.status(200).json({ message: "Notification handled" }); // PENTING: HARUS 200
+    return res.status(200).json({ message: "Notification handled" });
   } catch (err) {
-    console.error("❌ Notification Error:", err);
+    console.error("Notification Error:", err);
     return res.status(500).json({ message: "Failed to process notification" });
   }
 }
 
-// Ambil semua order milik user yang sedang login
+// Ambil semua order milik user
 async function getUserOrders(req, res) {
   try {
     const orders = await Order.findOrdersByUserId(req.user.id);
@@ -260,7 +266,14 @@ async function completeOrder(req, res) {
 async function updateOrderStatus(req, res) {
   const { order_id } = req.params;
   const { status } = req.body;
-  const allowedStatuses = ["packing", "shipped", "done", "cancelled"];
+  const allowedStatuses = [
+    "pending",
+    "packing",
+    "paid",
+    "shipped",
+    "done",
+    "cancelled",
+  ];
 
   if (!allowedStatuses.includes(status)) {
     return res.status(400).json({ message: "Status tidak valid" });
@@ -278,6 +291,24 @@ async function updateOrderStatus(req, res) {
     return res.status(500).json({ message: "Gagal mengubah status order" });
   }
 }
+async function updateTrackingNumber(req, res) {
+  const { order_id } = req.params;
+  const { tracking_number } = req.body;
+
+  if (!tracking_number) {
+    return res.status(400).json({ message: "Tracking number is required" });
+  }
+
+  try {
+    await Order.updateTrackingNumber(order_id, tracking_number);
+    return res.json({ message: "Tracking number updated successfully" });
+  } catch (err) {
+    console.error("Update Tracking Number Error:", err);
+    return res
+      .status(500)
+      .json({ message: "Failed to update tracking number" });
+  }
+}
 
 module.exports = {
   getTransactionStatus,
@@ -288,4 +319,5 @@ module.exports = {
   completeOrder,
   updateOrderStatus,
   getAllOrders,
+  updateTrackingNumber,
 };

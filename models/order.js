@@ -73,7 +73,7 @@ module.exports = {
     return rows;
   },
 
-  // Ambil semua order milik user
+  // Ambil semua order milik user (untuk user)
   async findOrdersByUserId(user_id) {
     const sql = `
     SELECT 
@@ -85,6 +85,7 @@ module.exports = {
       o.shipping_address,
       o.recipient_name,
       o.recipient_phone,
+      o.tracking_number,
 
       oi.product_id,
       oi.quantity,
@@ -114,6 +115,7 @@ module.exports = {
           shipping_address: row.shipping_address,
           recipient_name: row.recipient_name,
           recipient_phone: row.recipient_phone,
+          tracking_number: row.tracking_number,
           items: [],
         };
       }
@@ -140,7 +142,18 @@ module.exports = {
 
   // Ambil semua item dari 1 order tertentu
   async getOrderItems(order_id) {
-    const sql = `SELECT * FROM order_items WHERE order_id = ?`;
+    const sql = `
+    SELECT 
+      oi.order_item_id,
+      oi.product_id,
+      p.name AS product_name,
+      oi.quantity,
+      oi.price,
+      oi.size
+    FROM order_items oi
+    JOIN products p ON oi.product_id = p.product_id
+    WHERE oi.order_id = ?
+  `;
     const [rows] = await db.promise().query(sql, [order_id]);
     return rows;
   },
@@ -148,5 +161,10 @@ module.exports = {
   async updatePaymentMethod(order_id, payment_method) {
     const sql = `UPDATE orders SET payment_method = ? WHERE order_id = ?`;
     await db.promise().query(sql, [payment_method, order_id]);
+  },
+  async updateTrackingNumber(order_id, tracking_number) {
+    const sql = `UPDATE orders SET tracking_number = ? WHERE order_id = ?`;
+    const [result] = await db.promise().query(sql, [tracking_number, order_id]);
+    return result;
   },
 };
