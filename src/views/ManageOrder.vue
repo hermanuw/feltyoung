@@ -33,10 +33,11 @@
                       density="compact"
                       variant="outlined"
                       style="max-width: 140px"
-                      @change="updateStatus(order)"
+                      :style="statusStyle(order.status)"
+                      @update:modelValue="() => updateStatus(order)"
                     />
                   </td>
-                  <td>{{ formatCurrency(order.total_amount) }}</td>
+                  <td>Rp {{ formatCurrency(order.total_amount) }}</td>
                   <td>
                     <v-btn size="small" @click="viewOrder(order)">View</v-btn>
                   </td>
@@ -54,12 +55,21 @@
     <v-card>
       <v-card-title class="text-lg font-semibold">Order Detail</v-card-title>
       <v-card-text v-if="selectedOrder">
-        <p><strong>User:</strong> {{ selectedOrder.user_name }} ({{ selectedOrder.email }})</p>
         <p><strong>Recipient:</strong> {{ selectedOrder.recipient_name }} ({{ selectedOrder.recipient_phone }})</p>
         <p><strong>Shipping:</strong> {{ selectedOrder.shipping_address }}</p>
+        <div v-if="selectedOrder.status === 'shipped'" class="mt-3">
+          <v-text-field
+            v-model="selectedOrder.tracking_number"
+            label="Tracking Number"
+            density="compact"
+            variant="outlined"
+            placeholder="Enter tracking number"
+          />
+          <v-btn color="primary" class="mt-2" size="small" @click="saveTrackingNumber"> Save Tracking Number </v-btn>
+        </div>
         <p><strong>Status:</strong> {{ selectedOrder.status }}</p>
         <p><strong>Payment Method:</strong> {{ selectedOrder.payment_method }}</p>
-        <p><strong>Total:</strong> {{ formatCurrency(selectedOrder.total_amount) }}</p>
+        <p><strong>Total:</strong> Rp {{ formatCurrency(selectedOrder.total_amount) }}</p>
 
         <hr class="my-3" />
 
@@ -67,7 +77,7 @@
           <p class="font-semibold mb-1">Items:</p>
           <ul>
             <li v-for="item in selectedOrder.items" :key="item.product_id">
-              {{ item.name }} ({{ item.quantity }} pcs) - {{ formatCurrency(item.price) }}
+              {{ item.product_name }} (Size {{ item.size }} - {{ item.quantity }} pairs) - Rp {{ formatCurrency(item.price) }}
             </li>
           </ul>
         </div>
@@ -83,6 +93,29 @@
 import { ref, onMounted } from 'vue';
 import axios from '@/axios';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
+import { useTheme } from 'vuetify';
+
+const theme = useTheme();
+
+const statusStyle = (status) => {
+  const bg = theme.current.value.colors[statusClass(status)] || '#f4f4f4';
+  const textColor = statusTextColor(status);
+  return {
+    backgroundColor: bg,
+    color: textColor,
+    borderRadius: '8px'
+  };
+};
+const statusTextColor = (status) => {
+  switch (status) {
+    case 'done':
+    case 'paid':
+    case 'packing':
+      return 'white';
+    default:
+      return '#000';
+  }
+};
 
 const page = { title: 'Manage Orders' };
 const breadcrumbs = [
@@ -108,17 +141,59 @@ const viewOrder = async (order) => {
 };
 
 const updateStatus = async (order) => {
-  await axios.patch(`/orders/${order.order_id}/status`, { status: order.status });
+  await axios.put(`/orders/${order.order_id}/status`, {
+    status: order.status
+  });
 };
 
-const formatDate = (str) =>
-  new Date(str).toLocaleDateString('id-ID', {
-    day: 'numeric',
+const formatDate = (str) => {
+  const date = new Date(str);
+
+  const datePart = date.toLocaleDateString('en-GB', {
+    day: '2-digit',
     month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    year: 'numeric'
   });
 
-const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val);
+  const timePart = date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+
+  return `${datePart} ${timePart}`;
+};
+
+const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(val);
+
+const statusClass = (status) => {
+  switch (status) {
+    case 'pending':
+      return 'warning';
+    case 'paid':
+      return 'primary';
+    case 'packing':
+      return 'primary';
+    case 'shipped':
+      return 'info';
+    case 'done':
+      return 'success';
+    case 'cancelled':
+      return 'error';
+    default:
+      return 'gray100'; // fallback
+  }
+};
+
+const saveTrackingNumber = async () => {
+  try {
+    await axios.put(`/orders/${selectedOrder.value.order_id}/tracking`, {
+      tracking_number: selectedOrder.value.tracking_number
+    });
+    alert('Tracking number saved!');
+  } catch (err) {
+    console.error(err);
+    alert('Failed to save tracking number.');
+  }
+};
 </script>
