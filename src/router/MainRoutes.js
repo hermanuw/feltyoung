@@ -32,14 +32,14 @@ const MainRoutes = {
       component: () => import('../views/RequestProduct.vue')
     },
     {
-      path: '/request-product/edit/:requestId',
-      name: 'Edit Request',
-      component: () => import('../views/EditRequest.vue')
+      path: '/add-product-request/:requestId',
+      name: 'AddProductFromRequest',
+      component: () => import('../views/AddProductFromRequest.vue')
     },
     {
-      path: 'utils/typography',
-      name: 'Typography',
-      component: () => import('../views/utilities/typography/TypographyPage.vue')
+      path: '/manage-orders',
+      name: 'Manage Orders',
+      component: () => import('../views/ManageOrder.vue')
     },
     {
       path: 'utils/shadows',

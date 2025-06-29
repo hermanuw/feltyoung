@@ -4,7 +4,7 @@ import axios from '@/axios';
 import Swal from 'sweetalert2';
 import UiParentCard from '@/components/shared/UiParentCard.vue';
 import { useRouter } from 'vue-router';
-import { EditCircleIcon, TrashIcon } from 'vue-tabler-icons';
+import { CheckIcon, XIcon } from 'vue-tabler-icons';
 
 const requests = ref([]);
 const loading = ref(false);
@@ -28,7 +28,7 @@ async function fetchRequests() {
 // Fungsi untuk mengubah status permintaan produk (accepted/declined)
 async function updateStatus(requestId, status) {
   const confirm = await Swal.fire({
-    title: `Set status to ${status}?`,
+    title: `Are you sure want to ${status}?`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonText: `Yes, ${status}`,
@@ -56,10 +56,19 @@ async function updateStatus(requestId, status) {
     Swal.fire('Error', 'Failed to update request status.', 'error');
   }
 }
+async function goToAddProductFromRequest(requestId) {
+  const confirm = await Swal.fire({
+    title: 'Accept this request?',
+    text: 'You will be redirected to add the requested product.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Accept',
+    cancelButtonText: 'Cancel'
+  });
 
-// Fungsi untuk mengedit request produk
-function editProduct(requestId) {
-  router.push(`/request-product/edit/${requestId}`);
+  if (!confirm.isConfirmed) return;
+
+  router.push(`/add-product-request/${requestId}`);
 }
 </script>
 
@@ -90,36 +99,31 @@ function editProduct(requestId) {
                   <td>{{ req.brand }}</td>
                   <td>{{ req.size }}</td>
                   <td>
-                    <v-chip :color="req.status === 'pending' ? 'grey' : req.status === 'accepted' ? 'green' : 'red'" size="small">
+                    <v-chip :color="req.status === 'requested' ? 'primary' : req.status === 'accepted' ? 'green' : 'red'" size="small">
                       {{ req.status }}
                     </v-chip>
                   </td>
                   <td>
-                    <!-- Tombol untuk menerima permintaan -->
-                    <v-btn
-                      v-if="req.status === 'pending'"
-                      size="small"
-                      color="green"
-                      variant="flat"
-                      @click="updateStatus(req.request_id, 'accepted')"
-                    >
-                      Accept
-                    </v-btn>
-                    <!-- Tombol untuk menolak permintaan -->
-                    <v-btn
-                      v-if="req.status === 'pending'"
-                      size="small"
-                      color="red"
-                      variant="outlined"
-                      @click="updateStatus(req.request_id, 'declined')"
-                    >
-                      Decline
-                    </v-btn>
+                    <template v-if="req.status === 'requested'">
+                      <v-btn size="small" class="mr-2" icon @click="goToAddProductFromRequest(req.request_id)">
+                        <CheckIcon color="green" />
+                      </v-btn>
+                      <v-btn size="small" icon @click="updateStatus(req.request_id, 'declined')">
+                        <XIcon color="red" />
+                      </v-btn>
+                    </template>
 
-                    <!-- Tombol Edit (untuk mengedit request produk) -->
-                    <v-btn size="small" color="blue" icon @click="editProduct(req.request_id)">
-                      <EditCircleIcon />
-                    </v-btn>
+                    <template v-else-if="req.status === 'accepted'">
+                      <v-icon color="green">
+                        <CheckIcon />
+                      </v-icon>
+                    </template>
+
+                    <template v-else-if="req.status === 'declined'">
+                      <v-icon color="red">
+                        <XIcon />
+                      </v-icon>
+                    </template>
                   </td>
                 </tr>
               </tbody>

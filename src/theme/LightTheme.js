@@ -32,7 +32,10 @@ const PurpleTheme = {
     linkedin: '#0e76a8',
     gray100: '#fafafa',
     primary200: '#90caf9',
-    secondary200: '#b39ddb'
+    secondary200: '#b39ddb',
+    blue: '#0000FF',
+    green: '#008000',
+    red: '#FF0000'
   }
 };
 
