@@ -91,13 +91,20 @@ const handleCardClick = (item) => {
       text: 'Your request is being processed. Please wait for further updates.',
       confirmButtonColor: '#5C4033',
     })
+  } else if (item.status === 'ordered') {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Already Ordered',
+      text: 'You have already ordered this product. Please wait for the order to be processed.',
+      confirmButtonColor: '#5C4033',
+    })
   } else if (item.status === 'accepted' && item.linked_product_id) {
     router.push({
       path: '/checkout',
       query: {
         productId: item.linked_product_id,
         size: item.size,
-        fromRequest: true, // opsional, biar kamu tahu asalnya dari request
+        fromRequest: true,
       },
     })
   }
