@@ -1,96 +1,70 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import axios from '@/axios';
 
-const select = ref({ state: 'Today', abbr: 'FL' });
-const items = [
-  { state: 'Today', abbr: 'FL' },
-  { state: 'This Month', abbr: 'GA' },
-  { state: 'This Year', abbr: 'NE' }
-];
+const select = ref('Per Minggu');
+const options = ['Per Minggu', 'This Month', 'This Year'];
+const chartData = ref([]);
 
-const chartOptions1 = computed(() => ({
+const formatPrice = (price) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price);
+
+// Mapping query param berdasarkan pilihan
+const periodMap = {
+  'Per Minggu': 'daily',
+  'This Month': 'weekly',
+  'This Year': 'yearly'
+};
+
+// Label X-axis akan menyesuaikan data
+const xAxisLabels = computed(() => {
+  const val = select.value;
+  const len = chartData.value.length;
+
+  if (val === 'Per Minggu') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  if (val === 'This Month') return Array.from({ length: len }, (_, i) => `W${i + 1}`);
+  if (val === 'This Year') return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return [];
+});
+
+// Chart config
+const chartOptions = computed(() => ({
   chart: {
     type: 'bar',
     height: 480,
     fontFamily: 'inherit',
-    foreColor: '#a1aab2',
-    stacked: true
-  },
-  colors: ['#eef2f6', '#1e88e5', '#5e35b1', '#ede7f6'],
-  responsive: [
-    {
-      breakpoint: 480,
-      options: {
-        legend: {
-          position: 'bottom',
-          offsetX: -10,
-          offsetY: 0
-        }
-      }
-    }
-  ],
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      columnWidth: '50%'
-    }
+    foreColor: '#a1aab2'
   },
   xaxis: {
-    type: 'category',
-    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    categories: xAxisLabels.value
   },
-  legend: {
-    show: true,
-    fontFamily: `'Roboto', sans-serif`,
-    position: 'bottom',
-    offsetX: 20,
-    labels: {
-      useSeriesColors: false
-    },
-    markers: {
-      width: 16,
-      height: 16,
-      radius: 5
-    },
-    itemMargin: {
-      horizontal: 15,
-      vertical: 8
-    }
-  },
-  fill: {
-    type: 'solid'
-  },
-  dataLabels: {
-    enabled: false
-  },
-  grid: {
-    show: true
-  },
-  tooltip: {
-    theme: 'light'
-  }
+  colors: ['#1e88e5'],
+  dataLabels: { enabled: false },
+  grid: { show: true },
+  tooltip: { theme: 'light' },
+  fill: { type: 'solid' }
 }));
 
-const lineChart1 = {
+const lineChart = computed(() => ({
   series: [
     {
-      name: 'Investment',
-      data: [35, 125, 35, 35, 35, 80, 35, 20, 35, 45, 15, 75]
-    },
-    {
-      name: 'Loss',
-      data: [35, 15, 15, 35, 65, 40, 80, 25, 15, 85, 25, 75]
-    },
-    {
-      name: 'Profit',
-      data: [35, 145, 35, 35, 20, 105, 100, 10, 65, 45, 30, 10]
-    },
-    {
-      name: 'Maintenance',
-      data: [0, 0, 75, 0, 0, 115, 0, 0, 0, 0, 150, 0]
+      name: 'Total Income',
+      data: chartData.value
     }
   ]
-};
+}));
+
+async function fetchGrowthData() {
+  try {
+    const period = periodMap[select.value];
+    const res = await axios.get(`/dashboard/growth?period=${period}`);
+    chartData.value = res.data.data;
+  } catch (err) {
+    console.error('Gagal ambil data growth:', err);
+  }
+}
+
+onMounted(fetchGrowthData);
+watch(select, fetchGrowthData);
 </script>
 
 <template>
@@ -100,7 +74,7 @@ const lineChart1 = {
         <v-row>
           <v-col cols="12" sm="9">
             <span class="text-subtitle-2 text-disabled font-weight-bold">Total Growth</span>
-            <h3 class="text-h3 mt-1">$2,324.00</h3>
+            <h3 class="text-h3 mt-1">Rp{{ formatPrice(chartData.reduce((a, b) => a + b, 0)) }}</h3>
           </v-col>
           <v-col cols="12" sm="3">
             <v-select
@@ -108,18 +82,16 @@ const lineChart1 = {
               variant="outlined"
               hide-details
               v-model="select"
-              :items="items"
-              item-title="state"
-              item-value="abbr"
-              label="Select"
+              :items="options"
+              label="Pilih Waktu"
               persistent-hint
-              return-object
               single-line
             />
           </v-col>
         </v-row>
+
         <div class="mt-4">
-          <apexchart type="bar" height="480" :options="chartOptions1" :series="lineChart1.series" />
+          <apexchart type="bar" height="480" :options="chartOptions" :series="lineChart.series" />
         </div>
       </v-card-text>
     </v-card>
