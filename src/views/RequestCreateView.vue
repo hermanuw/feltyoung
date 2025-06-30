@@ -18,11 +18,12 @@
     <form @submit.prevent="submitRequest" class="space-y-4 bg-white p-4 mb-8">
       <!-- Nama Sepatu -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sepatu</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
         <input
           v-model="form.name"
           type="text"
-          placeholder="Contoh: Nike Air Jordan 1"
+          placeholder="Example: Nike Air Jordan 1"
+          maxlength="100"
           class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-200"
         />
       </div>
@@ -33,25 +34,27 @@
         <input
           v-model="form.brand"
           type="text"
-          placeholder="Contoh: Nike, Adidas"
+          placeholder="Example: Nike, Adidas"
+          maxlength="100"
           class="w-full px-4 py-2 border rounded-md focus:ring focus:ring-blue-200"
         />
       </div>
 
       <!-- Ukuran -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Ukuran</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Size</label>
         <input
           v-model="form.size"
           type="text"
-          placeholder="Contoh: 42, 9 US"
+          placeholder="Example: 42, 9 US"
+          maxlength="20"
           class="w-full px-4 py-2 border rounded-md focus:ring"
         />
       </div>
 
       <!-- Gambar Sepatu -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Gambar Sepatu</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
         <label
           for="file-upload"
           class="cursor-pointer border bg-white text-black px-4 py-1 text-xs rounded hover:bg-gray-100 transition"
@@ -85,7 +88,7 @@
         :disabled="loading"
         class="w-full bg-[#5C4033] text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
       >
-        {{ loading ? 'Mengirim...' : 'Kirim Permintaan' }}
+        {{ loading ? 'Processing...' : 'Send Request' }}
       </button>
 
       <!-- Pesan -->
@@ -130,6 +133,26 @@ const submitRequest = async () => {
   message.value = ''
   loading.value = true
 
+  // Validasi panjang input
+  if (form.value.name.length > 100) {
+    message.value = 'Name Too long (maximum 100 characters)'
+    messageType.value = 'error'
+    loading.value = false
+    return
+  }
+  if (form.value.brand.length > 100) {
+    message.value = 'Brand Too long (maximum 100 characters)'
+    messageType.value = 'error'
+    loading.value = false
+    return
+  }
+  if (form.value.size.length > 20) {
+    message.value = 'Size Too long (maximum 20 characters)'
+    messageType.value = 'error'
+    loading.value = false
+    return
+  }
+
   try {
     const formData = new FormData()
     formData.append('name', form.value.name)
@@ -146,13 +169,13 @@ const submitRequest = async () => {
       },
     })
 
-    message.value = 'Request berhasil dikirim!'
+    message.value = 'Success! Request has been sent successfully.'
     messageType.value = 'success'
     form.value = { name: '', brand: '', size: '' }
     imageFile.value = null
   } catch (err) {
     console.error('Error response from backend:', err.response)
-    message.value = err.response?.data?.message || 'Gagal mengirim permintaan.'
+    message.value = err.response?.data?.message || 'Failed to send request. Please try again later.'
     messageType.value = 'error'
   } finally {
     loading.value = false

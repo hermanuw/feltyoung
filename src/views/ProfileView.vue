@@ -7,11 +7,11 @@
       <div class="grid md:grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium mb-1">Full Name</label>
-          <input v-model="form.name" class="form-input" type="text" />
+          <input v-model="form.name" class="form-input" type="text" maxlength="100" />
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Phone Number</label>
-          <input v-model="form.phone_number" class="form-input" type="text" />
+          <input v-model="form.phone_number" class="form-input" type="text" maxlength="20" />
         </div>
       </div>
 
@@ -23,14 +23,14 @@
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">New Password</label>
-          <input v-model="form.new_password" class="form-input" type="password" />
+          <input v-model="form.new_password" class="form-input" type="password" maxlength="100" />
         </div>
       </div>
 
       <!-- Alamat -->
       <div>
         <label class="block text-sm font-medium mb-1">Address</label>
-        <textarea v-model="form.address" class="form-input h-24"></textarea>
+        <textarea v-model="form.address" class="form-input h-24" maxlength="255"></textarea>
       </div>
 
       <button class="btn-black w-full">Save Changes</button>
@@ -43,6 +43,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import axiosInstance from '@/axios'
+import Swal from 'sweetalert2'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -71,6 +72,27 @@ onMounted(async () => {
 })
 
 async function handleSubmit() {
+  // Manual length validation
+  if (form.value.name.length > 100) {
+    Swal.fire('Too Long', 'Full name must be max 100 characters.', 'error')
+    return
+  }
+  if (form.value.phone_number.length > 20) {
+    Swal.fire('Too Long', 'Phone number must be max 20 characters.', 'error')
+    return
+  }
+  if (form.value.address.length > 255) {
+    Swal.fire('Too Long', 'Address must be max 255 characters.', 'error')
+    return
+  }
+  if (
+    form.value.new_password &&
+    (form.value.new_password.length < 6 || form.value.new_password.length > 100)
+  ) {
+    Swal.fire('Invalid Password', 'New password must be between 6 and 100 characters.', 'error')
+    return
+  }
+
   try {
     await axiosInstance.put('/profile', {
       name: form.value.name,
@@ -88,12 +110,12 @@ async function handleSubmit() {
       address: form.value.address,
     })
 
-    alert('Semua data berhasil diperbarui')
+    Swal.fire('Success', 'Your profile has been updated.', 'success')
     form.value.current_password = ''
     form.value.new_password = ''
   } catch (err) {
     console.error(err)
-    alert('Gagal menyimpan perubahan')
+    Swal.fire('Error', 'Failed to save changes.', 'error')
   }
 }
 </script>

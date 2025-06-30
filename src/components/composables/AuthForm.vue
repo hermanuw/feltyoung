@@ -5,20 +5,46 @@
       <div class="form-container register-container">
         <form @submit.prevent="register">
           <h1>Register here.</h1>
-          <input v-model="name" type="name" placeholder="Name" required />
-          <input v-model="email" type="email" placeholder="Email" required />
-          <input v-model="phone" type="phone" placeholder="Phone" required />
-          <input v-model="password" type="password" placeholder="Password" required />
+          <input v-model="name" type="text" placeholder="Name" required maxlength="100" />
+          <input v-model="email" type="email" placeholder="Email" required maxlength="255" />
+          <input v-model="phone" type="tel" placeholder="Phone" required maxlength="20" />
+          <input
+            v-model="password"
+            type="password"
+            placeholder="Password"
+            required
+            maxlength="100"
+          />
           <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
-          <button type="submit" class="btn-primary">Register</button>
-          <!-- <span>or use your account</span>
-              <div class="social-container">
-                <a href="#" class="social"><i class="lni lni-facebook-fill"></i></a>
-                <a href="#" class="social"><i class="lni lni-google"></i></a>
-                <a href="#" class="social"><i class="lni lni-linkedin-original"></i></a>
-              </div> -->
+          <button type="submit" class="btn-primary cursor-pointer" :disabled="isLoading">
+            <span v-if="!isLoading">Register</span>
+            <span v-else class="flex items-center gap-2 justify-center">
+              <svg
+                class="animate-spin h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
+                ></path>
+              </svg>
+              Registering...
+            </span>
+          </button>
         </form>
       </div>
+
       <!-- Login Form -->
       <div class="form-container login-container">
         <form @submit.prevent="login">
@@ -27,15 +53,11 @@
           <input v-model="password" type="password" placeholder="Password" required />
           <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
           <div class="content">
-            <!-- <div class="checkbox">
-                  <input type="checkbox" id="checkbox" />
-                  <label for="checkbox">Remember me</label>
-                </div> -->
             <div class="pass-link">
               <a href="#">Forgot password?</a>
             </div>
           </div>
-          <button type="submit" class="btn-primary">Login</button>
+          <button type="submit" class="btn-primary cursor-pointer">Login</button>
         </form>
       </div>
       <!-- Overlay -->
@@ -47,7 +69,7 @@
               friends
             </h1>
             <p><b>If you have an account, login here and have fun</b></p>
-            <button class="ghost" @click="isRegister = false">
+            <button class="ghost cursor-pointer" @click="isRegister = false">
               Login
               <i class="lni lni-arrow-left login"></i>
             </button>
@@ -58,7 +80,7 @@
               journey now
             </h1>
             <p><b>If you don't have an account yet, join us and start your journey.</b></p>
-            <button class="ghost" @click="isRegister = true">
+            <button class="ghost cursor-pointer" @click="isRegister = true">
               Register
               <i class="lni lni-arrow-right register"></i>
             </button>
@@ -72,46 +94,83 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axiosInstance from '@/axios'
+import { useAuthStore } from '@/stores/auth' // <-- Import store
 import bgImage from '@/assets/Feltyoung.jpg'
 import Swal from 'sweetalert2'
 
-// Emit ke parent
 const emit = defineEmits(['close', 'login-success'])
 
+const authStore = useAuthStore() // <-- Gunakan auth store
 const router = useRouter()
+
 const name = ref('')
 const phone = ref('')
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const isRegister = ref(false)
+const isLoading = ref(false)
 
 async function login() {
   try {
     error.value = ''
-    const res = await axiosInstance.post('/login', {
-      email: email.value,
-      password: password.value,
-    })
+    await authStore.login(email.value, password.value) // <-- Pakai store
 
-    // Simpan token
-    localStorage.setItem('accessToken', res.data.accessToken)
-    localStorage.setItem('refreshToken', res.data.refreshToken)
-
-    // Beri tahu parent dan tutup modal
     emit('login-success')
     emit('close')
-    // Redirect dan refresh ke home
     window.location.href = '/'
   } catch (err) {
     error.value = err.response?.data?.message || 'Login gagal'
   }
 }
 
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+
+function isStrongPassword(password) {
+  const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/
+  return pwRegex.test(password)
+}
+
+function isValidPhone(phone) {
+  const phoneRegex = /^(?:\+?[1-9]\d{6,14}|(?:\+62|62|0)[2-9]\d{7,11})$/
+  return phoneRegex.test(phone)
+}
+
 async function register() {
   try {
-    const res = await axiosInstance.post('/register', {
+    error.value = ''
+    isLoading.value = true
+
+    if (name.value.length > 100) {
+      error.value = 'Name too long (max 100 characters)'
+      return
+    }
+    if (email.value.length > 255) {
+      error.value = 'Email too long (max 255 characters)'
+      return
+    }
+    if (phone.value.length > 20) {
+      error.value = 'Phone number too long (max 20 characters)'
+      return
+    }
+    if (!isValidEmail(email.value)) {
+      error.value = 'Please enter a valid email address'
+      return
+    }
+    if (!isValidPhone(phone.value)) {
+      error.value = 'Please enter a valid phone number! It must start with (e.g. +62, 62, or 0)'
+      return
+    }
+    if (!isStrongPassword(password.value)) {
+      error.value =
+        'Password must be at least 6 characters, contain uppercase, lowercase, and a number'
+      return
+    }
+
+    await authStore.register({
       name: name.value,
       email: email.value,
       phone_number: phone.value,
@@ -119,16 +178,18 @@ async function register() {
     })
 
     await Swal.fire({
-      title: 'Registrasi Berhasil!',
-      text: 'Silahkan verifikasi melalui email yang Anda daftarkan.',
+      title: 'Registration Successful!',
+      text: 'Please check your email to verify your account.',
       icon: 'success',
       confirmButtonText: 'OK',
-      confirmButtonColor: '#5C4033', // warna cokelat
+      confirmButtonColor: '#5C4033',
     })
 
-    isRegister.value = false // Berhasil, kembali ke form login
+    isRegister.value = false
   } catch (err) {
-    error.value = err.response?.data?.message || 'Register gagal'
+    error.value = err.response?.data?.message || 'Register failed'
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

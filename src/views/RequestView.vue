@@ -96,6 +96,13 @@ const handleCardClick = (item) => {
       text: 'You have already ordered this product. Please wait for the order to be processed.',
       confirmButtonColor: '#5C4033',
     })
+  } else if (item.status === 'declined') {
+    Swal.fire({
+      icon: 'error',
+      title: 'Request Declined',
+      text: 'Your request has been declined. You can create a new request.',
+      confirmButtonColor: '#5C4033',
+    })
   } else if (item.status === 'accepted' && item.linked_product_id) {
     router.push({
       path: '/checkout',

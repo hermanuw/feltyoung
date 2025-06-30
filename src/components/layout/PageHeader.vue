@@ -161,7 +161,7 @@
         <div class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]">
           <!-- Tombol Close harus di sini, dalam wrapper -->
           <button
-            class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999]"
+            class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999] cursor-pointer"
             @click="showAuthForm = false"
             aria-label="Close"
           >
