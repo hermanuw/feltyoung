@@ -58,12 +58,32 @@ async function addProducts(req, res) {
       request_id,
     } = req.body;
 
+    if (!name || !description || !category || !brand) {
+      return res.status(400).json({ message: "Required fields are missing" });
+    }
+
+    if (name.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Name too long (max 100 characters)" });
+    if (description.length > 1000)
+      return res
+        .status(400)
+        .json({ message: "Description too long (max 1000 characters)" });
+    if (category.length > 50)
+      return res
+        .status(400)
+        .json({ message: "Category too long (max 50 characters)" });
+    if (brand.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Brand too long (max 100 characters)" });
+
     const file = req.file;
     if (!file) {
       return res.status(400).json({ message: "Image file is required" });
     }
 
-    // Upload ke Cloudflare R2
     const fileName = `${uuidv4()}-${file.originalname}`;
     const uploadParams = {
       Bucket: process.env.R2_BUCKET_NAME,
@@ -74,7 +94,6 @@ async function addProducts(req, res) {
     await r2.send(new PutObjectCommand(uploadParams));
     const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
 
-    // Simpan produk ke database
     const product_id = uuidv4();
     await Product.create({
       product_id,
@@ -88,7 +107,6 @@ async function addProducts(req, res) {
       is_top_seller: Number(is_top_seller),
     });
 
-    // Jika produk berasal dari request, update status dan linked ID
     if (request_id) {
       await Product.updateRequestStatus(request_id, "accepted", product_id);
     }
@@ -114,9 +132,26 @@ async function updateProducts(req, res) {
 
     const { name, price, stock, description, category, brand, is_top_seller } =
       req.body;
+
+    if (name.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Name too long (max 100 characters)" });
+    if (description.length > 1000)
+      return res
+        .status(400)
+        .json({ message: "Description too long (max 1000 characters)" });
+    if (category.length > 50)
+      return res
+        .status(400)
+        .json({ message: "Category too long (max 50 characters)" });
+    if (brand.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Brand too long (max 100 characters)" });
+
     let image_url = existing.image_url;
 
-    // Jika file gambar dikirim, upload ke Cloudflare R2
     if (req.file) {
       const fileName = `${uuidv4()}-${req.file.originalname}`;
       const uploadParams = {
@@ -127,7 +162,6 @@ async function updateProducts(req, res) {
       };
 
       await r2.send(new PutObjectCommand(uploadParams));
-
       image_url = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
     }
 
@@ -458,17 +492,32 @@ async function addProductFromRequest(req, res) {
       image_url,
     } = req.body;
 
-    // 1. Validasi: request_id wajib ada
     if (!request_id) {
       return res.status(400).json({ message: "request_id is required" });
     }
+
+    if (name.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Name too long (max 100 characters)" });
+    if (description.length > 1000)
+      return res
+        .status(400)
+        .json({ message: "Description too long (max 1000 characters)" });
+    if (category.length > 50)
+      return res
+        .status(400)
+        .json({ message: "Category too long (max 50 characters)" });
+    if (brand.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Brand too long (max 100 characters)" });
 
     const request = await Product.getRequestById(request_id);
     if (!request) {
       return res.status(404).json({ message: "Product request not found" });
     }
 
-    // 2. Upload gambar jika ada file, kalau tidak pakai image_url dari request
     let finalImageUrl;
     if (req.file) {
       const fileName = `${uuidv4()}-${req.file.originalname}`;
@@ -486,7 +535,6 @@ async function addProductFromRequest(req, res) {
       return res.status(400).json({ message: "Image is required" });
     }
 
-    // 3. Buat produk baru
     const product_id = uuidv4();
     await Product.create({
       product_id,
@@ -500,7 +548,6 @@ async function addProductFromRequest(req, res) {
       is_top_seller: Number(is_top_seller),
     });
 
-    // 4. Update status request jadi accepted dan isi linked_product_id
     await Product.updateRequestStatus(request_id, "accepted", product_id);
 
     return res.status(201).json({

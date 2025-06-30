@@ -12,6 +12,28 @@ async function register(req, res) {
   const { email, name, phone_number, password, address, role } = req.body;
 
   try {
+    // Length validation
+    if (name.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Name too long (max 100 characters)" });
+    if (email.length > 255)
+      return res
+        .status(400)
+        .json({ message: "Email too long (max 255 characters)" });
+    if (phone_number.length > 20)
+      return res
+        .status(400)
+        .json({ message: "Phone number too long (max 20 characters)" });
+    if (address && address.length > 255)
+      return res
+        .status(400)
+        .json({ message: "Address too long (max 255 characters)" });
+    if (password.length < 6 || password.length > 100)
+      return res
+        .status(400)
+        .json({ message: "Password must be 6–100 characters" });
+
     const existing = await User.findByEmail(email);
     if (existing)
       return res.status(400).json({ message: "Email already used" });
