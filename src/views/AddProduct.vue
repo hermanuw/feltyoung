@@ -40,12 +40,47 @@ async function submit() {
 
   if (!confirm.isConfirmed) return;
 
+  // ✅ Validasi panjang input
+  if (name.value.length > 100) {
+    Swal.fire('Too Long', 'Product name must be max 100 characters.', 'warning');
+    return;
+  }
+  if (brand.value.length > 100) {
+    Swal.fire('Too Long', 'Brand must be max 100 characters.', 'warning');
+    return;
+  }
+  if (category.value.length > 50) {
+    Swal.fire('Too Long', 'Category must be max 50 characters.', 'warning');
+    return;
+  }
+  if (description.value.length > 1000) {
+    Swal.fire('Too Long', 'Description must be max 1000 characters.', 'warning');
+    return;
+  }
+
+  if (variants.value.length === 0) {
+    Swal.fire('Missing Variant', 'You must add at least one size variant.', 'warning');
+    return;
+  }
+
+  const hasInvalidVariant = variants.value.some((v) => !v.size || v.stock < 0);
+  if (hasInvalidVariant) {
+    Swal.fire('Invalid Variant', 'Each variant must have a size and stock ≥ 0.', 'warning');
+    return;
+  }
+
+  const numericPrice = Number(price.value);
+  if (isNaN(numericPrice) || numericPrice <= 0) {
+    Swal.fire('Invalid Price', 'Please enter a valid price greater than 0.', 'warning');
+    return;
+  }
+
   loading.value = true;
   try {
     const formData = new FormData();
     formData.append('name', name.value);
     formData.append('brand', brand.value);
-    formData.append('price', price.value);
+    formData.append('price', numericPrice);
     formData.append('category', category.value);
     formData.append('description', description.value);
     formData.append('is_top_seller', is_top_seller.value === 'Yes' ? 1 : 0);
@@ -55,7 +90,6 @@ async function submit() {
     const res = await axios.post('/products', formData);
     const product_id = res.data.product_id;
 
-    // Tambahkan semua varian setelah produk dibuat
     for (const v of variants.value) {
       await axios.post(`/products/${product_id}/variants`, {
         size: v.size,

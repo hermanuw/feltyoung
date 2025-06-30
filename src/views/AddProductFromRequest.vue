@@ -61,7 +61,7 @@ function addNewVariant() {
   newStock.value = 0;
 }
 
-const formatPrice = (val) => 'Rp ' + new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(val);
+const formatPrice = (val) => 'Rp' + new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(val);
 
 async function submit() {
   const confirm = await Swal.fire({
@@ -75,14 +75,30 @@ async function submit() {
 
   if (!confirm.isConfirmed) return;
 
-  // ✅ VALIDASI HARGA
+  // ✅ Validasi panjang input
+  if (name.value.length > 100) {
+    Swal.fire('Too Long', 'Product name must be max 100 characters.', 'warning');
+    return;
+  }
+  if (brand.value.length > 100) {
+    Swal.fire('Too Long', 'Brand must be max 100 characters.', 'warning');
+    return;
+  }
+  if (category.value.length > 50) {
+    Swal.fire('Too Long', 'Category must be max 50 characters.', 'warning');
+    return;
+  }
+  if (description.value.length > 1000) {
+    Swal.fire('Too Long', 'Description must be max 1000 characters.', 'warning');
+    return;
+  }
+
   const numericPrice = Number(price.value);
   if (isNaN(numericPrice) || numericPrice <= 0) {
     Swal.fire('Invalid Price', 'Please enter a valid price greater than 0.', 'warning');
     return;
   }
 
-  // ✅ VALIDASI VARIAN
   if (variants.value.length === 0) {
     Swal.fire('Missing Variant', 'You must add at least one size variant.', 'warning');
     return;

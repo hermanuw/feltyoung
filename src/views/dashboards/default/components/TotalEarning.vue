@@ -51,7 +51,7 @@ onMounted(async () => {
         </div> -->
       </div>
       <h2 class="text-h1 font-weight-medium">
-        Rp {{ formatCurrency(totalEarning) }}
+        Rp{{ formatCurrency(totalEarning) }}
         <a href="#"><CircleArrowUpRightIcon stroke-width="1.5" width="28" class="text-white" /></a>
       </h2>
 

@@ -63,6 +63,24 @@ async function submit() {
 
   if (!confirm.isConfirmed) return;
 
+  // Length validation
+  if (name.value.length > 100) {
+    Swal.fire('Too Long', 'Product name must be max 100 characters.', 'warning');
+    return;
+  }
+  if (brand.value.length > 100) {
+    Swal.fire('Too Long', 'Brand must be max 100 characters.', 'warning');
+    return;
+  }
+  if (category.value.length > 50) {
+    Swal.fire('Too Long', 'Category must be max 50 characters.', 'warning');
+    return;
+  }
+  if (description.value.length > 1000) {
+    Swal.fire('Too Long', 'Description must be max 1000 characters.', 'warning');
+    return;
+  }
+
   loading.value = true;
   try {
     const formData = new FormData();
@@ -106,7 +124,8 @@ async function updateSelectedStock() {
   if (!selectedVariantId.value) return;
 
   if (selectedStock.value < 0) {
-    alert('Stock tidak boleh kurang dari 0');
+    Swal.fire('Invalid Input', 'Stock must be at least 0.', 'warning');
+
     return;
   }
 
@@ -127,7 +146,7 @@ async function updateSelectedStock() {
 }
 async function addNewVariant() {
   if (!newSize.value || newStock.value < 0) {
-    alert('Size harus diisi dan stock tidak boleh kurang dari 0');
+    Swal.fire('Invalid Input', 'Size is required and stock must be 0 or greater.', 'warning');
     return;
   }
 

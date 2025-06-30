@@ -2,15 +2,15 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import axios from '@/axios';
 
-const select = ref('Per Minggu');
-const options = ['Per Minggu', 'This Month', 'This Year'];
+const select = ref('This Week');
+const options = ['This Week', 'This Month', 'This Year'];
 const chartData = ref([]);
 
 const formatPrice = (price) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price);
 
 // Mapping query param berdasarkan pilihan
 const periodMap = {
-  'Per Minggu': 'daily',
+  'This Week': 'daily',
   'This Month': 'weekly',
   'This Year': 'yearly'
 };
@@ -20,7 +20,7 @@ const xAxisLabels = computed(() => {
   const val = select.value;
   const len = chartData.value.length;
 
-  if (val === 'Per Minggu') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  if (val === 'This Week') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   if (val === 'This Month') return Array.from({ length: len }, (_, i) => `W${i + 1}`);
   if (val === 'This Year') return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return [];
