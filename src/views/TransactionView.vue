@@ -166,7 +166,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import axios from '@/axios'
+
+const router = useRouter()
+const auth = useAuthStore()
 
 const orders = ref([])
 const loading = ref(true)
@@ -208,31 +213,28 @@ const statusClass = (status) => {
     case 'pending':
       return 'bg-yellow-100 text-yellow-800'
     case 'paid':
-      return 'bg-green-100 text-green-800'
     case 'packing':
+    case 'done':
       return 'bg-green-100 text-green-800'
     case 'shipped':
       return 'bg-blue-100 text-blue-800'
-    case 'done':
-      return 'bg-green-100 text-green-800'
     case 'cancelled':
       return 'bg-red-100 text-red-800'
     default:
       return 'bg-gray-100 text-gray-800'
   }
 }
+
 const statusTextClass = (status) => {
   switch (status) {
     case 'pending':
       return ' text-yellow-800'
     case 'paid':
-      return ' text-green-800'
     case 'packing':
+    case 'done':
       return ' text-green-800'
     case 'shipped':
       return ' text-blue-800'
-    case 'done':
-      return ' text-green-800'
     case 'cancelled':
       return ' text-red-800'
     default:
@@ -244,7 +246,13 @@ function openModal(order) {
   selectedOrder.value = order
 }
 
-onMounted(fetchOrders)
+onMounted(() => {
+  if (!auth.accessToken) {
+    router.push('/')
+  } else {
+    fetchOrders()
+  }
+})
 </script>
 
 <style scoped>

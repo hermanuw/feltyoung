@@ -70,7 +70,7 @@ const route = useRoute()
 const brandSlug = ref(route.params.slug || '')
 const products = ref([])
 const loading = ref(true)
-const sort = ref('') // ⛔️ Jangan sort default, hanya saat user pilih
+const sort = ref('')
 
 function formatPrice(price) {
   if (price == null || isNaN(price)) return 'Rp -'

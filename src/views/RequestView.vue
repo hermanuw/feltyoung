@@ -52,18 +52,16 @@ import { ref, onMounted } from 'vue'
 import axios from '@/axios'
 import Swal from 'sweetalert2'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
 const router = useRouter()
+const auth = useAuthStore()
 
 const requests = ref([])
 
 const fetchRequests = async () => {
   try {
-    const token = localStorage.getItem('accessToken')
-    const res = await axios.get('/products/request/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const res = await axios.get('/products/request/me')
     requests.value = res.data
   } catch (err) {
     console.error('Gagal fetch request:', err)
@@ -110,5 +108,11 @@ const handleCardClick = (item) => {
   }
 }
 
-onMounted(fetchRequests)
+onMounted(() => {
+  if (!auth.accessToken) {
+    router.push('/')
+  } else {
+    fetchRequests()
+  }
+})
 </script>

@@ -22,14 +22,16 @@
           <div class="flex items-center gap-2 mt-2">
             <button
               @click="updateQty(item, item.quantity - 1)"
-              class="px-2 py-1 border border-black rounded"
+              :disabled="updatingItemId === item.cart_id"
+              class="px-2 py-1 border border-black rounded disabled:opacity-40"
             >
               −
             </button>
             <span>{{ item.quantity }}</span>
             <button
               @click="updateQty(item, item.quantity + 1)"
-              class="px-2 py-1 border border-black rounded"
+              :disabled="updatingItemId === item.cart_id"
+              class="px-2 py-1 border border-black rounded disabled:opacity-40"
             >
               +
             </button>
@@ -60,12 +62,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-const router = useRouter()
 import axios from '@/axios'
 import Swal from 'sweetalert2'
 
+const router = useRouter()
 const cartItems = ref([])
 const loading = ref(true)
+const updatingItemId = ref(null) // untuk disable tombol saat update
 
 const formatPrice = (price) => new Intl.NumberFormat('id-ID').format(price)
 
@@ -83,16 +86,22 @@ async function fetchCart() {
     cartItems.value = res.data
   } catch (err) {
     console.error('Gagal ambil cart:', err)
+    Swal.fire('Error', 'Gagal memuat cart.', 'error')
   } finally {
     loading.value = false
   }
 }
 
 async function updateQty(item, newQty) {
-  if (newQty < 1) return
+  if (newQty < 1 || newQty > 10) {
+    Swal.fire('Oops', 'Quantity hanya boleh antara 1 sampai 10', 'warning')
+    return
+  }
+
+  updatingItemId.value = item.cart_id
   try {
-    await axios.put(
-      `/api/cart/${item.cart_id}`,
+    const res = await axios.put(
+      `/cart/${item.cart_id}`,
       { quantity: newQty },
       {
         headers: {
@@ -102,11 +111,27 @@ async function updateQty(item, newQty) {
     )
     item.quantity = newQty
   } catch (err) {
-    console.error('Gagal update qty:', err)
+    const msg = err?.response?.data?.message || 'Gagal update quantity'
+    Swal.fire('Error', msg, 'error')
+  } finally {
+    updatingItemId.value = null
   }
 }
 
 async function removeItem(cartId) {
+  const confirm = await Swal.fire({
+    title: 'Remove this item?',
+    text: 'Are you sure you want to remove this item from your cart?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#aaa',
+    confirmButtonText: 'Yes, remove it',
+    cancelButtonText: 'Cancel',
+  })
+
+  if (!confirm.isConfirmed) return
+
   try {
     await axios.delete(`/cart/${cartId}`, {
       headers: {
@@ -114,13 +139,11 @@ async function removeItem(cartId) {
       },
     })
     cartItems.value = cartItems.value.filter((item) => item.cart_id !== cartId)
+    Swal.fire('Removed!', 'The item has been removed from your cart.', 'success')
   } catch (err) {
-    console.error('Gagal hapus item:', err)
+    console.error('Failed to remove item:', err)
+    Swal.fire('Error', 'Failed to remove item from your cart.', 'error')
   }
-}
-
-function checkout() {
-  router.push('/checkout')
 }
 
 onMounted(() => {

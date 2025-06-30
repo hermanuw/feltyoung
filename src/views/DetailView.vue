@@ -178,18 +178,22 @@
 import { ref, nextTick, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from '@/axios'
+import Swal from 'sweetalert2'
 import SizeChart from '@/components/composables/SizeChart.vue'
 import SimilarProducts from '@/components/composables/SimilarProducts.vue'
-
-import Swal from 'sweetalert2'
 import AuthForm from '../components/composables/AuthForm.vue'
+import { useAuthStore } from '@/stores/auth'
+
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
+
 const product = ref({})
 const variants = ref([])
-const showAuthForm = ref(false)
 const selectedSize = ref(null)
-const isAuthenticated = ref(!!localStorage.getItem('accessToken'))
+const selectedVariant = computed(() => variants.value.find((v) => v.size === selectedSize.value))
+
+const showAuthForm = ref(false)
 const showSizeChart = ref(false)
 const open1 = ref(false)
 const open2 = ref(false)
@@ -216,11 +220,10 @@ function toggleAccordion(index) {
 }
 
 const handleLoginSuccess = () => {
-  isAuthenticated.value = true
   showAuthForm.value = false
-  // Setelah login, arahkan ke halaman checkout
   window.location.reload()
 }
+
 const formatPrice = (price) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price)
 
 onMounted(async () => {
@@ -242,14 +245,10 @@ onMounted(async () => {
 
 function selectSize(size) {
   selectedSize.value = size
-  console.log('Selected size:', size)
 }
 
-const selectedVariant = computed(() => {
-  return variants.value.find((v) => v.size === selectedSize.value)
-})
 const handleBuyNow = () => {
-  if (!isAuthenticated.value) {
+  if (!auth.accessToken) {
     Swal.fire({
       title: 'Login Diperlukan',
       text: 'Silakan login terlebih dahulu untuk membeli produk.',
@@ -290,7 +289,7 @@ const handleBuyNow = () => {
 }
 
 async function addToCart() {
-  if (!isAuthenticated.value) {
+  if (!auth.accessToken) {
     Swal.fire({
       title: 'Login Required',
       text: 'You need to login to add this product to your cart.',
@@ -301,43 +300,36 @@ async function addToCart() {
         showAuthForm.value = true
       }
     })
-  } else {
-    if (!selectedVariant.value) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Pilih ukuran terlebih dahulu!',
-      })
-      return
-    }
+    return
+  }
 
-    try {
-      await axios.post(
-        '/cart',
-        {
-          variant_id: selectedVariant.value.variant_id,
-          quantity: 1,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-        },
-      )
+  if (!selectedVariant.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Pilih ukuran terlebih dahulu!',
+    })
+    return
+  }
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Added to Cart',
-        showConfirmButton: false,
-        timer: 1200,
-      })
-    } catch (err) {
-      console.error('Gagal tambah ke cart:', err)
-      Swal.fire({
-        icon: 'error',
-        title: 'Gagal menambahkan ke cart.',
-        text: err.response?.data?.message || 'Terjadi kesalahan.',
-      })
-    }
+  try {
+    await axios.post('/cart', {
+      variant_id: selectedVariant.value.variant_id,
+      quantity: 1,
+    })
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Added to Cart',
+      showConfirmButton: false,
+      timer: 1200,
+    })
+  } catch (err) {
+    console.error('Gagal tambah ke cart:', err)
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal menambahkan ke cart.',
+      text: err.response?.data?.message || 'Terjadi kesalahan.',
+    })
   }
 }
 </script>

@@ -72,13 +72,16 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from '@/axios'
 import ProductFilter from '@/components/composables/ProductFilter.vue'
 import SortBy from '@/components/composables/SortByFilter.vue'
-import router from '@/router'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+
 const keyword = ref(route.query.keyword || '')
 const products = ref([])
 const loading = ref(true)
@@ -95,7 +98,6 @@ function formatPrice(price) {
   return 'Rp ' + Number(price).toLocaleString('id-ID', { maximumFractionDigits: 0 })
 }
 
-// Fetch produk dari search keyword awal
 async function fetchSearchResult(word) {
   if (!word || word === 'undefined') {
     console.warn('Keyword kosong, tidak fetch')
@@ -118,9 +120,8 @@ async function fetchSearchResult(word) {
   }
 }
 
-// Filter berdasarkan kategori/harga/keyword
 async function handleApplyFilter({ category, min, max, name, sort }) {
-  currentFilter.value = { category, min, max, name: name ?? currentFilter.value.name } // simpan filter terkini
+  currentFilter.value = { category, min, max, name: name ?? currentFilter.value.name }
   loading.value = true
   try {
     const res = await axios.get('/products/filter', {
@@ -142,7 +143,11 @@ async function handleSortChange(value) {
 }
 
 onMounted(() => {
-  fetchSearchResult(keyword.value)
+  if (!auth.accessToken) {
+    router.push('/')
+  } else {
+    fetchSearchResult(keyword.value)
+  }
 })
 
 watch(

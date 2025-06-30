@@ -103,11 +103,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from '@/axios'
 import { BsTrash } from '@kalimahapps/vue-icons'
 import { IoOutlineArrowBack } from '@kalimahapps/vue-icons'
 import bgImage from '@/assets/shoe-bg.png'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const auth = useAuthStore()
 
 const form = ref({
   name: '',
@@ -116,8 +121,7 @@ const form = ref({
 })
 
 const imageFile = ref(null)
-const imageError = ref(false) // Untuk menampilkan pesan error jika file bukan gambar
-
+const imageError = ref(false)
 const loading = ref(false)
 const message = ref('')
 const messageType = ref('success')
@@ -127,25 +131,17 @@ const submitRequest = async () => {
   loading.value = true
 
   try {
-    const token = localStorage.getItem('accessToken')
     const formData = new FormData()
-
-    // Append the fields
     formData.append('name', form.value.name)
     formData.append('brand', form.value.brand)
     formData.append('size', form.value.size)
 
-    // Append the file if it exists
     if (imageFile.value) {
       formData.append('image', imageFile.value)
-    } else {
-      console.log('No image file selected')
     }
 
-    // Send the form data to the backend
     await axios.post('/products/request', formData, {
       headers: {
-        Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data',
       },
     })
@@ -155,7 +151,7 @@ const submitRequest = async () => {
     form.value = { name: '', brand: '', size: '' }
     imageFile.value = null
   } catch (err) {
-    console.error('Error response from backend:', err.response) // Log the error response from backend
+    console.error('Error response from backend:', err.response)
     message.value = err.response?.data?.message || 'Gagal mengirim permintaan.'
     messageType.value = 'error'
   } finally {
@@ -168,13 +164,12 @@ const handleImageUpload = (e) => {
   const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/avif']
 
   if (file) {
-    // Periksa apakah file adalah gambar dengan MIME type yang valid
     if (validImageTypes.includes(file.type)) {
       imageFile.value = file
-      imageError.value = false // Reset error
+      imageError.value = false
     } else {
-      imageFile.value = null // Reset jika bukan gambar
-      imageError.value = true // Set error
+      imageFile.value = null
+      imageError.value = true
     }
   }
 }
@@ -183,4 +178,10 @@ const deleteImage = () => {
   imageFile.value = null
   imageError.value = false
 }
+
+onMounted(() => {
+  if (!auth.accessToken) {
+    router.push('/')
+  }
+})
 </script>

@@ -131,11 +131,15 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from '@/axios'
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+
 const bgImage = '../src/assets/payment.png'
 const processingFee = 30000
 const productId = route.query.productId
@@ -143,7 +147,7 @@ const size = route.query.size
 const fromRequest = route.query.fromRequest === 'true'
 const selectedSize = route.query.size || '-'
 
-const items = ref([]) // array agar mendukung banyak produk
+const items = ref([])
 const productTotal = ref(0)
 const total = ref(0)
 const shippingName = ref('')
@@ -151,26 +155,29 @@ const shippingPhone = ref('')
 const shippingAddress = ref('')
 
 const formatPrice = (price) => new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(price)
+
 const user = ref({
   name: '',
   phone_number: '',
   address: '',
 })
+
 onMounted(async () => {
+  if (!auth.accessToken) {
+    router.push('/')
+    return
+  }
+
   try {
-    const profileRes = await axios.get('/profile', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-    })
+    const profileRes = await axios.get('/profile')
     user.value = profileRes.data
 
-    // Set nilai default pengiriman berdasarkan profil
     shippingName.value = user.value.name
     shippingPhone.value = user.value.phone_number
     shippingAddress.value = user.value.address
 
     const id = route.query.productId
     if (id) {
-      // Checkout dari DetailView (1 produk)
       const res = await axios.get(`/products/id/${id}`)
       const data = res.data
       items.value = [
@@ -184,12 +191,7 @@ onMounted(async () => {
       ]
       productTotal.value = Number(data.price)
     } else {
-      // Checkout dari Cart (semua produk user)
-      const res = await axios.get('/cart', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      })
+      const res = await axios.get('/cart')
       items.value = res.data
       productTotal.value = items.value.reduce((acc, item) => acc + item.price * item.quantity, 0)
     }
@@ -201,12 +203,10 @@ onMounted(async () => {
 })
 
 const isEditingShipping = ref(false)
-
 const originalShippingData = ref({})
 
 const toggleEditShipping = () => {
   if (!isEditingShipping.value) {
-    // Backup data sebelum di-edit
     originalShippingData.value = {
       name: shippingName.value,
       phone: shippingPhone.value,
@@ -229,34 +229,25 @@ const cancelShippingChanges = () => {
 
 const handlePayment = async () => {
   try {
-    const res = await axios.post(
-      '/orders',
-      {
-        total_amount: total.value,
-        payment_method: 'midtrans',
-        shipping_address: shippingAddress.value,
-        recipient_name: shippingName.value,
-        recipient_phone: shippingPhone.value,
-        items: items.value.map((item) => ({
-          product_id: item.product_id,
-          quantity: item.quantity || 1,
-          price: item.price,
-          size: item.size || selectedSize,
-        })),
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      },
-    )
+    const res = await axios.post('/orders', {
+      total_amount: total.value,
+      payment_method: 'midtrans',
+      shipping_address: shippingAddress.value,
+      recipient_name: shippingName.value,
+      recipient_phone: shippingPhone.value,
+      items: items.value.map((item) => ({
+        product_id: item.product_id,
+        quantity: item.quantity || 1,
+        price: item.price,
+        size: item.size || selectedSize,
+      })),
+    })
 
-    // Panggil Midtrans Snap
     window.snap.pay(res.data.token, {
       onSuccess: function (result) {
         console.log('Payment success:', result)
         alert('Pembayaran berhasil!')
-        window.location.href = '/' // redirect jika ingin
+        window.location.href = '/'
       },
       onPending: function (result) {
         console.log('Payment pending:', result)

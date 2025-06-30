@@ -40,7 +40,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import axiosInstance from '@/axios'
+
+const router = useRouter()
+const auth = useAuthStore()
 
 const form = ref({
   name: '',
@@ -52,9 +57,13 @@ const form = ref({
 })
 
 onMounted(async () => {
+  if (!auth.accessToken) {
+    router.push('/')
+    return
+  }
+
   try {
     const res = await axiosInstance.get('/profile')
-    console.log('Profil:', res.data)
     Object.assign(form.value, res.data)
   } catch (err) {
     console.error('Gagal load profil:', err)
