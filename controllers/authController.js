@@ -6,40 +6,25 @@ const RefreshToken = require("../models/RefreshToken");
 const config = require("../util/config");
 const { v4: uuidv4 } = require("uuid");
 const helper = require("../util/helper");
+const { registerSchema } = require("../util/authSchema");
 
 // Register user
 async function register(req, res) {
-  const { email, name, phone_number, password, address, role } = req.body;
+  const { error } = registerSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  const { email, name, phone_number, password, address } = req.body;
 
   try {
-    // Length validation
-    if (name.length > 100)
-      return res
-        .status(400)
-        .json({ message: "Name too long (max 100 characters)" });
-    if (email.length > 255)
-      return res
-        .status(400)
-        .json({ message: "Email too long (max 255 characters)" });
-    if (phone_number.length > 20)
-      return res
-        .status(400)
-        .json({ message: "Phone number too long (max 20 characters)" });
-    if (address && address.length > 255)
-      return res
-        .status(400)
-        .json({ message: "Address too long (max 255 characters)" });
-    if (password.length < 6 || password.length > 100)
-      return res
-        .status(400)
-        .json({ message: "Password must be 6–100 characters" });
-
     const existing = await User.findByEmail(email);
     if (existing)
       return res.status(400).json({ message: "Email already used" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user_id = uuidv4();
+
     const user = await User.createUser({
       user_id,
       email,
@@ -47,7 +32,7 @@ async function register(req, res) {
       phone_number,
       password: hashedPassword,
       address,
-      role: role || "user",
+      role: "user", // ✅ enforce role ke 'user' meskipun user iseng kirim 'admin'
       verified: false,
     });
 
