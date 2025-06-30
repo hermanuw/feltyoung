@@ -242,6 +242,24 @@ module.exports = {
   `;
     await db.promise().query(sqlUpdateProductStock, [totalStock, product_id]);
   },
+  // Cek apakah variant_id ada di tabel product_variants
+  async checkVariantExists(variant_id) {
+    const [rows] = await db
+      .promise()
+      .query("SELECT variant_id FROM product_variants WHERE variant_id = ?", [
+        variant_id,
+      ]);
+    return rows.length > 0;
+  },
+  // Ambil stok varian berdasarkan variant_id
+  async getVariantStock(variant_id) {
+    const [rows] = await db
+      .promise()
+      .query("SELECT stock FROM product_variants WHERE variant_id = ?", [
+        variant_id,
+      ]);
+    return rows[0]?.stock || 0;
+  },
 
   // Hapus varian berdasarkan variant_id
   async removeVariant(variant_id) {

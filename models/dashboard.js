@@ -85,14 +85,93 @@ module.exports = {
   async getTopSellers(limit = 5) {
     const sql = `
     SELECT p.name, COUNT(oi.product_id) AS total_sold
-FROM order_items oi
-JOIN products p ON p.product_id = oi.product_id
-GROUP BY oi.product_id
-ORDER BY total_sold DESC
-LIMIT ?
-
+    FROM order_items oi
+    JOIN products p ON p.product_id = oi.product_id
+    GROUP BY oi.product_id
+    ORDER BY total_sold DESC
+    LIMIT ?
   `;
     const [rows] = await db.promise().query(sql, [limit]);
     return rows;
+  },
+
+  async getWeeklyIncome() {
+    const sql = `
+    SELECT
+      WEEK(order_date, 1) - WEEK(DATE_SUB(order_date, INTERVAL DAY(order_date)-1 DAY), 1) + 1 AS week,
+      SUM(total_amount) AS income
+    FROM orders
+    WHERE MONTH(order_date) = MONTH(CURRENT_DATE())
+      AND YEAR(order_date) = YEAR(CURRENT_DATE())
+      AND status IN ('paid', 'done')
+    GROUP BY week
+    ORDER BY week
+  `;
+    const [rows] = await db.promise().query(sql);
+    const result = Array(4).fill(0);
+    rows.forEach((row) => {
+      if (row.week >= 1 && row.week <= 4) result[row.week - 1] = row.income;
+    });
+    return result;
+  },
+  async getDailyIncomeThisWeek() {
+    const sql = `
+    SELECT 
+      day_index,
+      day_name,
+      SUM(income) AS income
+    FROM (
+      SELECT 
+        DAYOFWEEK(order_date) AS day_index,
+        CASE DAYOFWEEK(order_date)
+          WHEN 1 THEN 'Sunday'
+          WHEN 2 THEN 'Monday'
+          WHEN 3 THEN 'Tuesday'
+          WHEN 4 THEN 'Wednesday'
+          WHEN 5 THEN 'Thursday'
+          WHEN 6 THEN 'Friday'
+          WHEN 7 THEN 'Saturday'
+        END AS day_name,
+        total_amount AS income
+      FROM orders
+      WHERE YEARWEEK(order_date, 1) = YEARWEEK(CURDATE(), 1)
+        AND status IN ('paid', 'packing', 'shipped','done')
+    ) AS sub
+    GROUP BY day_index, day_name
+    ORDER BY day_index
+  `;
+    const [rows] = await db.promise().query(sql);
+
+    const days = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+    const result = days.map((day) => {
+      const found = rows.find((row) => row.day_name === day);
+      return found ? found.income : 0;
+    });
+
+    return result;
+  },
+
+  async getMonthlyIncomeThisYear() {
+    const sql = `
+    SELECT MONTH(order_date) AS month, SUM(total_amount) AS income
+    FROM orders
+    WHERE YEAR(order_date) = YEAR(CURRENT_DATE())
+      AND status IN ('paid', 'done')
+    GROUP BY month ORDER BY month
+  `;
+    const [rows] = await db.promise().query(sql);
+    const result = Array(12).fill(0);
+    rows.forEach((row) => {
+      result[row.month - 1] = row.income;
+    });
+    return result;
   },
 };

@@ -1,3 +1,4 @@
+// ... import tetap sama
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
@@ -16,7 +17,7 @@ async function register(req, res) {
       return res.status(400).json({ message: "Email already used" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user_id = uuidv4(); // Generate unique user_id
+    const user_id = uuidv4();
     const user = await User.createUser({
       user_id,
       email,
@@ -99,7 +100,6 @@ async function verifyEmail(req, res) {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     await User.setVerified(email);
-
     return res.status(200).json({ message: "Email berhasil diverifikasi" });
   } catch (err) {
     console.error("Verification error:", err);
@@ -107,7 +107,7 @@ async function verifyEmail(req, res) {
   }
 }
 
-// Refresh token
+// ✅ Refresh token - diperbaiki
 async function refreshToken(req, res) {
   const { refreshToken: token } = req.body;
 
@@ -121,6 +121,9 @@ async function refreshToken(req, res) {
       await RefreshToken.deleteById(storedToken.id);
       return res.status(403).json({ message: "Refresh token expired" });
     }
+
+    // HAPUS token lama sebelum buat baru
+    await RefreshToken.deleteById(storedToken.id);
 
     const payload = {
       id: storedToken.user_id,
@@ -144,7 +147,7 @@ async function refreshToken(req, res) {
 async function logout(req, res) {
   try {
     await RefreshToken.deleteByUserId(req.user.user_id);
-    req.session = null; // Clear session
+    req.session = null;
     res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
     console.log("Logout error:", err);

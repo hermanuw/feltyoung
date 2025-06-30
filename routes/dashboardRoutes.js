@@ -32,5 +32,11 @@ router.get(
 
 router.get("/users", authenticate, isAdmin, dashboardController.getUserStats);
 router.get("/top-sellers", dashboardController.getTopSellerProducts);
+router.get(
+  "/growth",
+  authenticate,
+  isAdmin,
+  dashboardController.getTotalGrowthByPeriod
+);
 
 module.exports = router;

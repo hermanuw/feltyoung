@@ -73,6 +73,25 @@ async function getTopSellerProducts(req, res) {
     res.status(500).json({ message: "Failed to fetch top seller products" });
   }
 }
+async function getTotalGrowthByPeriod(req, res) {
+  try {
+    const { period } = req.query;
+    let result;
+
+    if (period === "daily") {
+      result = await Dashboard.getDailyIncomeThisWeek();
+    } else if (period === "weekly") {
+      result = await Dashboard.getWeeklyIncome(); // W1–W4
+    } else {
+      result = await Dashboard.getMonthlyIncomeThisYear(); // Jan–Dec
+    }
+
+    res.json({ data: result });
+  } catch (err) {
+    console.error("Total growth error:", err);
+    res.status(500).json({ message: "Failed to fetch growth data" });
+  }
+}
 
 module.exports = {
   getTotalEarning,
@@ -82,4 +101,5 @@ module.exports = {
   getOrderChartData,
   getUserStats,
   getTopSellerProducts,
+  getTotalGrowthByPeriod,
 };
