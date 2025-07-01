@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 import router from '@/router' // ⬅️ Tambahkan ini
 
 const axiosInstance = axios.create({
-  baseURL: 'feltyoung-be.up.railway.app/api',
+  baseURL: 'https://feltyoung-be.up.railway.app/api',
 })
 
 let isRefreshing = false
