@@ -25,12 +25,12 @@ onMounted(async () => {
 
   try {
     // 1. Cek token valid atau tidak
-    const res1 = await axios.post(`http://localhost:3000/api/verify-token/${token}`)
+    const res1 = await axios.post(`https://feltyoung-be.up.railway.app/api/verify-token/${token}`)
     const result = res1.data
 
     if (result.token_valid === 'valid') {
       // 2. Set email sebagai verified
-      await axios.post(`http://localhost:3000/api/verify-email/${email}`)
+      await axios.post(`https://feltyoung-be.up.railway.app/api/verify-email/${email}`)
       message.value = 'Email berhasil diverifikasi! Silakan login.'
     } else if (result.token_valid === 'expired') {
       message.value = 'Link verifikasi sudah kadaluarsa.'

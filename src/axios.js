@@ -31,8 +31,18 @@ axiosInstance.interceptors.response.use(
     const auth = useAuthStore()
     const originalRequest = err.config
 
+    console.log('Interceptor error:', err) // <-- Log error
+
+    // If 401 error and refresh token exists, try to refresh
     if (err.response?.status === 401 && !originalRequest._retry && auth.refreshToken) {
       originalRequest._retry = true
+
+      // Ensure refreshToken is available
+      if (!auth.refreshToken) {
+        auth.logout()
+        router.push('/') // Redirect to login page if no refresh token
+        return Promise.reject(new Error('No refresh token found'))
+      }
 
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -46,7 +56,7 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true
 
       try {
-        const res = await axios.post('http://localhost:3000/api/auth/token/refresh', {
+        const res = await axios.post('https://feltyoung-be.up.railway.app/api/auth/token/refresh', {
           refreshToken: auth.refreshToken,
         })
 
@@ -60,7 +70,7 @@ axiosInstance.interceptors.response.use(
       } catch (refreshErr) {
         processQueue(refreshErr, null)
         auth.logout()
-        router.push('/')
+        router.push('/') // Redirect to login on refresh token failure
         return Promise.reject(refreshErr)
       } finally {
         isRefreshing = false

@@ -68,7 +68,7 @@ export const useAuthStore = defineStore('auth', {
 
         return response
       } catch (err) {
-        throw err // Re-throw the error to handle it in the component
+        throw err
       }
     },
 
