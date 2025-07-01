@@ -21,12 +21,12 @@ const authStore = useAuthStore();
 
       <!-- Profile Links -->
       <v-list class="mt-3">
-        <v-list-item color="secondary" rounded="md">
+        <!-- <v-list-item color="secondary" rounded="md">
           <template v-slot:prepend>
             <SettingsIcon size="20" class="mr-2" />
           </template>
           <v-list-item-title class="text-subtitle-2">Account Settings</v-list-item-title>
-        </v-list-item>
+        </v-list-item> -->
 
         <v-list-item @click="authStore.logout()" color="secondary" rounded="md">
           <template v-slot:prepend>
