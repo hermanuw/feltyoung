@@ -13,16 +13,21 @@ async function hashPassword(password) {
   return passwordHash;
 }
 
-async function sendVerificationEmail(email, token, url) {
+async function sendVerificationEmail(email, token) {
   const transporter = nodemailer.createTransport({
-    // Configure your email service
     service: "Gmail",
     auth: {
       user: config.EMAIL_USER,
       pass: config.EMAIL_PASS,
     },
   });
+
   const frontendURL = process.env.FRONTEND_URL;
+  if (!frontendURL) {
+    console.error("Frontend URL is not defined");
+    return;
+  }
+
   const verificationLink = `${frontendURL}/verify-email?token=${token}&email=${email}`;
 
   const mailOptions = {
@@ -30,10 +35,18 @@ async function sendVerificationEmail(email, token, url) {
     to: email,
     subject: "Verify Your Email",
     html: `<p>Please click the link below to verify your email:</p>
-             <a href="${verificationLink}">Verify Email</a>`,
+           <a href="${verificationLink}">Verify Email</a>`,
   };
-  await transporter.sendMail(mailOptions);
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Verification email sent to ${email}`);
+  } catch (err) {
+    console.error("Error sending verification email:", err);
+    throw new Error("Failed to send verification email");
+  }
 }
+
 async function sendResetPasswordEmail(email, token, url) {
   const transporter = nodemailer.createTransport({
     service: "Gmail",

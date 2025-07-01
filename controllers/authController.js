@@ -18,10 +18,18 @@ async function register(req, res) {
   const { email, name, phone_number, password, address } = req.body;
 
   try {
-    // Cek apakah email sudah terdaftar
+    // Cek apakah email sudah terdaftar dan terverifikasi
     const existing = await User.findByEmail(email);
     if (existing) {
-      return res.status(400).json({ message: "Email already used" });
+      if (existing.verified) {
+        return res
+          .status(400)
+          .json({ message: "Email already used and verified." });
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Email is already registered but not verified." });
+      }
     }
 
     // Hash password
@@ -129,7 +137,6 @@ async function verifyEmail(req, res) {
   }
 }
 
-// ✅ Refresh token - diperbaiki
 async function refreshToken(req, res) {
   const { refreshToken: token } = req.body;
 
