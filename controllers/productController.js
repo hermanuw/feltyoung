@@ -387,6 +387,14 @@ async function createProductRequests(req, res) {
     }
 
     try {
+      // Check if product with the same name already exists in products catalog
+      const existingProduct = await Product.findByName(name);
+      if (existingProduct) {
+        return res.status(400).json({
+          message:
+            "This product is already available in the catalog. No need to request.",
+        });
+      }
       const file = req.file;
       if (!file) {
         return res.status(400).json({ message: "No file uploaded" });

@@ -358,4 +358,16 @@ module.exports = {
   `;
     await db.promise().query(sql, [product_id, user_id]);
   },
+  // Cek apakah produk sudah ada di catalog berdasarkan nama
+  async findByName(name) {
+    const cleanedName = name.replace(/\s+/g, " ").trim();
+
+    // Query untuk cek nama produk tanpa spasi ganda dan case-insensitive
+    const sql = `
+      SELECT * FROM products 
+      WHERE REPLACE(name, ' ', '') = REPLACE(?, ' ', '')
+    `;
+    const [rows] = await db.promise().query(sql, [cleanedName]);
+    return rows[0] || null;
+  },
 };
