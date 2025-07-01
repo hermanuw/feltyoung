@@ -100,7 +100,7 @@ import Swal from 'sweetalert2'
 
 const emit = defineEmits(['close', 'login-success'])
 
-const authStore = useAuthStore() // <-- Gunakan auth store
+const authStore = useAuthStore()
 const router = useRouter()
 
 const name = ref('')
@@ -114,7 +114,7 @@ const isLoading = ref(false)
 async function login() {
   try {
     error.value = ''
-    await authStore.login(email.value, password.value) // <-- Pakai store
+    await authStore.login(email.value, password.value)
 
     emit('login-success')
     emit('close')
