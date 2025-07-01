@@ -1,4 +1,3 @@
-// src/stores/auth.js
 import { defineStore } from 'pinia'
 import axios from '@/axios'
 import router from '@/router'
@@ -19,9 +18,15 @@ export const useAuthStore = defineStore('auth', {
       localStorage.setItem('refreshToken', refreshToken)
     },
 
+    // Set user data to state and localStorage
     setUser(user) {
-      this.user = user
-      localStorage.setItem('user', JSON.stringify(user))
+      // Validasi jika user adalah objek yang valid
+      if (user && typeof user === 'object') {
+        this.user = user
+        localStorage.setItem('user', JSON.stringify(user))
+      } else {
+        console.error('Invalid user data:', user) // Log jika data user invalid
+      }
     },
 
     // Logout and clear state and localStorage
@@ -32,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('user')
-      router.push('/login')
+      router.push('/login') // Redirect to login page
     },
 
     // Register user
@@ -68,7 +73,7 @@ export const useAuthStore = defineStore('auth', {
 
         return response
       } catch (err) {
-        throw err
+        throw err // Re-throw the error to handle it in the component
       }
     },
 
@@ -84,7 +89,7 @@ export const useAuthStore = defineStore('auth', {
 
         return accessToken
       } catch (error) {
-        this.logout()
+        this.logout() // Logout if refresh fails
         throw error
       }
     },
