@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: 'feltyoung-be.up.railway.app/api'
 });
 
 // Interceptor: selalu ambil token terbaru sebelum request dikirim
