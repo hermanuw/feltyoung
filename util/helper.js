@@ -22,7 +22,7 @@ async function sendVerificationEmail(email, token, url) {
       pass: config.EMAIL_PASS,
     },
   });
-  const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+  const frontendURL = process.env.FRONTEND_URL;
   const verificationLink = `${frontendURL}/verify-email?token=${token}&email=${email}`;
 
   const mailOptions = {

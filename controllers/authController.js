@@ -18,13 +18,17 @@ async function register(req, res) {
   const { email, name, phone_number, password, address } = req.body;
 
   try {
+    // Cek apakah email sudah terdaftar
     const existing = await User.findByEmail(email);
-    if (existing)
+    if (existing) {
       return res.status(400).json({ message: "Email already used" });
+    }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user_id = uuidv4();
+    const user_id = uuidv4(); // Generate unique user_id
 
+    // Buat user baru
     const user = await User.createUser({
       user_id,
       email,
@@ -32,18 +36,29 @@ async function register(req, res) {
       phone_number,
       password: hashedPassword,
       address,
-      role: "user", // ✅ enforce role ke 'user' meskipun user iseng kirim 'admin'
+      role: "user",
       verified: false,
     });
 
+    // Hapus refresh token lama milik user sebelum membuat yang baru
+    await RefreshToken.deleteByUserId(user_id);
+
+    // Buat token akses baru dan refresh token
     const token = jwt.sign({ id: user.user_id }, config.SECRET, {
-      expiresIn: "1d",
+      expiresIn: "1d", // Access token expires in 1 day
     });
+
+    const refreshToken = await helper.createRefreshToken(user.user_id); // Refresh token baru dibuat
+
+    // Kirim email verifikasi
     await helper.sendVerificationEmail(email, token);
 
-    return res
-      .status(201)
-      .json({ message: "Check your email to verify account." });
+    // Kirim response sukses dengan access token dan refresh token
+    return res.status(201).json({
+      message: "Check your email to verify account.",
+      accessToken: token,
+      refreshToken: refreshToken,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Registration failed." });
