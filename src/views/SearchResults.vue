@@ -143,11 +143,7 @@ async function handleSortChange(value) {
 }
 
 onMounted(() => {
-  if (!auth.accessToken) {
-    router.push('/')
-  } else {
-    fetchSearchResult(keyword.value)
-  }
+  fetchSearchResult(keyword.value)
 })
 
 watch(
