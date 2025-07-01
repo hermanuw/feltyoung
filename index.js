@@ -6,7 +6,10 @@ const multer = require("multer"); // Impor Multer untuk mengakses MulterError
 const bodyParser = require("body-parser");
 
 // Middleware bawaan
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const allowedOrigins = [
+  "https://feltyoung.up.railway.app",
+  "https://feltyoung-admin.up.railway.app",
+];
 
 app.use(
   cors({
