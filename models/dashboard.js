@@ -19,6 +19,7 @@ module.exports = {
     SELECT COUNT(*) AS count FROM orders
     WHERE MONTH(order_date) = MONTH(CURRENT_DATE())
     AND YEAR(order_date) = YEAR(CURRENT_DATE())
+    AND status IN ('paid', 'packing', 'shipped', 'done')
   `);
     return rows[0]?.count || 0;
   },
@@ -27,6 +28,7 @@ module.exports = {
     const [rows] = await db.promise().query(`
     SELECT COUNT(*) AS count FROM orders
     WHERE YEAR(order_date) = YEAR(CURRENT_DATE())
+    AND status IN ('paid', 'packing', 'shipped', 'done')
   `);
     return rows[0]?.count || 0;
   },
@@ -39,6 +41,7 @@ module.exports = {
     FROM orders
     WHERE MONTH(order_date) = MONTH(CURRENT_DATE())
       AND YEAR(order_date) = YEAR(CURRENT_DATE())
+      AND status IN ('paid', 'packing', 'shipped', 'done')
     GROUP BY week
     ORDER BY week
   `;
@@ -56,6 +59,7 @@ module.exports = {
     SELECT MONTH(order_date) AS month, COUNT(*) AS count
     FROM orders
     WHERE YEAR(order_date) = YEAR(CURRENT_DATE())
+      AND status IN ('paid', 'packing', 'shipped', 'done')
     GROUP BY MONTH(order_date)
     ORDER BY month
   `;
