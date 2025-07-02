@@ -4,7 +4,7 @@ module.exports = {
   async getTotalEarning() {
     const [rows] = await db.promise().query(`
       SELECT SUM(total_amount) AS total FROM orders
-      WHERE status IN ('paid', 'done')
+      WHERE status IN ('paid', 'packing', 'shipped','done')
     `);
     return rows[0]?.total || 0;
   },
@@ -107,7 +107,7 @@ module.exports = {
     FROM orders
     WHERE MONTH(order_date) = MONTH(CURRENT_DATE())
       AND YEAR(order_date) = YEAR(CURRENT_DATE())
-      AND status IN ('paid', 'done')
+      AND status IN ('paid', 'packing', 'shipped', 'done')
     GROUP BY week
     ORDER BY week
   `;
@@ -168,7 +168,7 @@ module.exports = {
     SELECT MONTH(order_date) AS month, SUM(total_amount) AS income
     FROM orders
     WHERE YEAR(order_date) = YEAR(CURRENT_DATE())
-      AND status IN ('paid', 'done')
+      AND status IN ('paid', 'packing', 'shipped', 'done')
     GROUP BY month ORDER BY month
   `;
     const [rows] = await db.promise().query(sql);
