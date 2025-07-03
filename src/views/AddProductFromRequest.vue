@@ -206,7 +206,7 @@ async function submit() {
               </v-row>
               <v-list dense class="mt-4">
                 <v-list-item v-for="(v, i) in variants" :key="i" class="px-0">
-                  <v-list-item-content>Size Requests : {{ v.size }}</v-list-item-content>
+                  <v-list-item-content>Size Requests : {{ v.size }} - {{ v.quantity }} pairs</v-list-item-content>
                 </v-list-item>
               </v-list>
               <v-row class="mt-6" justify="end" align="center" style="gap: 1rem">
