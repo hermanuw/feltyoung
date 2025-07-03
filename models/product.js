@@ -290,22 +290,26 @@ module.exports = {
     size,
     image_url,
     status,
+    quantity,
     linked_product_id, // Tambahkan ini
   }) {
     const sql = `
-    INSERT INTO product_requests (request_id, user_id, name, brand, size, status, created_at, image_url, linked_product_id)
-    VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+    INSERT INTO product_requests (request_id, user_id, name, brand, size, status, quantity, created_at, image_url, linked_product_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
   `;
-    await db.promise().query(sql, [
-      request_id,
-      user_id,
-      name,
-      brand,
-      size,
-      status,
-      image_url,
-      linked_product_id, // dan ini juga
-    ]);
+    await db
+      .promise()
+      .query(sql, [
+        request_id,
+        user_id,
+        name,
+        brand,
+        size,
+        status,
+        image_url,
+        quantity,
+        linked_product_id,
+      ]);
   },
 
   async getRequestsByUserId(user_id) {

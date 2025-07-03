@@ -367,11 +367,11 @@ async function addVariant(req, res) {
 }
 
 async function createProductRequests(req, res) {
-  const { name, brand, size } = req.body;
+  const { name, brand, size, quantity } = req.body;
   const user_id = req.user.id;
 
   // Validasi data
-  if (!name || !brand || !size || !user_id) {
+  if (!name || !brand || !size || !quantity || !user_id) {
     return res
       .status(400)
       .json({ message: "Name, brand, size, and user_id are required" });
@@ -418,18 +418,19 @@ async function createProductRequests(req, res) {
       const request_id = uuidv4();
       await Product.createRequest({
         request_id,
-        user_id, // Pastikan user_id diteruskan dengan benar
+        user_id,
         name,
         brand,
         size,
+        quantity,
         status: "requested",
-        image_url: imageUrl, // Menyimpan URL gambar ke database
+        image_url: imageUrl,
       });
 
       return res.status(201).json({
         message: "Product request created successfully",
         request_id,
-        image_url: imageUrl, // Kembalikan URL gambar
+        image_url: imageUrl,
       });
     } catch (err) {
       console.error("Error processing request:", err);
