@@ -34,9 +34,8 @@ onMounted(async () => {
     brand.value = data.brand;
     previewImage.value = data.image_url;
 
-    variants.value = [];
-
-    variants.value.push({ size: data.size, stock: data.quantity });
+    // Reset and add variant once only
+    variants.value = [{ size: data.size, stock: data.quantity }];
   } catch (err) {
     console.error('Gagal fetch request:', err);
     Swal.fire('Error', 'Failed to load request data.', 'error');
@@ -61,11 +60,7 @@ function addNewVariant() {
     return;
   }
 
-  variants.value.push({
-    size: newSize.value,
-    stock: newStock.value
-  });
-
+  variants.value.push({ size: newSize.value, stock: newStock.value });
   newSize.value = '';
   newStock.value = 0;
 }
@@ -81,40 +76,21 @@ async function submit() {
     confirmButtonText: 'Yes, Create',
     cancelButtonText: 'Cancel'
   });
-
   if (!confirm.isConfirmed) return;
 
-  if (name.value.length > 100) {
-    Swal.fire('Too Long', 'Product name must be max 100 characters.', 'warning');
-    return;
-  }
-  if (brand.value.length > 100) {
-    Swal.fire('Too Long', 'Brand must be max 100 characters.', 'warning');
-    return;
-  }
-  if (category.value.length > 50) {
-    Swal.fire('Too Long', 'Category must be max 50 characters.', 'warning');
-    return;
-  }
-  if (description.value.length > 1000) {
-    Swal.fire('Too Long', 'Description must be max 1000 characters.', 'warning');
+  if (name.value.length > 100 || brand.value.length > 100 || category.value.length > 50 || description.value.length > 1000) {
+    Swal.fire('Invalid Input', 'Some fields are too long.', 'warning');
     return;
   }
 
   const numericPrice = Number(price.value);
   if (isNaN(numericPrice) || numericPrice <= 0) {
-    Swal.fire('Invalid Price', 'Please enter a valid price greater than 0.', 'warning');
+    Swal.fire('Invalid Price', 'Please enter a valid price.', 'warning');
     return;
   }
 
-  if (variants.value.length === 0) {
-    Swal.fire('Missing Variant', 'You must add at least one size variant.', 'warning');
-    return;
-  }
-
-  const hasInvalidVariant = variants.value.some((v) => !v.size || v.stock < 0);
-  if (hasInvalidVariant) {
-    Swal.fire('Invalid Variant', 'Each variant must have a size and stock ≥ 0.', 'warning');
+  if (variants.value.length === 0 || variants.value.some((v) => !v.size || v.stock < 0)) {
+    Swal.fire('Invalid Variants', 'Each variant must have a size and stock ≥ 0.', 'warning');
     return;
   }
 
@@ -139,6 +115,7 @@ async function submit() {
     const res = await axios.post('/products/from-request', formData);
     const product_id = res.data.product_id;
 
+    // ✅ Add each variant
     for (const v of variants.value) {
       await axios.post(`/products/${product_id}/variants`, {
         size: v.size,
@@ -153,7 +130,6 @@ async function submit() {
       timer: 2000,
       showConfirmButton: false
     });
-
     router.push('/manage-product');
   } catch (err) {
     console.error('Gagal tambah produk', err);
@@ -163,76 +139,3 @@ async function submit() {
   }
 }
 </script>
-
-<template>
-  <v-row>
-    <v-col cols="12">
-      <UiParentCard title="Add Product from Request">
-        <v-card flat>
-          <v-card-text>
-            <v-form @submit.prevent="submit">
-              <v-row>
-                <v-col cols="12" md="8">
-                  <v-text-field v-model="name" label="Product Name" required variant="solo" />
-                </v-col>
-                <v-col cols="12" md="8">
-                  <v-text-field v-model="brand" label="Brand" required variant="solo" />
-                </v-col>
-                <v-col cols="12" md="8">
-                  <v-text-field v-model="price" label="Price" required variant="solo" :formatter="formatPrice" />
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-select v-model="category" label="Category" :items="['Requested']" required variant="solo" />
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-select v-model="is_top_seller" label="Top Seller?" :items="['Yes', 'No']" required variant="solo" />
-                </v-col>
-              </v-row>
-
-              <v-file-input label="Upload Product Image (optional)" accept="image/*" @change="handleFileUpload" show-size>
-                <FileUploadIcon />
-              </v-file-input>
-
-              <div v-if="previewImage" class="my-3">
-                <img :src="previewImage" style="max-width: 150px; border-radius: 8px" />
-              </div>
-
-              <v-textarea v-model="description" label="Product Description" auto-grow rows="3" required variant="solo" />
-
-              <v-divider class="my-6" />
-              <p class="text-subtitle-1 font-weight-medium mb-2">Add Size Variants</p>
-              <v-row>
-                <v-col cols="6" md="3">
-                  <v-text-field v-model="newSize" label="Size (ex: 39)" variant="solo" />
-                </v-col>
-                <v-col cols="6" md="3">
-                  <v-text-field v-model="newStock" type="number" label="Stock" variant="solo" />
-                </v-col>
-                <v-col cols="12" md="3">
-                  <v-btn color="secondary" @click="addNewVariant">Add Size</v-btn>
-                </v-col>
-              </v-row>
-
-              <v-list dense class="mt-4">
-                <v-list-item v-for="(v, i) in variants" :key="i" class="px-0">
-                  <v-list-item-content>Size {{ v.size }} — {{ v.stock }} pairs</v-list-item-content>
-                </v-list-item>
-              </v-list>
-
-              <v-row class="mt-6" justify="end" align="center" style="gap: 1rem">
-                <v-btn variant="outlined" color="primary" @click="router.back()">Cancel</v-btn>
-                <v-btn :loading="loading" color="primary" type="submit">Create Product</v-btn>
-              </v-row>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </UiParentCard>
-    </v-col>
-  </v-row>
-</template>
-
-<style scoped>
-img {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-</style>
