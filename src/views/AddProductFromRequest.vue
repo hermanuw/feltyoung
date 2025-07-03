@@ -32,8 +32,8 @@ onMounted(async () => {
 
     name.value = data.name;
     brand.value = data.brand;
-    previewImage.value = data.image_url; // tampilkan preview
-    variants.value.push({ size: data.size, stock: 0 }); // inisialisasi dari request
+    previewImage.value = data.image_url;
+    variants.value.push({ size: data.size, stock: data.quantity });
   } catch (err) {
     console.error('Gagal fetch request:', err);
     Swal.fire('Error', 'Failed to load request data.', 'error');
