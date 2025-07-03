@@ -434,12 +434,10 @@ async function createProductRequests(req, res) {
       });
     } catch (err) {
       console.error("Error processing request:", err);
-      return res
-        .status(500)
-        .json({
-          message: "Failed to create product request",
-          error: err.message,
-        });
+      return res.status(500).json({
+        message: "Failed to create product request",
+        error: err.message,
+      });
     }
   });
 }
@@ -512,13 +510,6 @@ async function addProductFromRequest(req, res) {
       return res.status(404).json({ message: "Product request not found" });
     }
 
-    const { size, quantity } = request;
-    if (!size || !quantity) {
-      return res
-        .status(400)
-        .json({ message: "Missing size or quantity in request" });
-    }
-
     let finalImageUrl;
     if (req.file) {
       const fileName = `${uuidv4()}-${req.file.originalname}`;
@@ -546,15 +537,7 @@ async function addProductFromRequest(req, res) {
       description,
       image_url: finalImageUrl,
       is_top_seller: Number(is_top_seller),
-      stock: quantity, // ✅ total stock diisi dari quantity request
-    });
-
-    const variant_id = uuidv4();
-    await Product.addVariant({
-      variant_id,
-      product_id,
-      size,
-      stock: quantity,
+      stock: 0,
     });
 
     await Product.updateRequestStatus(request_id, "accepted", product_id);
