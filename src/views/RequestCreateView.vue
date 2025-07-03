@@ -5,12 +5,9 @@
   >
     <!-- Header dan Tombol Navigasi -->
     <div class="flex items-center mb-2">
-      <!-- Tombol Back -->
       <router-link to="/product/request/me" class="cursor-pointer px-4 py-2 transition">
         <IoOutlineArrowBack />
       </router-link>
-
-      <!-- Judul Request a Product -->
       <h1 class="text-xl font-semibold text-gray-800 ml-2">Request a Product</h1>
     </div>
 
@@ -52,6 +49,19 @@
         />
       </div>
 
+      <!-- Quantity -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+        <input
+          v-model.number="form.quantity"
+          type="number"
+          min="1"
+          max="100"
+          placeholder="Example: 1"
+          class="w-full px-4 py-2 border rounded-md focus:ring"
+        />
+      </div>
+
       <!-- Gambar Sepatu -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
@@ -63,11 +73,9 @@
         </label>
         <input id="file-upload" type="file" @change="handleImageUpload" class="hidden" />
         <div class="flex items-center justify-between w-full">
-          <!-- Tampilkan nama file jika sudah di-upload -->
           <span v-if="imageFile" class="text-sm text-gray-700 mr-2">{{ imageFile.name }}</span>
           <span v-else class="text-sm text-gray-500">No file chosen</span>
 
-          <!-- Tombol Delete (tempat sampah) -->
           <button
             v-if="imageFile"
             @click="deleteImage"
@@ -76,7 +84,6 @@
             <BsTrash />
           </button>
         </div>
-        <!-- Pesan error jika file bukan gambar -->
         <p v-if="imageError" class="text-red-500 text-xs mt-1">
           Only image files (jpg, jpeg, png, gif, avif) are allowed.
         </p>
@@ -121,6 +128,7 @@ const form = ref({
   name: '',
   brand: '',
   size: '',
+  quantity: 1,
 })
 
 const imageFile = ref(null)
@@ -152,12 +160,19 @@ const submitRequest = async () => {
     loading.value = false
     return
   }
+  if (form.value.quantity < 1 || form.value.quantity > 100) {
+    message.value = 'Quantity must be between 1 and 100'
+    messageType.value = 'error'
+    loading.value = false
+    return
+  }
 
   try {
     const formData = new FormData()
     formData.append('name', form.value.name)
     formData.append('brand', form.value.brand)
     formData.append('size', form.value.size)
+    formData.append('quantity', form.value.quantity)
 
     if (imageFile.value) {
       formData.append('image', imageFile.value)
@@ -171,7 +186,7 @@ const submitRequest = async () => {
 
     message.value = 'Success! Request has been sent successfully.'
     messageType.value = 'success'
-    form.value = { name: '', brand: '', size: '' }
+    form.value = { name: '', brand: '', size: '', quantity: 1 }
     imageFile.value = null
   } catch (err) {
     console.error('Error response from backend:', err.response)
