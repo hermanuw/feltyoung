@@ -73,7 +73,9 @@
         <!-- Buy Now Button -->
         <div class="flex gap-2">
           <button
-            @click="handleBuyNow"
+            @click="
+              selectedVariant && selectedVariant.stock > 0 ? handleBuyNow() : showOutOfStock()
+            "
             :disabled="!selectedVariant || selectedVariant.stock === 0"
             :class="[
               'px-6 py-2 rounded text-center flex items-center justify-center',
@@ -84,17 +86,16 @@
           >
             Buy Now
           </button>
+
           <!-- MODAL AUTH FORM -->
           <transition name="slide-down">
             <div
               v-if="showAuthForm"
               class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
             >
-              <!-- WRAPPER tombol dan konten auth -->
               <div
                 class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]"
               >
-                <!-- Tombol Close harus di sini, dalam wrapper -->
                 <button
                   class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999]"
                   @click="showAuthForm = false"
@@ -102,12 +103,11 @@
                 >
                   ×
                 </button>
-
-                <!-- AuthForm harus berada di bawah tombol -->
                 <AuthForm @close="showAuthForm = false" @login-success="handleLoginSuccess" />
               </div>
             </div>
           </transition>
+
           <button
             class="border p-3 rounded"
             :disabled="!selectedVariant || selectedVariant.stock === 0"
@@ -116,7 +116,7 @@
                 ? 'bg-gray-200 cursor-not-allowed text-gray-400'
                 : 'cursor-pointer',
             ]"
-            @click="addToCart"
+            @click="selectedVariant && selectedVariant.stock > 0 ? addToCart() : showOutOfStock()"
           >
             <span>Add To Cart</span>
           </button>
@@ -124,7 +124,6 @@
 
         <!-- Accordion FAQ -->
         <div class="mt-8 space-y-4">
-          <!-- Accordion 1 -->
           <div class="border border-gray-200 rounded-md">
             <button
               @click="toggleAccordion(1)"
@@ -145,7 +144,6 @@
             </transition>
           </div>
 
-          <!-- Accordion 2 -->
           <div class="border border-gray-200 rounded-md">
             <button
               @click="toggleAccordion(2)"
@@ -219,6 +217,14 @@ function toggleAccordion(index) {
   }
 }
 
+function showOutOfStock() {
+  Swal.fire({
+    icon: 'error',
+    title: 'Out of Stock',
+    text: 'This size is currently out of stock.',
+  })
+}
+
 const handleLoginSuccess = () => {
   showAuthForm.value = false
   window.location.reload()
@@ -250,8 +256,8 @@ function selectSize(size) {
 const handleBuyNow = () => {
   if (!auth.accessToken) {
     Swal.fire({
-      title: 'Login Diperlukan',
-      text: 'Silakan login terlebih dahulu untuk membeli produk.',
+      title: 'Login Required',
+      text: 'You need to login to purchase this product.',
       icon: 'warning',
       confirmButtonText: 'Login',
     }).then((result) => {
@@ -265,17 +271,13 @@ const handleBuyNow = () => {
   if (!selectedVariant.value) {
     Swal.fire({
       icon: 'warning',
-      title: 'Pilih ukuran terlebih dahulu!',
+      title: 'Choose Size First!',
     })
     return
   }
 
   if (selectedVariant.value.stock === 0) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Stok Habis',
-      text: 'Ukuran yang dipilih tidak tersedia.',
-    })
+    showOutOfStock()
     return
   }
 
@@ -308,6 +310,11 @@ async function addToCart() {
       icon: 'warning',
       title: 'Pilih ukuran terlebih dahulu!',
     })
+    return
+  }
+
+  if (selectedVariant.value.stock === 0) {
+    showOutOfStock()
     return
   }
 
@@ -352,6 +359,6 @@ async function addToCart() {
 .accordion-enter-to,
 .accordion-leave-from {
   opacity: 1;
-  max-height: 500px; /* Atur sesuai kebutuhan */
+  max-height: 500px;
 }
 </style>
