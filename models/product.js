@@ -291,12 +291,14 @@ module.exports = {
     image_url,
     status,
     quantity,
-    linked_product_id, // Tambahkan ini
+    linked_product_id,
   }) {
     const sql = `
-    INSERT INTO product_requests (request_id, user_id, name, brand, size, status, quantity, created_at, image_url, linked_product_id)
+    INSERT INTO product_requests
+    (request_id, user_id, name, brand, size, status, quantity, created_at, image_url, linked_product_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
   `;
+
     await db
       .promise()
       .query(sql, [
@@ -306,8 +308,8 @@ module.exports = {
         brand,
         size,
         status,
-        image_url,
         quantity,
+        image_url,
         linked_product_id,
       ]);
   },
