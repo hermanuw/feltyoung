@@ -33,7 +33,7 @@ onMounted(async () => {
     name.value = data.name;
     brand.value = data.brand;
     previewImage.value = data.image_url;
-    variants.value({ size: data.size, stock: data.quantity });
+    variants.value.push({ size: data.size, stock: data.quantity });
   } catch (err) {
     console.error('Gagal fetch request:', err);
     Swal.fire('Error', 'Failed to load request data.', 'error');
@@ -52,7 +52,7 @@ function addNewVariant() {
     return;
   }
 
-  variants.value.push({
+  variants.value({
     size: newSize.value,
     stock: newStock.value
   });
@@ -75,7 +75,6 @@ async function submit() {
 
   if (!confirm.isConfirmed) return;
 
-  // ✅ Validasi panjang input
   if (name.value.length > 100) {
     Swal.fire('Too Long', 'Product name must be max 100 characters.', 'warning');
     return;
