@@ -22,10 +22,6 @@ const chartOptions1 = computed(() => ({
   }
 }));
 
-const lineChart1 = ref({
-  series: [{ data: [0, 15, 10, 50, 30, 40, 25] }]
-});
-
 const topProducts = ref([]);
 
 onMounted(async () => {
@@ -74,7 +70,6 @@ onMounted(async () => {
               <h4 class="text-h4">{{ topProducts[0]?.total_sold || 0 }} Sold</h4>
             </div>
           </div>
-          <apexchart type="area" height="95" :options="chartOptions1" :series="lineChart1.series" />
         </v-card>
 
         <div class="mt-4">
