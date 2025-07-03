@@ -74,7 +74,7 @@ watch(select, fetchGrowthData);
         <v-row>
           <v-col cols="12" sm="9">
             <span class="text-subtitle-2 text-disabled font-weight-bold">Total Growth</span>
-            <h3 class="text-h3 mt-1">Rp{{ formatPrice(chartData.reduce((a, b) => a + b, 0)) }}</h3>
+            <h3 class="text-h3 mt-1">Rp{{ formatPrice(chartData.reduce((a, b) => a + Number(b), 0)) }}</h3>
           </v-col>
           <v-col cols="12" sm="3">
             <v-select
