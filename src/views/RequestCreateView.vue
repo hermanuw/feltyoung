@@ -128,7 +128,7 @@ const form = ref({
   name: '',
   brand: '',
   size: '',
-  quantity: 1,
+  quantity: '',
 })
 
 const imageFile = ref(null)
