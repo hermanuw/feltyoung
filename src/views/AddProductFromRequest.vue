@@ -33,7 +33,11 @@ onMounted(async () => {
     name.value = data.name;
     brand.value = data.brand;
     previewImage.value = data.image_url;
-    variants.value.push({ size: data.size, stock: data.quantity });
+
+    // Tambahkan size dari request jika belum ada
+    if (!variants.value.find((v) => v.size === data.size)) {
+      variants.value.push({ size: data.size, stock: data.quantity });
+    }
   } catch (err) {
     console.error('Gagal fetch request:', err);
     Swal.fire('Error', 'Failed to load request data.', 'error');
@@ -52,7 +56,13 @@ function addNewVariant() {
     return;
   }
 
-  variants.value({
+  const exists = variants.value.find((v) => v.size === newSize.value);
+  if (exists) {
+    alert('This size already exists.');
+    return;
+  }
+
+  variants.value.push({
     size: newSize.value,
     stock: newStock.value
   });
@@ -203,11 +213,13 @@ async function submit() {
                   <v-btn color="secondary" @click="addNewVariant">Add Size</v-btn>
                 </v-col>
               </v-row>
+
               <v-list dense class="mt-4">
                 <v-list-item v-for="(v, i) in variants" :key="i" class="px-0">
-                  <v-list-item-content>Size Requests : {{ v.size }} - {{ v.stock }} pairs</v-list-item-content>
+                  <v-list-item-content>Size {{ v.size }} — {{ v.stock }} pairs</v-list-item-content>
                 </v-list-item>
               </v-list>
+
               <v-row class="mt-6" justify="end" align="center" style="gap: 1rem">
                 <v-btn variant="outlined" color="primary" @click="router.back()">Cancel</v-btn>
                 <v-btn :loading="loading" color="primary" type="submit">Create Product</v-btn>
