@@ -4,7 +4,7 @@ const Order = require("../models/order");
 const { snap, coreApi } = require("../config/midtrans");
 const crypto = require("crypto");
 const Product = require("../models/product");
-require("dotenv").config(); // Load env variables
+require("dotenv").config();
 
 // Ambil semua order (khusus admin)
 async function getAllOrders(req, res) {
@@ -164,7 +164,7 @@ function verifyMidtransSignature(payload, serverKey) {
 async function handleNotification(req, res) {
   try {
     const body = req.body;
-    console.log("🔔 Webhook received:", body); // ini penting banget
+    console.log("🔔 Webhook received:", body);
     if (!verifyMidtransSignature(body, process.env.MIDTRANS_SERVER_KEY)) {
       console.warn("❌ Invalid signature");
       return res.status(403).json({ message: "Invalid signature" });
@@ -177,7 +177,7 @@ async function handleNotification(req, res) {
       status = "paid";
 
       const items = await Order.getOrderItems(order_id);
-      const order = await Order.findOrderById(order_id); // untuk ambil user_id
+      const order = await Order.findOrderById(order_id);
 
       for (const item of items) {
         await Product.decreaseVariantStock(

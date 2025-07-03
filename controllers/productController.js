@@ -492,7 +492,6 @@ async function addProductFromRequest(req, res) {
       name,
       brand,
       price,
-      stock,
       category,
       description,
       is_top_seller,
@@ -504,26 +503,16 @@ async function addProductFromRequest(req, res) {
       return res.status(400).json({ message: "request_id is required" });
     }
 
-    if (name.length > 100)
-      return res
-        .status(400)
-        .json({ message: "Name too long (max 100 characters)" });
-    if (description.length > 1000)
-      return res
-        .status(400)
-        .json({ message: "Description too long (max 1000 characters)" });
-    if (category.length > 50)
-      return res
-        .status(400)
-        .json({ message: "Category too long (max 50 characters)" });
-    if (brand.length > 100)
-      return res
-        .status(400)
-        .json({ message: "Brand too long (max 100 characters)" });
-
     const request = await Product.getRequestById(request_id);
     if (!request) {
       return res.status(404).json({ message: "Product request not found" });
+    }
+
+    const { size, quantity } = request;
+    if (!size || !quantity) {
+      return res
+        .status(400)
+        .json({ message: "Missing size or quantity in request" });
     }
 
     let finalImageUrl;
@@ -549,11 +538,19 @@ async function addProductFromRequest(req, res) {
       name,
       brand,
       price,
-      stock,
       category,
       description,
       image_url: finalImageUrl,
       is_top_seller: Number(is_top_seller),
+      stock: quantity, // ✅ total stock diisi dari quantity request
+    });
+
+    const variant_id = uuidv4();
+    await Product.addVariant({
+      variant_id,
+      product_id,
+      size,
+      stock: quantity,
     });
 
     await Product.updateRequestStatus(request_id, "accepted", product_id);
