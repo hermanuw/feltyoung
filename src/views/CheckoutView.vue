@@ -166,7 +166,7 @@ onMounted(async () => {
 
   // Cek jika data cart ada di state (dari halaman cart)
   const cartData = route.state?.items || [] // Mengambil data cart dari state
-
+  console.log('Cart data from state:', cartData)
   // Jika ada data cart di state, gunakan itu
   if (cartData.length > 0) {
     items.value = cartData
