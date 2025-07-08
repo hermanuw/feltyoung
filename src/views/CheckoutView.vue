@@ -163,24 +163,37 @@ onMounted(async () => {
     router.push('/')
     return
   }
+
+  // Cek jika data cart ada di query params (dari halaman cart)
   const cartData = JSON.parse(route.query.items || '[]')
 
   // Jika ada data cart di query params, gunakan itu
   if (cartData.length > 0) {
     items.value = cartData
   } else {
-    // Jika tidak ada di query, ambil data cart dari backend
-    try {
-      const res = await axios.get('/cart', {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      })
-      items.value = res.data
-    } catch (err) {
-      console.error('Gagal ambil cart:', err)
+    // Jika tidak ada di query, ambil data produk dari halaman detail (Buy Now)
+    const id = route.query.productId
+    if (id) {
+      try {
+        const res = await axios.get(`/products/id/${id}`)
+        const data = res.data
+        items.value = [
+          {
+            product_id: data.product_id,
+            name: data.name,
+            image_url: data.image_url,
+            price: Number(data.price),
+            size: route.query.size || '-',
+          },
+        ]
+        productTotal.value = Number(data.price)
+      } catch (err) {
+        console.error('Gagal ambil data produk:', err)
+      }
     }
   }
+
+  // Ambil data profil pengguna untuk pengiriman
   try {
     const profileRes = await axios.get('/profile')
     user.value = profileRes.data
@@ -189,26 +202,8 @@ onMounted(async () => {
     shippingPhone.value = user.value.phone_number
     shippingAddress.value = user.value.address
 
-    const id = route.query.productId
-    if (id) {
-      const res = await axios.get(`/products/id/${id}`)
-      const data = res.data
-      items.value = [
-        {
-          product_id: data.product_id,
-          name: data.name,
-          image_url: data.image_url,
-          price: Number(data.price),
-          size: selectedSize,
-        },
-      ]
-      productTotal.value = Number(data.price)
-    } else {
-      const res = await axios.get('/cart')
-      items.value = res.data
-      productTotal.value = items.value.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    }
-
+    // Menghitung total harga produk
+    productTotal.value = items.value.reduce((acc, item) => acc + item.price * item.quantity, 0)
     total.value = productTotal.value + processingFee
   } catch (err) {
     console.error('Gagal ambil data checkout:', err)
