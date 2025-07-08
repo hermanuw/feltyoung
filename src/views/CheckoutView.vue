@@ -134,7 +134,7 @@ import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const router = useRouter()
-const auth = useAuthStore()
+const authStore = useAuthStore()
 
 const bgImage = '../src/assets/payment.png'
 const processingFee = 30000
