@@ -108,7 +108,23 @@
         <p>Rp {{ formatPrice(productTotal) }}</p>
       </div>
       <div class="flex justify-between text-sm mb-1">
-        <p class="flex items-center">Processing Fee</p>
+        <p class="flex items-center">
+          Processing Fee
+          <!-- Logo Info (MdRoundInfoOutline) with Tooltip -->
+          <span class="relative ml-2">
+            <!-- Use MdRoundInfoOutline logo -->
+            <MdRoundInfoOutline
+              class="text-blue-500 cursor-pointer hover:text-blue-700"
+              style="font-size: 20px"
+            />
+            <span
+              class="absolute left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded py-1 px-2 opacity-0 transition-opacity duration-300 hover:opacity-100"
+            >
+              The processing fee applies only for Jabodetabek area. For other regions, please
+              contact the admin.
+            </span>
+          </span>
+        </p>
         <p>Rp {{ formatPrice(processingFee) }}</p>
       </div>
       <div class="flex justify-between items-center mt-4">
@@ -131,7 +147,7 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from '@/axios'
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-
+import { MdRoundInfoOutline } from '@kalimahapps/vue-icons'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
