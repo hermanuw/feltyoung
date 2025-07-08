@@ -158,7 +158,7 @@ const productId = route.query.productId
 const size = route.query.size
 const fromRequest = route.query.fromRequest === 'true'
 const selectedSize = route.query.size || '-'
-const showInfo = ref(false)
+const showInfo = ref(true)
 const items = ref([])
 const productTotal = ref(0)
 const total = ref(0)
