@@ -10,9 +10,6 @@ const authStore = useAuthStore()
 const cartItems = ref([])
 const loading = ref(true)
 const updatingItemId = ref(null)
-const shippingName = ref('')
-const shippingPhone = ref('')
-const shippingAddress = ref('')
 
 const formatPrice = (price) => new Intl.NumberFormat('id-ID').format(price)
 
@@ -43,18 +40,21 @@ async function checkout() {
 
   // Kirim data cart ke halaman checkout sebagai query params
   const cartData = cartItems.value.map((item) => ({
-    product_id: item.product_id,
+    cart_id: item.cart_id,
     quantity: item.quantity,
+    variant_id: item.variant_id,
     size: item.size,
+    product_id: item.product_id,
+    name: item.name,
+    image_url: item.image_url,
+    price: item.price,
   }))
 
   const queryParams = {
     items: JSON.stringify(cartData), // Mengirimkan data cart dalam bentuk JSON string
-    shippingName: shippingName.value,
-    shippingPhone: shippingPhone.value,
-    shippingAddress: shippingAddress.value,
   }
 
+  // Navigasi ke halaman checkout dan kirim data cart
   router.push({ name: 'Checkout', query: queryParams })
 }
 
