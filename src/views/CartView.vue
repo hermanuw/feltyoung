@@ -38,7 +38,6 @@ async function checkout() {
     return
   }
 
-  // Kirim data cart ke halaman checkout sebagai query params
   const cartData = cartItems.value.map((item) => ({
     cart_id: item.cart_id,
     quantity: item.quantity,
@@ -50,12 +49,7 @@ async function checkout() {
     price: item.price,
   }))
 
-  const queryParams = {
-    items: JSON.stringify(cartData), // Mengirimkan data cart dalam bentuk JSON string
-  }
-  console.log('Sending query parameters:', queryParams)
-  // Navigasi ke halaman checkout dan kirim data cart
-  router.push({ name: 'Checkout', query: queryParams })
+  router.push({ path: '/checkout', state: { items: cartData } })
 }
 
 async function updateQty(item, newQty) {

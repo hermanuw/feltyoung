@@ -159,23 +159,25 @@ const user = ref({
 })
 
 onMounted(async () => {
-  if (!auth.accessToken) {
+  if (!authStore.accessToken) {
     router.push('/')
     return
   }
 
-  // Cek jika data cart ada di query params (dari halaman cart)
-  const cartData = JSON.parse(route.query.items || '[]')
-  console.log('Received cart data:', cartData)
-  // Jika ada data cart di query params, gunakan itu
+  // Cek jika data cart ada di state (dari halaman cart)
+  const cartData = route.state?.items || [] // Mengambil data cart dari state
+
+  // Jika ada data cart di state, gunakan itu
   if (cartData.length > 0) {
     items.value = cartData
   } else {
-    // Jika tidak ada di query, ambil data produk dari halaman detail (Buy Now)
-    const id = route.query.productId
-    if (id) {
+    // Jika tidak ada data cart di state, cek apakah datang dari Buy Now (productId di query params)
+    const productId = route.query.productId
+    const size = route.query.size
+
+    if (productId && size) {
       try {
-        const res = await axios.get(`/products/id/${id}`)
+        const res = await axios.get(`/products/id/${productId}`)
         const data = res.data
         items.value = [
           {
@@ -183,7 +185,7 @@ onMounted(async () => {
             name: data.name,
             image_url: data.image_url,
             price: Number(data.price),
-            size: route.query.size || '-',
+            size: size, // Menetapkan ukuran produk yang dipilih
           },
         ]
         productTotal.value = Number(data.price)
