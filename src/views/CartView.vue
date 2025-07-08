@@ -10,6 +10,9 @@ const authStore = useAuthStore()
 const cartItems = ref([])
 const loading = ref(true)
 const updatingItemId = ref(null)
+const shippingName = ref('')
+const shippingPhone = ref('')
+const shippingAddress = ref('')
 
 const formatPrice = (price) => new Intl.NumberFormat('id-ID').format(price)
 

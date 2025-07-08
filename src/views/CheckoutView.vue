@@ -108,10 +108,6 @@
         <p>Rp {{ formatPrice(productTotal) }}</p>
       </div>
       <div class="flex justify-between text-sm mb-1">
-        <p>Authentication Fee</p>
-        <p>FREE</p>
-      </div>
-      <div class="flex justify-between text-sm mb-1">
         <p class="flex items-center">Processing Fee</p>
         <p>Rp {{ formatPrice(processingFee) }}</p>
       </div>
