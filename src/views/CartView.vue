@@ -53,7 +53,7 @@ async function checkout() {
   const queryParams = {
     items: JSON.stringify(cartData), // Mengirimkan data cart dalam bentuk JSON string
   }
-
+  console.log('Sending query parameters:', queryParams)
   // Navigasi ke halaman checkout dan kirim data cart
   router.push({ name: 'Checkout', query: queryParams })
 }

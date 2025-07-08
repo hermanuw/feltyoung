@@ -166,7 +166,7 @@ onMounted(async () => {
 
   // Cek jika data cart ada di query params (dari halaman cart)
   const cartData = JSON.parse(route.query.items || '[]')
-
+  console.log('Received cart data:', cartData)
   // Jika ada data cart di query params, gunakan itu
   if (cartData.length > 0) {
     items.value = cartData
