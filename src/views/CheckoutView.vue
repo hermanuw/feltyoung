@@ -167,7 +167,24 @@ onMounted(async () => {
     router.push('/')
     return
   }
+  const cartData = JSON.parse(route.query.items || '[]')
 
+  // Jika ada data cart di query params, gunakan itu
+  if (cartData.length > 0) {
+    items.value = cartData
+  } else {
+    // Jika tidak ada di query, ambil data cart dari backend
+    try {
+      const res = await axios.get('/cart', {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      items.value = res.data
+    } catch (err) {
+      console.error('Gagal ambil cart:', err)
+    }
+  }
   try {
     const profileRes = await axios.get('/profile')
     user.value = profileRes.data

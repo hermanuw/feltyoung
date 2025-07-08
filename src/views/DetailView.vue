@@ -17,7 +17,6 @@ const variants = ref([])
 const selectedSize = ref(null)
 const selectedVariant = computed(() => variants.value.find((v) => v.size === selectedSize.value))
 
-// ✅ Tambahan: cek jika stok kosong ATAU minus
 const isOutOfStock = computed(() => !selectedVariant.value || selectedVariant.value.stock <= 0)
 
 const showAuthForm = ref(false)

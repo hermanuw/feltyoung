@@ -21,7 +21,7 @@ async function fetchCart() {
   try {
     const res = await axios.get('/cart', {
       headers: {
-        Authorization: `Bearer ${authStore.accessToken}`, // <-- Ambil token dari Pinia
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
     })
     cartItems.value = res.data
@@ -31,6 +31,28 @@ async function fetchCart() {
   } finally {
     loading.value = false
   }
+}
+async function checkout() {
+  if (cartItems.value.length === 0) {
+    Swal.fire('Error', 'Keranjang belanja Anda kosong.', 'error')
+    return
+  }
+
+  // Kirim data cart ke halaman checkout sebagai query params
+  const cartData = cartItems.value.map((item) => ({
+    product_id: item.product_id,
+    quantity: item.quantity,
+    size: item.size,
+  }))
+
+  const queryParams = {
+    items: JSON.stringify(cartData), // Mengirimkan data cart dalam bentuk JSON string
+    shippingName: shippingName.value,
+    shippingPhone: shippingPhone.value,
+    shippingAddress: shippingAddress.value,
+  }
+
+  router.push({ name: 'Checkout', query: queryParams })
 }
 
 async function updateQty(item, newQty) {
@@ -46,7 +68,7 @@ async function updateQty(item, newQty) {
       { quantity: newQty },
       {
         headers: {
-          Authorization: `Bearer ${authStore.accessToken}`, // <-- Ambil token dari Pinia
+          Authorization: `Bearer ${authStore.accessToken}`,
         },
       },
     )
@@ -76,7 +98,7 @@ async function removeItem(cartId) {
   try {
     await axios.delete(`/cart/${cartId}`, {
       headers: {
-        Authorization: `Bearer ${authStore.accessToken}`, // <-- Ambil token dari Pinia
+        Authorization: `Bearer ${authStore.accessToken}`,
       },
     })
     cartItems.value = cartItems.value.filter((item) => item.cart_id !== cartId)
@@ -89,7 +111,7 @@ async function removeItem(cartId) {
 
 onMounted(() => {
   if (!authStore.accessToken) {
-    router.push('/') // redirect if not logged in
+    router.push('/')
   } else {
     fetchCart()
   }

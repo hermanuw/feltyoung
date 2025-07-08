@@ -299,8 +299,8 @@ function handleClickOutside(event) {
 function alertLoginRequired() {
   Swal.fire({
     icon: 'warning',
-    title: 'Login Diperlukan',
-    text: 'Silakan login terlebih dahulu untuk melakukan permintaan produk.',
+    title: 'Login Required',
+    text: 'You need to login to request a product.',
     confirmButtonText: 'Login',
   }).then((result) => {
     if (result.isConfirmed) {
@@ -354,16 +354,15 @@ nav a.active-link {
   animation: fade 0.2s ease-out;
 }
 
-/* Tambahkan style default dropdown item agar tetap terlihat */
 nav .dropdown-item {
-  color: #1f2937; /* Tailwind: text-gray-800 */
+  color: #1f2937;
   padding: 0.5rem 1rem;
   display: block;
-  font-size: 0.875rem; /* text-sm */
+  font-size: 0.875rem;
   transition: background-color 0.2s ease;
 }
 
 nav .dropdown-item:hover {
-  background-color: #f3f4f6; /* Tailwind: hover:bg-gray-100 */
+  background-color: #f3f4f6;
 }
 </style>
