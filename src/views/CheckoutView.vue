@@ -164,38 +164,6 @@ onMounted(async () => {
     return
   }
 
-  // Cek jika data cart ada di state (dari halaman cart)
-  const cartData = route.state?.items || [] // Mengambil data cart dari state
-  console.log('Cart data from state:', cartData)
-  // Jika ada data cart di state, gunakan itu
-  if (cartData.length > 0) {
-    items.value = cartData
-  } else {
-    // Jika tidak ada data cart di state, cek apakah datang dari Buy Now (productId di query params)
-    const productId = route.query.productId
-    const size = route.query.size
-
-    if (productId && size) {
-      try {
-        const res = await axios.get(`/products/id/${productId}`)
-        const data = res.data
-        items.value = [
-          {
-            product_id: data.product_id,
-            name: data.name,
-            image_url: data.image_url,
-            price: Number(data.price),
-            size: size, // Menetapkan ukuran produk yang dipilih
-          },
-        ]
-        productTotal.value = Number(data.price)
-      } catch (err) {
-        console.error('Gagal ambil data produk:', err)
-      }
-    }
-  }
-
-  // Ambil data profil pengguna untuk pengiriman
   try {
     const profileRes = await axios.get('/profile')
     user.value = profileRes.data
@@ -204,8 +172,26 @@ onMounted(async () => {
     shippingPhone.value = user.value.phone_number
     shippingAddress.value = user.value.address
 
-    // Menghitung total harga produk
-    productTotal.value = items.value.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    const id = route.query.productId
+    if (id) {
+      const res = await axios.get(`/products/id/${id}`)
+      const data = res.data
+      items.value = [
+        {
+          product_id: data.product_id,
+          name: data.name,
+          image_url: data.image_url,
+          price: Number(data.price),
+          size: selectedSize,
+        },
+      ]
+      productTotal.value = Number(data.price)
+    } else {
+      const res = await axios.get('/cart')
+      items.value = res.data
+      productTotal.value = items.value.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    }
+
     total.value = productTotal.value + processingFee
   } catch (err) {
     console.error('Gagal ambil data checkout:', err)
