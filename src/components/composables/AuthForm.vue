@@ -184,7 +184,7 @@ watch(email, (val) => {
 
 watch(phone, (val) => {
   validationErrors.value.phone = !isValidPhone(val)
-    ? 'Invalid phone number (start with +62, 62, or 0)'
+    ? 'Invalid phone number (start with +62, 62, 08, or + followed by country code)'
     : ''
 })
 
