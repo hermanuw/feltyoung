@@ -249,8 +249,8 @@ const handlePayment = async () => {
       recipient_phone: shippingPhone.value,
       items: items.value.map((item) => ({
         product_id: item.product_id,
-        quantity: item.quantity || 1,
-        price: item.price,
+        quantity: Number(item.quantity || 1),
+        price: Number(item.price),
         size: item.size || selectedSize,
       })),
     })
