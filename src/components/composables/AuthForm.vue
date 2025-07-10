@@ -6,15 +6,32 @@
         <form @submit.prevent="register">
           <h1>Register here.</h1>
           <input v-model="name" type="text" placeholder="Name" required maxlength="100" />
+          <p v-if="validationErrors.name" class="text-red-500 text-sm">
+            {{ validationErrors.name }}
+          </p>
+
           <input v-model="email" type="email" placeholder="Email" required maxlength="255" />
+          <p v-if="validationErrors.email" class="text-red-500 text-sm">
+            {{ validationErrors.email }}
+          </p>
+
           <input v-model="phone" type="tel" placeholder="Phone" required maxlength="20" />
+          <p v-if="validationErrors.phone" class="text-red-500 text-sm">
+            {{ validationErrors.phone }}
+          </p>
+
           <input
             v-model="password"
             type="password"
             placeholder="Password"
             required
             maxlength="100"
+            minlength="6"
           />
+          <p v-if="validationErrors.password" class="text-red-500 text-sm">
+            {{ validationErrors.password }}
+          </p>
+
           <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
           <button type="submit" class="btn-primary cursor-pointer" :disabled="isLoading">
             <span v-if="!isLoading">Register</span>
@@ -94,7 +111,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth' // <-- Import store
+import { useAuthStore } from '@/stores/auth'
 import bgImage from '@/assets/Feltyoung.jpg'
 import Swal from 'sweetalert2'
 
@@ -138,35 +155,50 @@ function isValidPhone(phone) {
   const phoneRegex = /^(?:\+?[1-9]\d{6,14}|(?:\+62|62|0)[2-9]\d{7,11})$/
   return phoneRegex.test(phone)
 }
+const validationErrors = ref({
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+})
+
+const hasValidationErrors = () => {
+  return Object.values(validationErrors.value).some((msg) => msg !== '')
+}
+
+watch(name, (val) => {
+  validationErrors.value.name = val.length > 100 ? 'Name too long (max 100 characters)' : ''
+})
+
+watch(email, (val) => {
+  if (val.length > 255) {
+    validationErrors.value.email = 'Email too long (max 255 characters)'
+  } else if (!isValidEmail(val)) {
+    validationErrors.value.email = 'Invalid email format'
+  } else {
+    validationErrors.value.email = ''
+  }
+})
+
+watch(phone, (val) => {
+  validationErrors.value.phone = !isValidPhone(val)
+    ? 'Invalid phone number (start with +62, 62, or 0)'
+    : ''
+})
+
+watch(password, (val) => {
+  validationErrors.value.password = !isStrongPassword(val)
+    ? 'Password must be 6+ characters with uppercase, lowercase, and number'
+    : ''
+})
 
 async function register() {
   try {
     error.value = ''
     isLoading.value = true
 
-    if (name.value.length > 100) {
-      error.value = 'Name too long (max 100 characters)'
-      return
-    }
-    if (email.value.length > 255) {
-      error.value = 'Email too long (max 255 characters)'
-      return
-    }
-    if (phone.value.length > 20) {
-      error.value = 'Phone number too long (max 20 characters)'
-      return
-    }
-    if (!isValidEmail(email.value)) {
-      error.value = 'Please enter a valid email address'
-      return
-    }
-    if (!isValidPhone(phone.value)) {
-      error.value = 'Please enter a valid phone number! It must start with (e.g. +62, 62, or 0)'
-      return
-    }
-    if (!isStrongPassword(password.value)) {
-      error.value =
-        'Password must be at least 6 characters, contain uppercase, lowercase, and a number'
+    if (hasValidationErrors()) {
+      error.value = 'Please fix the validation errors before submitting.'
       return
     }
 
