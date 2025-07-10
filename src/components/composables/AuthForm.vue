@@ -153,7 +153,7 @@ function isStrongPassword(password) {
 
 function isValidPhone(phone) {
   const regexIndo = /^(?:\+62|62|08)[2-9][0-9]{7,11}$/
-  const regexIntl = /^\+?[1-9][0-9]{7,14}$/
+  const regexIntl = /^\+[1-9][0-9]{7,14}$/
   return regexIndo.test(phone) || regexIntl.test(phone)
 }
 
