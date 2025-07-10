@@ -58,6 +58,10 @@ async function submit() {
     return;
   }
 
+  if (!description.value || description.value.trim() === '') {
+    Swal.fire('Missing Description', 'Please provide a product description.', 'error');
+    return;
+  }
   if (variants.value.length === 0) {
     Swal.fire('Missing Variant', 'You must add at least one size variant.', 'warning');
     return;
