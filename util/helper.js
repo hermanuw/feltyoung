@@ -31,11 +31,26 @@ async function sendVerificationEmail(email, token) {
   const verificationLink = `${frontendURL}/verify-email?token=${token}&email=${email}`;
 
   const mailOptions = {
-    from: config.EMAIL_USER,
+    from: `"Feltyoung Kicks" <${config.EMAIL_USER}>`,
     to: email,
     subject: "Verify Your Email",
-    html: `<p>Please click the link below to verify your email:</p>
-           <a href="${verificationLink}">Verify Email</a>`,
+    html: `
+    <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+      <p>Hello,</p>
+      <p>Thanks for registering at <strong>Feltyoung.kicks</strong>.</p>
+      <p>Please click the link below to verify your email address:</p>
+      <p><a href="${verificationLink}" style="color: #007bff;">Verify My Email</a></p>
+      <br>
+      <p>If you didn’t request this, you can ignore this email.</p>
+      <br>
+      <hr>
+      <small>Feltyoung Kicks &mdash; Indonesia's Modern Sneaker Store</small>
+    </div>
+  `,
+    headers: {
+      "X-Priority": "3",
+      "X-Mailer": "Nodemailer",
+    },
   };
 
   try {
