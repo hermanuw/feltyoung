@@ -11,6 +11,6 @@ router.post("/logout", authenticate, authController.logout);
 router.post("/verify-token/:token", authController.verifyToken);
 router.post("/verify-email/:email", authController.verifyEmail);
 router.post("/token/refresh", authController.refreshToken);
-router.get("/whoami", authController.whoami);
+router.get("/whoami", authenticate, authController.whoami);
 
 module.exports = router;
