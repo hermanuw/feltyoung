@@ -201,6 +201,7 @@ onMounted(() => {
   handleScroll()
   window.addEventListener('scroll', handleScroll)
   document.addEventListener('click', handleClickOutside)
+  checkTokenValidity()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('storage', syncAuth)
@@ -307,6 +308,28 @@ function alertLoginRequired() {
       showAuthForm.value = true
     }
   })
+}
+async function checkTokenValidity() {
+  const token = localStorage.getItem('accessToken')
+  if (!token) {
+    isAuthenticated.value = false
+    return
+  }
+
+  try {
+    const res = await axios.get('/whoami', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    // Jika berhasil, tetap isAuthenticated
+    isAuthenticated.value = true
+  } catch (err) {
+    // Token tidak valid atau expired
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    isAuthenticated.value = false
+  }
 }
 </script>
 
