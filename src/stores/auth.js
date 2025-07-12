@@ -80,7 +80,7 @@ export const useAuthStore = defineStore('auth', {
     // Refresh access token if expired
     async refreshAccessToken() {
       try {
-        const response = await axios.post('/auth/token/refresh', {
+        const response = await axios.post('/token/refresh', {
           refreshToken: this.refreshToken,
         })
 
