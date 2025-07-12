@@ -214,7 +214,9 @@ onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   document.addEventListener('click', handleClickOutside)
   handleScroll()
-  checkTokenValidity()
+  if (authStore.accessToken) {
+    checkTokenValidity()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -292,7 +294,6 @@ function handleClickOutside(event) {
   }
 }
 
-// SweetAlert jika belum login
 function alertLoginRequired() {
   Swal.fire({
     icon: 'warning',
