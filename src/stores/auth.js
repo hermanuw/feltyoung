@@ -105,10 +105,12 @@ export const useAuthStore = defineStore('auth', {
 
         this.setUser(response.data)
       } catch (error) {
-        if (this.refreshToken) {
+        const status = error.response?.status
+
+        if (status === 401 && this.refreshToken) {
           try {
             await this.refreshAccessToken()
-            await this.fetchUser() // retry after refresh
+            await this.fetchUser() // retry setelah refresh
           } catch (err) {
             this.logout()
             throw err

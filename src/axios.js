@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
-import router from '@/router' // ⬅️ Tambahkan ini
+import router from '@/router'
 
 const axiosInstance = axios.create({
   baseURL: 'https://feltyoung-be.up.railway.app/api',
