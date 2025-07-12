@@ -240,6 +240,14 @@ const cancelShippingChanges = () => {
 }
 
 const handlePayment = async () => {
+  if (!shippingName.value || !shippingPhone.value || !shippingAddress.value) {
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Incomplete Shipping Information',
+      text: 'Please fill in all the shipping details before proceeding with the payment.',
+    })
+    return
+  }
   try {
     const res = await axios.post('/orders', {
       total_amount: total.value,
