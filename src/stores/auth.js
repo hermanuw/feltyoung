@@ -66,7 +66,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await axios.post('/login', { email, password })
         const { accessToken, refreshToken, user } = response.data
-
+        console.log('✅ Login berhasil:', response.data)
         // Store tokens and user data
         this.setTokens(accessToken, refreshToken)
         this.setUser(user)
@@ -110,7 +110,7 @@ export const useAuthStore = defineStore('auth', {
         if (status === 401 && this.refreshToken) {
           try {
             await this.refreshAccessToken()
-            await this.fetchUser() // retry setelah refresh
+            await this.fetchUser()
           } catch (err) {
             this.logout()
             throw err
