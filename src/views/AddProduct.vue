@@ -24,8 +24,36 @@ const newStock = ref(0);
 const formatPrice = (val) => 'Rp ' + new Intl.NumberFormat('id-ID', { style: 'decimal' }).format(val);
 
 function handleFileUpload(e) {
-  image.value = e.target.files[0];
-  previewImage.value = URL.createObjectURL(image.value);
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Hanya izinkan gambar: JPG, JPEG, PNG, GIF, AVIF
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/avif'];
+
+  if (!allowedTypes.includes(file.type)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid File Format',
+      text: 'Only JPG, JPEG, PNG, GIF, and AVIF formats are allowed.'
+    });
+
+    e.target.value = null;
+    image.value = null;
+    previewImage.value = '';
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'File Too Large',
+      text: 'Maximum file size is 5MB.'
+    });
+    e.target.value = null;
+    return;
+  }
+
+  image.value = file;
+  previewImage.value = URL.createObjectURL(file);
 }
 
 async function submit() {
@@ -39,8 +67,10 @@ async function submit() {
   });
 
   if (!confirm.isConfirmed) return;
-
-  // ✅ Validasi panjang input
+  if (numericPrice >= 100_000_000) {
+    Swal.fire('Price Too High', 'The price must be less than Rp100.000.000.', 'warning');
+    return;
+  }
   if (name.value.length > 100) {
     Swal.fire('Too Long', 'Product name must be max 100 characters.', 'warning');
     return;
