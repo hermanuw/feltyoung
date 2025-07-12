@@ -52,7 +52,7 @@ async function register(req, res) {
     await RefreshToken.deleteByUserId(user_id);
 
     // Buat token akses baru dan refresh token
-    const token = jwt.sign({ id: user.user_id }, config.SECRET, {
+    const token = jwt.sign({ user_id: user.user_id }, config.SECRET, {
       expiresIn: "1d", // Access token expires in 1 day
     });
 
@@ -88,7 +88,11 @@ async function login(req, res) {
     const isMatch = await helper.comparePassword(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid Password" });
 
-    const payload = { id: user.user_id, email: user.email, role: user.role };
+    const payload = {
+      user_id: user.user_id,
+      email: user.email,
+      role: user.role,
+    };
     const accessToken = helper.issueAccessToken(payload);
     const refreshToken = await helper.createRefreshToken(user.user_id);
 
@@ -109,7 +113,7 @@ async function verifyToken(req, res) {
 
   try {
     const decoded = jwt.verify(token, config.SECRET);
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.user_id);
     if (!user) return res.status(400).json({ message: "Invalid token" });
 
     return res.status(200).json({ token_valid: "valid" });
@@ -155,12 +159,12 @@ async function refreshToken(req, res) {
     await RefreshToken.deleteById(storedToken.id);
 
     const payload = {
-      id: storedToken.user_id,
+      user_id: storedToken.user_id,
       email: storedToken.email,
       role: storedToken.role,
     };
     const newAccessToken = helper.issueAccessToken(payload);
-    const newRefreshToken = await helper.createRefreshToken(payload.id);
+    const newRefreshToken = await helper.createRefreshToken(payload.user_id);
 
     return res.status(200).json({
       accessToken: newAccessToken,
@@ -185,18 +189,23 @@ async function logout(req, res) {
 }
 
 async function whoami(req, res) {
-  const user = await User.findById(req.user.id);
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
+  try {
+    const user = await User.findById(req.user.user_id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      id: user.user_id,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (err) {
+    console.error("Whoami error:", err);
+    return res.status(500).json({ message: "Failed to get user information" });
   }
-
-  return res.status(200).json({
-    id: user.user_id,
-    email: user.email,
-    role: user.role,
-  });
 }
-
 module.exports = {
   register,
   login,
