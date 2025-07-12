@@ -185,7 +185,7 @@ async function logout(req, res) {
 }
 
 async function whoami(req, res) {
-  const user = await User.findById(req.user.user_id);
+  const user = await User.findById(req.user.id);
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
