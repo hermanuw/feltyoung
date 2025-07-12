@@ -13,5 +13,4 @@ router.post("/verify-email/:email", authController.verifyEmail);
 router.post("/token/refresh", authController.refreshToken);
 router.get("/whoami", authController.whoami);
 
-// Export router, bukan fungsi satu per satu
 module.exports = router;

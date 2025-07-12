@@ -184,9 +184,8 @@ async function logout(req, res) {
   }
 }
 
-// Whoami
 async function whoami(req, res) {
-  const user = await User.findByPk(req.user.id);
+  const user = await User.findById(req.user.id);
   return res.status(200).json({
     id: user.id,
     email: user.email,
