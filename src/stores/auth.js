@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('user')
-      router.push('/login') // Redirect to login page
+      router.push('/') // Redirect to login page
     },
 
     // Register user
