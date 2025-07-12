@@ -308,16 +308,6 @@ function alertLoginRequired() {
 
 // Validasi token & auto logout jika tidak valid
 async function checkTokenValidity() {
-  if (!authStore.accessToken) {
-    await Swal.fire({
-      icon: 'warning',
-      title: 'Not Logged In',
-      text: 'Please login to continue.',
-    })
-    authStore.logout()
-    return
-  }
-
   try {
     await authStore.fetchUser()
   } catch (err) {
