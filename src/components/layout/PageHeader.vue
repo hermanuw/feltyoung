@@ -184,37 +184,22 @@ import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { FaBarsStaggered } from '@kalimahapps/vue-icons'
 import { CgProfile } from '@kalimahapps/vue-icons'
 import { BsCart3 } from '@kalimahapps/vue-icons'
-import axios from '@/axios'
-import bgNavbar from '@/assets/bg-navbar.png'
 import Swal from 'sweetalert2'
+import bgNavbar from '@/assets/bg-navbar.png'
+import { useAuthStore } from '@/stores/auth'
 
-const showProfileDropdown = ref(false)
-const profileDropdownRef = ref(null)
 const route = useRoute()
 const router = useRouter()
-const isScrolled = ref(false)
-const menuVisible = ref(false)
-const isAuthenticated = ref(!!localStorage.getItem('accessToken'))
+const authStore = useAuthStore()
 
-onMounted(() => {
-  window.addEventListener('storage', syncAuth)
-  handleScroll()
-  window.addEventListener('scroll', handleScroll)
-  document.addEventListener('click', handleClickOutside)
-  checkTokenValidity()
-})
-onBeforeUnmount(() => {
-  window.removeEventListener('storage', syncAuth)
-  window.removeEventListener('scroll', handleScroll)
-  document.removeEventListener('click', handleClickOutside)
-})
-
-function syncAuth() {
-  isAuthenticated.value = !!localStorage.getItem('accessToken')
-}
-
-const searchQuery = ref('')
 const showAuthForm = ref(false)
+const searchQuery = ref('')
+const menuVisible = ref(false)
+const showProfileDropdown = ref(false)
+const profileDropdownRef = ref(null)
+const isScrolled = ref(false)
+
+const isAuthenticated = computed(() => !!authStore.accessToken)
 
 const links = [
   { name: 'Featured', path: '/' },
@@ -224,27 +209,38 @@ const links = [
   { name: 'Request Product', path: '/product/request/me' },
 ]
 
+onMounted(() => {
+  window.addEventListener('storage', syncAuth)
+  window.addEventListener('scroll', handleScroll)
+  document.addEventListener('click', handleClickOutside)
+  handleScroll()
+  checkTokenValidity()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', syncAuth)
+  window.removeEventListener('scroll', handleScroll)
+  document.removeEventListener('click', handleClickOutside)
+})
+
+function syncAuth() {
+  if (!localStorage.getItem('accessToken')) {
+    authStore.logout()
+  }
+}
+
 function handleSearch() {
   if (searchQuery.value.trim()) {
     router.push({ name: 'SearchResults', query: { keyword: searchQuery.value } })
   }
 }
 
-const logout = async () => {
-  try {
-    await axios.post('/logout')
-  } catch (e) {
-    console.warn('Logout failed, forcing logout')
-  } finally {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    isAuthenticated.value = false
-    window.location.href = '/'
-  }
+const logout = () => {
+  authStore.logout()
 }
 
 function handleLoginSuccess() {
-  isAuthenticated.value = true
+  authStore.fetchUser()
 }
 
 const headerClass = computed(() => ({
@@ -271,7 +267,6 @@ const handleScroll = () => {
 const toggleMenu = () => {
   menuVisible.value = !menuVisible.value
 }
-
 const closeMenu = () => {
   menuVisible.value = false
 }
@@ -297,6 +292,7 @@ function handleClickOutside(event) {
   }
 }
 
+// SweetAlert jika belum login
 function alertLoginRequired() {
   Swal.fire({
     icon: 'warning',
@@ -309,26 +305,28 @@ function alertLoginRequired() {
     }
   })
 }
+
+// Validasi token & auto logout jika tidak valid
 async function checkTokenValidity() {
-  const token = localStorage.getItem('accessToken')
-  if (!token) {
-    isAuthenticated.value = false
+  if (!authStore.accessToken) {
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Not Logged In',
+      text: 'Please login to continue.',
+    })
+    authStore.logout()
     return
   }
 
   try {
-    const res = await axios.get('/whoami', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    // Jika berhasil, tetap isAuthenticated
-    isAuthenticated.value = true
+    await authStore.fetchUser()
   } catch (err) {
-    // Token tidak valid atau expired
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    isAuthenticated.value = false
+    await Swal.fire({
+      icon: 'warning',
+      title: 'Session Expired',
+      text: 'Your session has expired. Please login again.',
+    })
+    authStore.logout()
   }
 }
 </script>
