@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-full flex items-center justify-center font-poppins">
+  <div class="w-full min-h-screen flex items-center justify-center font-poppins px-4 md:px-0">
     <div class="container" :class="{ 'right-panel-active': isRegister }" id="container">
       <!-- Register Form -->
       <div class="form-container register-container">
@@ -49,12 +49,12 @@
                   r="10"
                   stroke="currentColor"
                   stroke-width="4"
-                ></circle>
+                />
                 <path
                   class="opacity-75"
                   fill="currentColor"
                   d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
-                ></path>
+                />
               </svg>
               Registering...
             </span>
@@ -70,40 +70,34 @@
           <input v-model="password" type="password" placeholder="Password" required />
           <div v-if="error" class="text-red-600 text-sm my-2">{{ error }}</div>
           <div class="content">
-            <div class="pass-link">
-              <a href="#">Forgot password?</a>
-            </div>
+            <div class="pass-link"><a href="#">Forgot password?</a></div>
           </div>
           <button type="submit" class="btn-primary cursor-pointer">Login</button>
         </form>
       </div>
-      <!-- Overlay -->
-      <div class="overlay-container">
+
+      <!-- Overlay Desktop Only -->
+      <div class="overlay-container hidden md:block">
         <div class="overlay" :style="{ backgroundImage: `url(${bgImage})` }">
           <div class="overlay-panel overlay-left">
-            <h1 class="title">
-              Hello <br />
-              friends
-            </h1>
+            <h1 class="title">Hello <br />friends</h1>
             <p><b>If you have an account, login here and have fun</b></p>
-            <button class="ghost cursor-pointer" @click="isRegister = false">
-              Login
-              <i class="lni lni-arrow-left login"></i>
-            </button>
+            <button class="ghost cursor-pointer" @click="isRegister = false">Login</button>
           </div>
           <div class="overlay-panel overlay-right">
-            <h1 class="title">
-              Start your <br />
-              journey now
-            </h1>
+            <h1 class="title">Start your <br />journey now</h1>
             <p><b>If you don't have an account yet, join us and start your journey.</b></p>
-            <button class="ghost cursor-pointer" @click="isRegister = true">
-              Register
-              <i class="lni lni-arrow-right register"></i>
-            </button>
+            <button class="ghost cursor-pointer" @click="isRegister = true">Register</button>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Switcher Button Mobile -->
+    <div class="md:hidden text-center mt-6">
+      <button class="text-blue-600 underline" @click="isRegister = !isRegister">
+        {{ isRegister ? 'Already have an account? Login' : "Don't have an account? Register" }}
+      </button>
     </div>
   </div>
 </template>
@@ -116,7 +110,6 @@ import bgImage from '@/assets/Feltyoung.jpg'
 import Swal from 'sweetalert2'
 
 const emit = defineEmits(['close', 'login-success'])
-
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -132,7 +125,6 @@ async function login() {
   try {
     error.value = ''
     await authStore.login(email.value, password.value)
-
     emit('login-success')
     emit('close')
     window.location.href = '/'
@@ -141,84 +133,59 @@ async function login() {
   }
 }
 
+const validationErrors = ref({ name: '', email: '', phone: '', password: '' })
+
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
 }
-
 function isStrongPassword(password) {
-  const pwRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/
-  return pwRegex.test(password)
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(password)
 }
-
 function isValidPhone(phone) {
-  const regexIndo = /^(?:\+62|62|08)[2-9][0-9]{7,11}$/
-  const regexIntl = /^\+[1-9][0-9]{7,14}$/
-  return regexIndo.test(phone) || regexIntl.test(phone)
-}
-
-const validationErrors = ref({
-  name: '',
-  email: '',
-  phone: '',
-  password: '',
-})
-
-const hasValidationErrors = () => {
-  return Object.values(validationErrors.value).some((msg) => msg !== '')
+  return /^(?:\+62|62|08)[2-9][0-9]{7,11}$/.test(phone) || /^\+[1-9][0-9]{7,14}$/.test(phone)
 }
 
 watch(name, (val) => {
   validationErrors.value.name = val.length > 100 ? 'Name too long (max 100 characters)' : ''
 })
-
 watch(email, (val) => {
-  if (val.length > 255) {
-    validationErrors.value.email = 'Email too long (max 255 characters)'
-  } else if (!isValidEmail(val)) {
-    validationErrors.value.email = 'Invalid email format'
-  } else {
-    validationErrors.value.email = ''
-  }
+  if (val.length > 255) validationErrors.value.email = 'Email too long'
+  else if (!isValidEmail(val)) validationErrors.value.email = 'Invalid email'
+  else validationErrors.value.email = ''
 })
-
 watch(phone, (val) => {
-  validationErrors.value.phone = !isValidPhone(val)
-    ? 'Invalid phone number (start with +62, 62, 08, or + followed by country code)'
-    : ''
+  validationErrors.value.phone = !isValidPhone(val) ? 'Invalid phone number' : ''
 })
-
 watch(password, (val) => {
   validationErrors.value.password = !isStrongPassword(val)
-    ? 'Password must be 6+ characters with uppercase, lowercase, and number'
+    ? 'Weak password: min 6 chars with upper, lower, number'
     : ''
 })
+
+const hasValidationErrors = () => Object.values(validationErrors.value).some((msg) => msg !== '')
 
 async function register() {
   try {
     error.value = ''
     isLoading.value = true
-
     if (hasValidationErrors()) {
-      error.value = 'Please fix the validation errors before submitting.'
+      error.value = 'Please fix the validation errors.'
       return
     }
-
     await authStore.register({
       name: name.value,
       email: email.value,
       phone_number: phone.value,
       password: password.value,
     })
-
     await Swal.fire({
       title: 'Registration Successful!',
-      text: 'Please check your email to verify your account.',
+      text: 'Please check your email to verify.',
       icon: 'success',
       confirmButtonText: 'OK',
       confirmButtonColor: '#5C4033',
     })
-
     isRegister.value = false
   } catch (err) {
     error.value = err.response?.data?.message || 'Register failed'
@@ -230,166 +197,6 @@ async function register() {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins');
-@import url('https://cdn.lineicons.com/4.0/lineicons.css');
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  display: flex;
-  background-color: #f6f5f7;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  font-family: 'Poppins', sans-serif;
-  overflow: hidden;
-  height: 100vh;
-}
-
-h1 {
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  margin: 0;
-  margin-bottom: 15px;
-}
-
-h1.title {
-  font-size: 45px;
-  line-height: 45px;
-  margin: 0;
-  text-shadow: 0 0 10px rgba(16, 64, 74, 0.5);
-}
-
-p {
-  font-size: 14px;
-  font-weight: 100;
-  line-height: 20px;
-  letter-spacing: 0.5px;
-  margin: 20px 0 30px;
-  text-shadow: 0 0 10px rgba(16, 64, 74, 0.5);
-}
-
-span {
-  font-size: 14px;
-  margin-top: 25px;
-}
-
-a {
-  color: #333;
-  font-size: 14px;
-  text-decoration: none;
-  margin: 15px 0;
-  transition: 0.3s ease-in-out;
-}
-
-a:hover {
-  color: #4bb6b7;
-}
-
-.content {
-  display: flex;
-  width: 100%;
-  height: 50px;
-  align-items: center;
-  justify-content: space-around;
-}
-
-.content .checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.content input {
-  accent-color: #333;
-  width: 12px;
-  height: 12px;
-}
-
-.content label {
-  font-size: 14px;
-  user-select: none;
-  padding-left: 5px;
-}
-
-button {
-  position: relative;
-  border-radius: 20px;
-  border: 1px solid #5c4033;
-  background-color: #5c4033;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  margin: 10px;
-  padding: 12px 80px;
-  letter-spacing: 1px;
-  text-transform: capitalize;
-  transition: 0.3s ease-in-out;
-}
-
-button:hover {
-  letter-spacing: 3px;
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-button:focus {
-  outline: none;
-}
-
-button.ghost {
-  background-color: rgba(225, 225, 225, 0.2);
-  border: 2px solid #fff;
-  color: #fff;
-}
-
-button.ghost i {
-  position: absolute;
-  opacity: 0;
-  transition: 0.3s ease-in-out;
-}
-
-button.ghost i.register {
-  right: 70px;
-}
-
-button.ghost i.login {
-  left: 70px;
-}
-
-button.ghost:hover i.register {
-  right: 40px;
-  opacity: 1;
-}
-
-button.ghost:hover i.login {
-  left: 40px;
-  opacity: 1;
-}
-
-form {
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 50px;
-  height: 100%;
-  text-align: center;
-}
-
-input {
-  background-color: #eee;
-  border-radius: 10px;
-  border: none;
-  padding: 12px 15px;
-  margin: 8px 0;
-  width: 100%;
-}
 
 .container {
   background-color: #fff;
@@ -409,11 +216,11 @@ input {
   top: 0;
   height: 100%;
   transition: all 0.6s ease-in-out;
+  width: 50%;
 }
 
 .login-container {
   left: 0;
-  width: 50%;
   z-index: 2;
 }
 
@@ -423,7 +230,6 @@ input {
 
 .register-container {
   left: 0;
-  width: 50%;
   opacity: 0;
   z-index: 1;
 }
@@ -441,7 +247,6 @@ input {
     opacity: 0;
     z-index: 1;
   }
-
   50%,
   100% {
     opacity: 1;
@@ -455,7 +260,6 @@ input {
   left: 50%;
   width: 50%;
   height: 100%;
-  overflow: hidden;
   transition: transform 0.6s ease-in-out;
   z-index: 100;
 }
@@ -465,27 +269,15 @@ input {
 }
 
 .overlay {
-  background-image: url('../assets/Feltyoung.jpg');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  color: #fff;
   position: relative;
   left: -100%;
   height: 100%;
   width: 200%;
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
-}
-
-.overlay::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(46, 94, 109, 0.4) 40%, rgba(46, 94, 109, 0));
 }
 
 .container.right-panel-active .overlay {
@@ -503,44 +295,86 @@ input {
   top: 0;
   height: 100%;
   width: 50%;
-  transform: translateX(0);
-  transition: transform 0.6s ease-in-out;
 }
 
 .overlay-left {
   transform: translateX(-20%);
 }
-
 .container.right-panel-active .overlay-left {
   transform: translateX(0);
 }
-
 .overlay-right {
   right: 0;
   transform: translateX(0);
 }
-
 .container.right-panel-active .overlay-right {
   transform: translateX(20%);
 }
 
-.social-container {
-  margin: 20px 0;
+form {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 50px;
+  height: 100%;
+  text-align: center;
+}
+input {
+  background-color: #eee;
+  border-radius: 10px;
+  border: none;
+  padding: 12px 15px;
+  margin: 8px 0;
+  width: 100%;
 }
 
-.social-container a {
-  border: 1px solid #dddddd;
-  border-radius: 50%;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 5px;
-  height: 40px;
-  width: 40px;
+button {
+  border-radius: 20px;
+  border: 1px solid #5c4033;
+  background-color: #5c4033;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 10px;
+  padding: 12px 80px;
   transition: 0.3s ease-in-out;
 }
+button:hover {
+  letter-spacing: 2px;
+}
+button.ghost {
+  background: transparent;
+  border: 2px solid #fff;
+  color: #fff;
+}
 
-.social-container a:hover {
-  border: 1px solid #4bb6b7;
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    min-height: auto;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .form-container {
+    width: 100% !important;
+    position: relative !important;
+    transform: none !important;
+    opacity: 1 !important;
+    z-index: 2 !important;
+  }
+
+  .overlay-container {
+    display: none !important;
+  }
+
+  form {
+    padding: 2rem 1rem;
+  }
+
+  button {
+    padding: 10px 40px;
+  }
 }
 </style>
