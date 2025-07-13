@@ -190,6 +190,8 @@ async function logout(req, res) {
 
 async function whoami(req, res) {
   try {
+    console.log("Decoded user from token:", req.user);
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
