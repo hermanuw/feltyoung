@@ -1,6 +1,6 @@
 <template>
   <section class="max-w-6xl mx-auto px-4 py-10 pt-30">
-    <h2 class="text-xl font-bold mb-6">History Transactions</h2>
+    <h2 class="text-xl font-bold mb-6">Transaction History</h2>
 
     <div v-if="loading" class="text-center text-gray-500">Loading data...</div>
     <div v-else-if="orders.length === 0" class="text-center text-gray-400">
