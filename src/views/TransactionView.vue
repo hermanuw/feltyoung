@@ -1,10 +1,10 @@
 <template>
   <section class="max-w-6xl mx-auto px-4 py-10 pt-30">
-    <h2 class="text-xl font-bold mb-6">Daftar Transaksi</h2>
+    <h2 class="text-xl font-bold mb-6">History Transactions</h2>
 
-    <div v-if="loading" class="text-center text-gray-500">Memuat data...</div>
+    <div v-if="loading" class="text-center text-gray-500">Loading data...</div>
     <div v-else-if="orders.length === 0" class="text-center text-gray-400">
-      Belum ada transaksi.
+      No transactions found.
     </div>
 
     <div v-else class="space-y-6">
@@ -15,9 +15,9 @@
       >
         <div class="flex justify-between items-center mb-4">
           <div>
-            <p class="text-xs text-gray-600 mb-3">ID Transaksi: {{ order.order_id }}</p>
+            <p class="text-xs text-gray-600 mb-3">Transaction ID : {{ order.order_id }}</p>
             <p class="text-sm text-black font-semibold">
-              Tanggal: {{ formatDate(order.order_date) }}
+              Transaction Date: {{ formatDate(order.order_date) }}
             </p>
           </div>
           <span class="text-xs px-3 py-1 rounded-full" :class="statusClass(order.status)">
@@ -52,7 +52,7 @@
             class="absolute right-30 bottom-1 font-medium text-sm text-blue-500 hover:underline cursor-pointer"
             @click="openModal(order)"
           >
-            Lihat Detail
+            More Details
           </button>
         </div>
       </div>
@@ -149,14 +149,14 @@
                 <p class="font-medium">{{ item.name }}</p>
                 <p class="text-sm text-gray-500">Qty: {{ item.quantity }}</p>
               </div>
-              <p class="font-semibold text-sm">Rp {{ formatPrice(item.price) }}</p>
+              <p class="font-semibold text-sm">Rp{{ formatPrice(item.price) }}</p>
             </div>
           </div>
 
           <!-- Total -->
           <div class="mt-6 text-right">
             <p class="text-sm text-gray-500">Total Price</p>
-            <p class="text-2xl font-bold">Rp {{ formatPrice(selectedOrder.total_amount) }}</p>
+            <p class="text-2xl font-bold">Rp{{ formatPrice(selectedOrder.total_amount) }}</p>
           </div>
         </div>
       </div>
