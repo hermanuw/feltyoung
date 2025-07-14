@@ -90,7 +90,9 @@
           <p class="text-sm text-gray-600">Size: {{ item.size || selectedSize }}</p>
         </div>
         <div class="text-right">
-          <p class="font-bold text-gray-900">Rp {{ formatPrice(item.price) }}</p>
+          <p class="font-bold text-gray-900">
+            {{ item.quantity }} x Rp {{ formatPrice(item.price) }}
+          </p>
         </div>
       </div>
     </div>
