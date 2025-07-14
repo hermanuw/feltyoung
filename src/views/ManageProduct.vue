@@ -113,7 +113,7 @@ onMounted(() => {
                   <td>{{ formatPrice(product.price) }}</td>
                   <td>{{ product.brand }}</td>
                   <td>{{ product.category }}</td>
-                  <td>{{ product.stock }}</td>
+                  <td>{{ product.total_stock }}</td>
                   <td>
                     <v-chip :color="product.is_top_seller ? 'green' : 'red'" size="small">
                       {{ product.is_top_seller ? 'Top Seller' : 'Regular' }}
