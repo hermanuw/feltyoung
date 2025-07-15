@@ -121,7 +121,7 @@ module.exports = {
 
   // Ambil produk berdasarkan kategori
   async getByCategory(category, sort) {
-    let sql = `SELECT * FROM products WHERE category = ? AND category != 'Requested'`;
+    let sql = `SELECT * FROM products WHERE category = ? AND LOWER(category) != 'requested'`;
     const params = [category];
 
     if (sort === "low") {
@@ -129,7 +129,7 @@ module.exports = {
     } else if (sort === "high") {
       sql += " ORDER BY price DESC";
     } else if (sort === "new") {
-      sql += " ORDER BY created_at DESC"; // pastikan kolom ini ada, atau ganti jadi id
+      sql += " ORDER BY created_at DESC";
     }
 
     const [rows] = await db.promise().query(sql, params);
@@ -139,7 +139,7 @@ module.exports = {
   async search(keyword) {
     const sql = `
     SELECT * FROM products
-    WHERE LOWER category != 'requested'
+    WHERE LOWER (category) != 'requested'
       AND (name LIKE ? OR brand LIKE ?)
   `;
     const [rows] = await db
