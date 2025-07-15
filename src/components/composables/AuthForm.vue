@@ -232,165 +232,15 @@ async function register() {
 @import url('https://fonts.googleapis.com/css2?family=Poppins');
 @import url('https://cdn.lineicons.com/4.0/lineicons.css');
 
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
 * {
   box-sizing: border-box;
-}
-
-body {
-  display: flex;
-  background-color: #f6f5f7;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  font-family: 'Poppins', sans-serif;
-  overflow: hidden;
-  height: 100vh;
-}
-
-h1 {
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -1.5px;
-  margin: 0;
-  margin-bottom: 15px;
-}
-
-h1.title {
-  font-size: 45px;
-  line-height: 45px;
-  margin: 0;
-  text-shadow: 0 0 10px rgba(16, 64, 74, 0.5);
-}
-
-p {
-  font-size: 14px;
-  font-weight: 100;
-  line-height: 20px;
-  letter-spacing: 0.5px;
-  margin: 20px 0 30px;
-  text-shadow: 0 0 10px rgba(16, 64, 74, 0.5);
-}
-
-span {
-  font-size: 14px;
-  margin-top: 25px;
-}
-
-a {
-  color: #333;
-  font-size: 14px;
-  text-decoration: none;
-  margin: 15px 0;
-  transition: 0.3s ease-in-out;
-}
-
-a:hover {
-  color: #4bb6b7;
-}
-
-.content {
-  display: flex;
-  width: 100%;
-  height: 50px;
-  align-items: center;
-  justify-content: space-around;
-}
-
-.content .checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.content input {
-  accent-color: #333;
-  width: 12px;
-  height: 12px;
-}
-
-.content label {
-  font-size: 14px;
-  user-select: none;
-  padding-left: 5px;
-}
-
-button {
-  position: relative;
-  border-radius: 20px;
-  border: 1px solid #5c4033;
-  background-color: #5c4033;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  margin: 10px;
-  padding: 12px 80px;
-  letter-spacing: 1px;
-  text-transform: capitalize;
-  transition: 0.3s ease-in-out;
-}
-
-button:hover {
-  letter-spacing: 3px;
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-button:focus {
-  outline: none;
-}
-
-button.ghost {
-  background-color: rgba(225, 225, 225, 0.2);
-  border: 2px solid #fff;
-  color: #fff;
-}
-
-button.ghost i {
-  position: absolute;
-  opacity: 0;
-  transition: 0.3s ease-in-out;
-}
-
-button.ghost i.register {
-  right: 70px;
-}
-
-button.ghost i.login {
-  left: 70px;
-}
-
-button.ghost:hover i.register {
-  right: 40px;
-  opacity: 1;
-}
-
-button.ghost:hover i.login {
-  left: 40px;
-  opacity: 1;
-}
-
-form {
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-direction: column;
-  padding: 0 50px;
-  height: 100%;
-  width: 100%;
-  text-align: center;
-  overflow-y: auto;
-}
-
-input {
-  background-color: #eee;
-  border-radius: 10px;
-  border: none;
-  padding: 12px 15px;
-  margin: 8px 0;
-  width: 100%;
 }
 
 .container {
@@ -403,8 +253,10 @@ input {
   overflow: hidden;
   width: 768px;
   max-width: 100%;
-  height: 90vh;
-  max-height: 90vh;
+  height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: row;
 }
 
 .form-container {
@@ -413,7 +265,7 @@ input {
   height: 100%;
   transition: all 0.6s ease-in-out;
   overflow-y: auto;
-  padding: 20px 0;
+  padding: 20px 30px;
 }
 
 .login-container,
@@ -464,6 +316,75 @@ input {
     opacity: 1;
     z-index: 5;
   }
+}
+
+form {
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 30px;
+  height: auto;
+  width: 100%;
+  text-align: center;
+}
+
+input {
+  background-color: #eee;
+  border-radius: 10px;
+  border: none;
+  padding: 12px 15px;
+  margin: 8px 0;
+  width: 100%;
+}
+
+button {
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid #5c4033;
+  background-color: #5c4033;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 10px;
+  padding: 12px 80px;
+  letter-spacing: 1px;
+  text-transform: capitalize;
+  transition: 0.3s ease-in-out;
+}
+button:hover {
+  letter-spacing: 3px;
+}
+button:active {
+  transform: scale(0.95);
+}
+button:focus {
+  outline: none;
+}
+button.ghost {
+  background-color: rgba(225, 225, 225, 0.2);
+  border: 2px solid #fff;
+  color: #fff;
+}
+button.ghost i {
+  position: absolute;
+  opacity: 0;
+  transition: 0.3s ease-in-out;
+}
+button.ghost i.register {
+  right: 70px;
+}
+button.ghost i.login {
+  left: 70px;
+}
+button.ghost:hover i.register {
+  right: 40px;
+  opacity: 1;
+}
+button.ghost:hover i.login {
+  left: 40px;
+  opacity: 1;
 }
 
 .overlay-container {
@@ -523,20 +444,16 @@ input {
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
 }
-
 .overlay-left {
   transform: translateX(-20%);
 }
-
 .container.right-panel-active .overlay-left {
   transform: translateX(0);
 }
-
 .overlay-right {
   right: 0;
   transform: translateX(0);
 }
-
 .container.right-panel-active .overlay-right {
   transform: translateX(20%);
 }
