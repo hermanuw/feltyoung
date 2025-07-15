@@ -70,7 +70,8 @@ const maxPrice = ref(null)
 const props = defineProps({ keyword: String })
 
 function selectCategory(cat) {
-  category.value = cat === category.value ? '' : cat // toggle
+  category.value = cat === category.value ? '' : cat
+  apply()
 }
 
 function resetFilter() {
