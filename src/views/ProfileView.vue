@@ -6,11 +6,15 @@
       <!-- Nama dan Telepon -->
       <div class="grid md:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <label class="block text-sm font-medium mb-1">
+            Full Name <span class="text-red-500">*</span>
+          </label>
           <input v-model="form.name" class="form-input" type="text" maxlength="100" />
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Phone Number</label>
+          <label class="block text-sm font-medium mb-1">
+            Phone Number <span class="text-red-500">*</span>
+          </label>
           <input v-model="form.phone_number" class="form-input" type="text" maxlength="20" />
         </div>
       </div>
@@ -29,7 +33,9 @@
 
       <!-- Alamat -->
       <div>
-        <label class="block text-sm font-medium mb-1">Address</label>
+        <label class="block text-sm font-medium mb-1">
+          Address <span class="text-red-500">*</span>
+        </label>
         <textarea v-model="form.address" class="form-input h-24" maxlength="255"></textarea>
       </div>
 
@@ -72,20 +78,21 @@ onMounted(async () => {
 })
 
 async function handleSubmit() {
-  if (!form.value.name.trim()) {
+  const isEmpty = (val) => !(val || '').trim()
+
+  if (isEmpty(form.value.name)) {
     Swal.fire('Required', 'Full name cannot be empty.', 'warning')
     return
   }
-
-  if (!form.value.phone_number.trim()) {
+  if (isEmpty(form.value.phone_number)) {
     Swal.fire('Required', 'Phone number cannot be empty.', 'warning')
     return
   }
-
-  if (!form.value.address.trim()) {
+  if (isEmpty(form.value.address)) {
     Swal.fire('Required', 'Address cannot be empty.', 'warning')
     return
   }
+
   if (form.value.name.length > 100) {
     Swal.fire('Too Long', 'Full name must be max 100 characters.', 'error')
     return
