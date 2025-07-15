@@ -50,11 +50,6 @@ export const useAuthStore = defineStore('auth', {
           password,
         })
 
-        // Store tokens and user data
-        const { accessToken, refreshToken, user } = response.data
-        this.setTokens(accessToken, refreshToken)
-        this.setUser(user)
-
         return response
       } catch (err) {
         throw err // Re-throw the error to handle it in the component
@@ -66,14 +61,13 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await axios.post('/login', { email, password })
         const { accessToken, refreshToken, user } = response.data
-        console.log('✅ Login berhasil:', response.data)
         // Store tokens and user data
         this.setTokens(accessToken, refreshToken)
         this.setUser(user)
 
         return response
       } catch (err) {
-        throw err // Re-throw the error to handle it in the component
+        throw err
       }
     },
 
