@@ -65,7 +65,7 @@ async function submit() {
     confirmButtonText: 'Yes, Create',
     cancelButtonText: 'Cancel'
   });
-
+  const numericPrice = Number(price.value);
   if (!confirm.isConfirmed) return;
   if (numericPrice >= 100_000_000) {
     Swal.fire('Price Too High', 'The price must be less than Rp100.000.000.', 'warning');
@@ -103,7 +103,6 @@ async function submit() {
     return;
   }
 
-  const numericPrice = Number(price.value);
   if (isNaN(numericPrice) || numericPrice <= 0) {
     Swal.fire('Invalid Price', 'Please enter a valid price greater than 0.', 'warning');
     return;
