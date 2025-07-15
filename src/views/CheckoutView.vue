@@ -150,6 +150,7 @@ import axios from '@/axios'
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { MdRoundInfoOutline } from '@kalimahapps/vue-icons'
+import Swal from 'sweetalert2'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
