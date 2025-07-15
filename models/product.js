@@ -97,14 +97,14 @@ module.exports = {
 
   // Ambil produk berdasarkan brand
   async getByBrand(brand, sort) {
-    let sql = `SELECT * FROM products WHERE brand = ? AND category != 'Requested'`;
+    let sql = `SELECT * FROM products WHERE brand = ? AND LOWER(category) != 'requested'`;
     const params = [brand];
     if (sort === "low") {
       sql += " ORDER BY price ASC";
     } else if (sort === "high") {
       sql += " ORDER BY price DESC";
     } else if (sort === "new") {
-      sql += " ORDER BY created_at DESC"; // pastikan kolom ini ada, atau ganti jadi id
+      sql += " ORDER BY created_at DESC";
     }
     const [rows] = await db.promise().query(sql, params);
     return rows;
@@ -139,7 +139,7 @@ module.exports = {
   async search(keyword) {
     const sql = `
     SELECT * FROM products
-    WHERE category != 'Requested'
+    WHERE LOWER category != 'requested'
       AND (name LIKE ? OR brand LIKE ?)
   `;
     const [rows] = await db
