@@ -39,7 +39,7 @@
         <textarea v-model="form.address" class="form-input h-24" maxlength="255"></textarea>
       </div>
 
-      <button class="btn-black w-full">Save Changes</button>
+      <button class="btn-black w-full cursor-pointer">Save Changes</button>
     </form>
   </div>
 </template>
