@@ -265,6 +265,30 @@ async function addToCart() {
             <span>Add To Cart</span>
           </button>
         </div>
+        <!-- Accordion tambahan setelah tombol Buy Now dan Add To Cart -->
+        <div>
+          <div v-for="index in [1, 2]" :key="index" class="accordion-section mt-4">
+            <button class="text-blue-500 hover:text-blue-700" @click="toggleAccordion(index)">
+              <span v-if="index === 1">Exchange Size Warranty</span>
+              <span v-if="index === 2">Authentic. Trusted. Best Price</span>
+            </button>
+            <div
+              :ref="`content${index}`"
+              class="accordion-content overflow-hidden transition-all"
+              :style="{ maxHeight: index === 1 ? maxHeight1 : maxHeight2 }"
+            >
+              <p v-if="index === 1">
+                If you get the wrong size, at our Shoe Shop we have a service Size Exchange
+                Guarantee with terms and conditions apply. For more information, contact our admin.
+              </p>
+              <p v-if="index === 2">
+                We guarantee the authenticity of every product we sell. Our products are sourced
+                from trusted suppliers and undergo strict quality checks. Shop with confidence
+                knowing you are getting the best price for genuine products.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
