@@ -242,7 +242,7 @@ const cancelShippingChanges = () => {
 }
 
 const handlePayment = async () => {
-  if (!shippingName.value || !shippingPhone.value || !shippingAddress.value) {
+  if (!shippingName.value.trim() || !shippingPhone.value.trim() || !shippingAddress.value.trim()) {
     await Swal.fire({
       icon: 'warning',
       title: 'Incomplete Shipping Information',

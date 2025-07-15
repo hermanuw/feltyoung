@@ -375,11 +375,13 @@ form {
   background-color: #fff;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: column;
   padding: 0 50px;
   height: 100%;
+  width: 100%;
   text-align: center;
+  overflow-y: auto;
 }
 
 input {
@@ -401,7 +403,8 @@ input {
   overflow: hidden;
   width: 768px;
   max-width: 100%;
-  min-height: 500px;
+  height: 90vh;
+  max-height: 90vh;
 }
 
 .form-container {
@@ -409,12 +412,28 @@ input {
   top: 0;
   height: 100%;
   transition: all 0.6s ease-in-out;
+  overflow-y: auto;
+  padding: 20px 0;
 }
 
-.login-container {
+.login-container,
+.register-container {
   left: 0;
   width: 50%;
-  z-index: 2;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.login-container::-webkit-scrollbar,
+.register-container::-webkit-scrollbar {
+  width: 6px;
+}
+.login-container::-webkit-scrollbar-thumb,
+.register-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
 }
 
 .container.right-panel-active .login-container {
@@ -422,8 +441,6 @@ input {
 }
 
 .register-container {
-  left: 0;
-  width: 50%;
   opacity: 0;
   z-index: 1;
 }

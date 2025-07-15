@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="max-w-lg mx-auto mt-30 mb-20 p-6 rounded-xl shadow bg-contain"
-    :style="{ backgroundImage: `url(${bgImage})` }"
-  >
+  <div class="max-w-lg mx-auto mt-30 mb-20 p-6 rounded-xl shadow bg-contain">
     <!-- Header dan Tombol Navigasi -->
     <div class="flex items-center mb-2">
       <router-link to="/product/request/me" class="cursor-pointer px-4 py-2 transition">
@@ -117,7 +114,6 @@ import { ref, onMounted } from 'vue'
 import axios from '@/axios'
 import { BsTrash } from '@kalimahapps/vue-icons'
 import { IoOutlineArrowBack } from '@kalimahapps/vue-icons'
-import bgImage from '@/assets/shoe-bg.png'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 

@@ -72,7 +72,20 @@ onMounted(async () => {
 })
 
 async function handleSubmit() {
-  // Manual length validation
+  if (!form.value.name.trim()) {
+    Swal.fire('Required', 'Full name cannot be empty.', 'warning')
+    return
+  }
+
+  if (!form.value.phone_number.trim()) {
+    Swal.fire('Required', 'Phone number cannot be empty.', 'warning')
+    return
+  }
+
+  if (!form.value.address.trim()) {
+    Swal.fire('Required', 'Address cannot be empty.', 'warning')
+    return
+  }
   if (form.value.name.length > 100) {
     Swal.fire('Too Long', 'Full name must be max 100 characters.', 'error')
     return
