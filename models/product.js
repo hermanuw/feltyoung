@@ -114,7 +114,7 @@ module.exports = {
     const [rows] = await db
       .promise()
       .query(
-        "SELECT * FROM products WHERE is_top_seller = TRUE AND category != 'Requested'"
+        "SELECT * FROM products WHERE is_top_seller = TRUE AND LOWER(category) != 'requested'"
       );
     return rows;
   },
@@ -149,13 +149,14 @@ module.exports = {
   },
 
   async filter(category, min, max, name, sort) {
-    let sql = `SELECT * FROM products WHERE 1=1`;
+    let sql = `SELECT * FROM products WHERE LOWER(category) != 'requested'`;
     const params = [];
 
     if (name) {
-      sql += ` AND name LIKE ?`;
-      params.push(`%${name}%`);
+      sql += ` AND (name LIKE ? OR brand LIKE ?)`;
+      params.push(`%${name}%`, `%${name}%`);
     }
+
     if (category) {
       sql += ` AND category = ?`;
       params.push(category);
@@ -170,9 +171,11 @@ module.exports = {
       sql += ` AND price <= ?`;
       params.push(parseInt(max));
     }
+
     if (sort === "low") sql += " ORDER BY price ASC";
     if (sort === "high") sql += " ORDER BY price DESC";
     if (sort === "new") sql += " ORDER BY created_at DESC";
+
     const [rows] = await db.promise().query(sql, params);
     return rows;
   },
