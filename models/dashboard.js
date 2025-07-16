@@ -99,25 +99,6 @@ module.exports = {
     return rows;
   },
 
-  async getWeeklyIncome() {
-    const sql = `
-    SELECT
-      WEEK(order_date, 1) - WEEK(DATE_SUB(order_date, INTERVAL DAY(order_date)-1 DAY), 1) + 1 AS week,
-      SUM(total_amount) AS income
-    FROM orders
-    WHERE MONTH(order_date) = MONTH(CURRENT_DATE())
-      AND YEAR(order_date) = YEAR(CURRENT_DATE())
-      AND status IN ('paid', 'packing', 'shipped', 'done')
-    GROUP BY week
-    ORDER BY week
-  `;
-    const [rows] = await db.promise().query(sql);
-    const result = Array(4).fill(0);
-    rows.forEach((row) => {
-      if (row.week >= 1 && row.week <= 4) result[row.week - 1] = row.income;
-    });
-    return result;
-  },
   async getDailyIncomeThisWeek() {
     const sql = `
     SELECT 
@@ -162,6 +143,25 @@ module.exports = {
 
     return result;
   },
+  async getWeeklyIncome() {
+    const sql = `
+    SELECT
+      WEEK(order_date, 1) - WEEK(DATE_SUB(order_date, INTERVAL DAY(order_date)-1 DAY), 1) + 1 AS week,
+      SUM(total_amount) AS income
+    FROM orders
+    WHERE MONTH(order_date) = MONTH(CURRENT_DATE())
+      AND YEAR(order_date) = YEAR(CURRENT_DATE())
+      AND status IN ('paid', 'packing', 'shipped', 'done')
+    GROUP BY week
+    ORDER BY week
+  `;
+    const [rows] = await db.promise().query(sql);
+    const result = Array(4).fill(0);
+    rows.forEach((row) => {
+      if (row.week >= 1 && row.week <= 4) result[row.week - 1] = row.income;
+    });
+    return result;
+  },
 
   async getMonthlyIncomeThisYear() {
     const sql = `
@@ -177,5 +177,46 @@ module.exports = {
       result[row.month - 1] = row.income;
     });
     return result;
+  },
+  async getTopSellersToday() {
+    const sql = `
+      SELECT p.product_id, p.name, SUM(oi.quantity) AS total_sold
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.order_id
+      JOIN products p ON oi.product_id = p.product_id
+      WHERE DATE(o.order_date) = CURDATE() AND o.status != 'cancelled'
+      GROUP BY p.product_id ORDER BY total_sold DESC LIMIT 10
+    `;
+    const [rows] = await db.promise().query(sql);
+    return rows;
+  },
+
+  async getTopSellersThisMonth() {
+    const sql = `
+      SELECT p.product_id, p.name, SUM(oi.quantity) AS total_sold
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.order_id
+      JOIN products p ON oi.product_id = p.product_id
+      WHERE MONTH(o.order_date) = MONTH(CURDATE()) 
+        AND YEAR(o.order_date) = YEAR(CURDATE()) 
+        AND o.status != 'cancelled'
+      GROUP BY p.product_id ORDER BY total_sold DESC LIMIT 10
+    `;
+    const [rows] = await db.promise().query(sql);
+    return rows;
+  },
+
+  async getTopSellersThisYear() {
+    const sql = `
+      SELECT p.product_id, p.name, SUM(oi.quantity) AS total_sold
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.order_id
+      JOIN products p ON oi.product_id = p.product_id
+      WHERE YEAR(o.order_date) = YEAR(CURDATE()) 
+        AND o.status != 'cancelled'
+      GROUP BY p.product_id ORDER BY total_sold DESC LIMIT 10
+    `;
+    const [rows] = await db.promise().query(sql);
+    return rows;
   },
 };

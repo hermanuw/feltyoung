@@ -38,5 +38,11 @@ router.get(
   isAdmin,
   dashboardController.getTotalGrowthByPeriod
 );
+router.get(
+  "/top-sellers/period",
+  authenticate,
+  isAdmin,
+  dashboardController.getTopSellersByPeriod
+);
 
 module.exports = router;

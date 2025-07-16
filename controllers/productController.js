@@ -6,7 +6,7 @@ const upload = require("../middleware/multer");
 // GET all products
 async function getAllProducts(req, res) {
   try {
-    const products = await Product.getAll(); // sudah include total_stock
+    const products = await Product.getAll();
     return res.json(products);
   } catch (err) {
     console.error(err);
@@ -283,10 +283,7 @@ async function getSimilarProducts(req, res) {
   if (!productName) {
     return res.status(400).json({ message: "Missing productName parameter" });
   }
-
-  // Contoh ambil produk yang nama mengandung kata kunci, tapi bukan produk exact sama
   try {
-    // misal kita cari produk yang namanya LIKE 'productName%' tapi exclude produk yg persis sama
     const products = await Product.getSimilarByName(productName);
     return res.json(products);
   } catch (err) {

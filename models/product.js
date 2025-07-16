@@ -42,17 +42,19 @@ module.exports = {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
   `;
 
-    await db.promise().query(sql, [
-      product_id,
-      name,
-      description,
-      price,
-      stock,
-      category,
-      image_url,
-      brand,
-      is_top_seller, // ini penting!
-    ]);
+    await db
+      .promise()
+      .query(sql, [
+        product_id,
+        name,
+        description,
+        price,
+        stock,
+        category,
+        image_url,
+        brand,
+        is_top_seller,
+      ]);
 
     return { product_id };
   },

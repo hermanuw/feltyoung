@@ -92,6 +92,28 @@ async function getTotalGrowthByPeriod(req, res) {
     res.status(500).json({ message: "Failed to fetch growth data" });
   }
 }
+// Ambil produk terlaris berdasarkan waktu
+async function getTopSellersByPeriod(req, res) {
+  const { period } = req.query;
+
+  try {
+    let result = [];
+    if (period === "today") {
+      result = await Dashboard.getTopSellersToday();
+    } else if (period === "month") {
+      result = await Dashboard.getTopSellersThisMonth();
+    } else if (period === "year") {
+      result = await Dashboard.getTopSellersThisYear();
+    } else {
+      return res.status(400).json({ message: "Invalid period" });
+    }
+
+    return res.json(result);
+  } catch (err) {
+    console.error("Top sellers by period error:", err);
+    return res.status(500).json({ message: "Failed to fetch top sellers" });
+  }
+}
 
 module.exports = {
   getTotalEarning,
@@ -102,4 +124,5 @@ module.exports = {
   getUserStats,
   getTopSellerProducts,
   getTotalGrowthByPeriod,
+  getTopSellersByPeriod,
 };
