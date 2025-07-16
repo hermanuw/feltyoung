@@ -14,7 +14,7 @@ const periods = {
 
 async function fetchTopProducts() {
   try {
-    const res = await axios.get(`/products/top-sellers/period?period=${selectedPeriod.value}`);
+    const res = await axios.get(`/dashboard/top-sellers/period?period=${selectedPeriod.value}`);
     topProducts.value = res.data || [];
   } catch (err) {
     console.error('Failed to fetch top sellers:', err);
