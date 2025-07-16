@@ -1,37 +1,28 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import axios from '@/axios';
 import { ChevronUpIcon, ChevronDownIcon, ChevronRightIcon, DotsIcon } from 'vue-tabler-icons';
 
-const chartOptions1 = computed(() => ({
-  chart: {
-    type: 'area',
-    height: 95,
-    fontFamily: 'inherit',
-    foreColor: '#a1aab2',
-    sparkline: { enabled: true }
-  },
-  colors: ['#5e35b1'],
-  dataLabels: { enabled: false },
-  stroke: { curve: 'smooth', width: 1 },
-  tooltip: {
-    theme: 'light',
-    x: { show: false },
-    y: { title: { formatter: () => 'Total Sold' } },
-    marker: { show: false }
-  }
-}));
-
 const topProducts = ref([]);
+const selectedPeriod = ref('today');
 
-onMounted(async () => {
+const periods = {
+  today: 'Today',
+  month: 'This Month',
+  year: 'This Year'
+};
+
+async function fetchTopProducts() {
   try {
-    const res = await axios.get('/dashboard/top-sellers');
+    const res = await axios.get(`/products/top-sellers/period?period=${selectedPeriod.value}`);
     topProducts.value = res.data || [];
   } catch (err) {
     console.error('Failed to fetch top sellers:', err);
   }
-});
+}
+
+onMounted(fetchTopProducts);
+watch(selectedPeriod, fetchTopProducts);
 </script>
 
 <template>
@@ -49,9 +40,11 @@ onMounted(async () => {
               </template>
               <v-sheet rounded="md" width="150" class="elevation-10">
                 <v-list>
-                  <v-list-item><v-list-item-title>Today</v-list-item-title></v-list-item>
-                  <v-list-item><v-list-item-title>This Month</v-list-item-title></v-list-item>
-                  <v-list-item><v-list-item-title>This Year</v-list-item-title></v-list-item>
+                  <v-list-item v-for="(label, key) in periods" :key="key" @click="selectedPeriod = key">
+                    <v-list-item-title :class="{ 'font-weight-bold text-primary': selectedPeriod === key }">
+                      {{ label }}
+                    </v-list-item-title>
+                  </v-list-item>
                 </v-list>
               </v-sheet>
             </v-menu>

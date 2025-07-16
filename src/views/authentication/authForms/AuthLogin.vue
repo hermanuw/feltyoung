@@ -77,12 +77,6 @@ const login = async () => {
       class="pwdInput"
     />
 
-    <div class="d-sm-flex align-center mt-2 mb-6">
-      <div class="ml-auto">
-        <a href="#" class="text-primary text-decoration-none">Forgot password?</a>
-      </div>
-    </div>
-
     <v-btn :loading="loading" block class="mt-2" variant="flat" size="large" color="secondary" type="submit"> Sign In </v-btn>
 
     <v-alert v-if="errorMsg" class="mt-4" color="error" variant="tonal" density="comfortable">
