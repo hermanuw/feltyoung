@@ -4,7 +4,7 @@
     <PageHeader />
 
     <!-- Main Content -->
-    <main class="flex-grow">
+    <main class="flex-grow pt-20 md:pt-24">
       <transition name="fade">
         <router-view :key="$route.fullPath" />
       </transition>
