@@ -34,6 +34,6 @@ router.put(
 // 6. Cek status transaksi ke Midtrans (opsional tapi bagus untuk debugging)
 router.get("/status/:order_id", orderController.getTransactionStatus);
 
-// 7. Handle notifikasi webhook dari Midtrans
+router.get("/:order_id/payment-token", orderController.getPaymentToken);
 
 module.exports = router;
