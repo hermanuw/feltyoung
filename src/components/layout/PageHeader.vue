@@ -324,7 +324,7 @@ async function checkTokenValidity() {
 
 <style scoped>
 nav a {
-  color: white;
+  color: black;
   transition: color 0.3s ease;
 }
 nav.scrolled-nav a,
