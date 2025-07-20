@@ -49,6 +49,13 @@
           <p class="text-sm text-gray-500">Total</p>
           <p class="text-lg font-semibold">Rp {{ formatPrice(order.total_amount) }}</p>
           <button
+            v-if="order.status === 'pending'"
+            class="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition"
+            @click="handlePayNow(order)"
+          >
+            Pay Now
+          </button>
+          <button
             class="absolute right-30 bottom-1 font-medium text-sm text-blue-500 hover:underline cursor-pointer"
             @click="openModal(order)"
           >
@@ -187,6 +194,13 @@ const fetchOrders = async () => {
     loading.value = false
   }
 }
+onMounted(() => {
+  if (!auth.accessToken) {
+    router.push('/')
+  } else {
+    fetchOrders()
+  }
+})
 
 const formatDate = (str) => {
   const date = new Date(str)
@@ -245,14 +259,39 @@ const statusTextClass = (status) => {
 function openModal(order) {
   selectedOrder.value = order
 }
+async function handlePayNow(order) {
+  try {
+    // Melakukan API call untuk mendapatkan token pembayaran dari order yang pending
+    const response = await axios.get(`/orders/${order.order_id}/payment-token`)
+    const token = response.data.token
 
-onMounted(() => {
-  if (!auth.accessToken) {
-    router.push('/')
-  } else {
-    fetchOrders()
+    // Inisialisasi Midtrans dengan token pembayaran
+    if (token) {
+      snap.pay(token, {
+        onSuccess: function (result) {
+          console.log('Pembayaran Sukses:', result)
+          // Menangani pembayaran sukses, bisa update status order
+        },
+        onPending: function (result) {
+          console.log('Pembayaran Tertunda:', result)
+          // Menangani status tertunda
+        },
+        onError: function (result) {
+          console.log('Pembayaran Gagal:', result)
+          // Menangani error pembayaran
+        },
+        onClose: function () {
+          console.log('Pembayaran Ditutup')
+          // Menangani event ketika popup ditutup
+        },
+      })
+    } else {
+      console.error('Token pembayaran tidak ditemukan!')
+    }
+  } catch (err) {
+    console.error('Gagal mengambil token pembayaran:', err)
   }
-})
+}
 </script>
 
 <style scoped>

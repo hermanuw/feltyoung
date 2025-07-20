@@ -74,7 +74,7 @@
 
         <!-- Cart & Profile for Authenticated Users -->
         <router-link v-if="isAuthenticated" to="/cart" title="Cart">
-          <BsCart3 class="text-2xl text-[#5C4033] hover:text-[#402a1e]" />
+          <BsCart3 class="text-2xl text-black hover:text-black" />
         </router-link>
 
         <div v-if="isAuthenticated" ref="cartDropdownRef" class="relative">
