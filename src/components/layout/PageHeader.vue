@@ -9,8 +9,8 @@
       <div class="flex justify-between items-center w-full md:w-5/6 md:relative">
         <PageLogo />
 
-        <!-- SEARCH -->
-        <div class="hidden md:flex flex-1 mx-8">
+        <!-- SEARCH (visible on all screens) -->
+        <div class="flex-1 mx-4 md:mx-8">
           <input
             v-model="searchQuery"
             @keyup.enter="handleSearch"
@@ -37,7 +37,6 @@
               {{ link.name }}
             </router-link>
 
-            <!-- Untuk Request Product, pakai <a> jika belum login -->
             <a
               v-else-if="!isAuthenticated"
               href="#"
@@ -54,7 +53,7 @@
               Request Product
             </router-link>
           </template>
-          <!-- Dropdown Cart -->
+
           <router-link
             v-if="isAuthenticated"
             to="/cart"
@@ -84,8 +83,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Tampilkan ikon profil jika sudah login -->
 
           <router-link
             v-if="!isAuthenticated"
@@ -117,7 +114,7 @@
 
           <div
             v-if="menuVisible"
-            class="absolute top-16 left-0 bg-white shadow-lg w-full p-4 flex flex-col space-y-6"
+            class="absolute top-16 left-0 bg-white shadow-lg w-full p-4 flex flex-col space-y-6 z-40"
           >
             <router-link
               v-for="link in links"
@@ -157,9 +154,7 @@
         v-if="showAuthForm"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
       >
-        <!-- WRAPPER tombol dan konten auth -->
         <div class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]">
-          <!-- Tombol Close harus di sini, dalam wrapper -->
           <button
             class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999] cursor-pointer"
             @click="showAuthForm = false"
@@ -167,8 +162,6 @@
           >
             ×
           </button>
-
-          <!-- AuthForm harus berada di bawah tombol -->
           <AuthForm @close="showAuthForm = false" @login-success="handleLoginSuccess" />
         </div>
       </div>
