@@ -1,16 +1,19 @@
 <template>
   <section
-    class="relative w-full h-screen bg-center bg-cover"
+    class="relative w-full h-100 md:h-screen bg-center bg-cover"
     :style="{ backgroundImage: `url(${bgImage})` }"
   >
     <!-- Overlay hitam -->
     <div class="absolute inset-0 bg-black/40"></div>
 
     <!-- Konten -->
-    <div class="relative z-10 flex items-center justify-center h-full px-6 text-center text-black">
-      <div class="w-full max-w-3xl content-wrapper" :class="{ 'animate-in': isVisible }">
+    <div
+      class="relative z-10 flex items-center justify-center h-full px-6 lg:ml-100 text-center text-black"
+    >
+      <div class="w-screen max-w-3xl content-wrapper" :class="{ 'animate-in': isVisible }">
         <h1
-          class="text-4xl md:text-6xl lg:text-8xl font-extrabold uppercase leading-tight drop-shadow-lg"
+          class="text-2xl md:text-6xl lg:text-8xl font-extrabold uppercase leading-tight drop-shadow-lg lg:ml-10"
+          style="position: absolute; left: 150px; top: 50%; transform: translateY(-50%)"
         >
           own the hype.<br />
           no limits.

@@ -135,7 +135,7 @@
             v-if="isAuthenticated"
             to="/cart"
             @click="closeMenu"
-            class="flex items-center gap-2 text-[#5C4033] hover:text-[#402a1e]"
+            class="flex items-center gap-2 text-black hover:text-black"
           >
             <BsCart3 class="text-xl" />
             <span>Cart</span>
@@ -145,7 +145,7 @@
             v-if="isAuthenticated"
             to="/profile"
             @click="closeMenu"
-            class="flex items-center gap-2 text-gray-700 hover:text-black"
+            class="flex items-center gap-2 text-black hover:text-black"
           >
             <CgProfile class="text-xl" />
             <span>Profile</span>
@@ -154,7 +154,7 @@
             v-if="isAuthenticated"
             to="/transactions"
             @click="closeMenu"
-            class="flex items-center gap-2 text-gray-700 hover:text-black"
+            class="flex items-center gap-2 text-black hover:text-black"
           >
             <span>Transactions</span>
           </router-link>
@@ -189,7 +189,7 @@
     >
       <div class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]">
         <button
-          class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999] cursor-pointer"
+          class="hidden md:block absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999] cursor-pointer"
           @click="showAuthForm = false"
           aria-label="Close"
         >

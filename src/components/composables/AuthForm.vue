@@ -1,7 +1,11 @@
 <template>
   <div class="w-full h-full flex items-center justify-center font-poppins">
-    <div class="container" :class="{ 'right-panel-active': isRegister }" id="container">
-      <!-- Register Form -->
+    <div
+      ref="authContainer"
+      class="container"
+      :class="{ 'right-panel-active': isRegister }"
+      id="container"
+    >
       <div class="form-container register-container">
         <form @submit.prevent="register">
           <h1>Register here.</h1>
@@ -59,10 +63,13 @@
               Registering...
             </span>
           </button>
+          <span class="mobile-text"
+            >Already have an account?
+            <a href="#" @click.prevent="isRegister = false">Login</a>
+          </span>
         </form>
       </div>
 
-      <!-- Login Form -->
       <div class="form-container login-container">
         <form @submit.prevent="login">
           <h1>Login here.</h1>
@@ -75,9 +82,13 @@
             </div>
           </div>
           <button type="submit" class="btn-primary cursor-pointer">Login</button>
+          <span class="mobile-text"
+            >Don't have an account?
+            <a href="#" @click.prevent="isRegister = true">Register</a>
+          </span>
         </form>
       </div>
-      <!-- Overlay -->
+
       <div class="overlay-container">
         <div class="overlay" :style="{ backgroundImage: `url(${bgImage})` }">
           <div class="overlay-panel overlay-left">
@@ -109,7 +120,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import bgImage from '@/assets/Feltyoung.jpg'
@@ -120,6 +131,30 @@ const emit = defineEmits(['close', 'login-success'])
 const authStore = useAuthStore()
 const router = useRouter()
 
+// Ref untuk click-outside
+const authContainer = ref(null)
+
+const handleClickOutside = (event) => {
+  // Hanya jalankan di mobile
+  if (window.innerWidth > 768) {
+    return
+  }
+  // Jika klik terjadi di luar container, emit close
+  if (authContainer.value && !authContainer.value.contains(event.target)) {
+    emit('close')
+  }
+}
+
+// Lifecycle hooks untuk event listener
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+})
+
+// State untuk form
 const name = ref('')
 const phone = ref('')
 const email = ref('')
@@ -128,11 +163,11 @@ const error = ref('')
 const isRegister = ref(false)
 const isLoading = ref(false)
 
+// Functions
 async function login() {
   try {
     error.value = ''
     await authStore.login(email.value, password.value)
-
     emit('login-success')
     emit('close')
     window.location.href = '/'
@@ -141,6 +176,41 @@ async function login() {
   }
 }
 
+async function register() {
+  try {
+    error.value = ''
+    isLoading.value = true
+
+    if (hasValidationErrors()) {
+      error.value = 'Please fix the validation errors before submitting.'
+      isLoading.value = false
+      return
+    }
+
+    await authStore.register({
+      name: name.value,
+      email: email.value,
+      phone_number: phone.value,
+      password: password.value,
+    })
+
+    await Swal.fire({
+      title: 'Registration Successful!',
+      text: 'Please check your email to verify your account.',
+      icon: 'success',
+      confirmButtonText: 'OK',
+      confirmButtonColor: '#5C4033',
+    })
+
+    isRegister.value = false
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Register failed'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Validation
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
@@ -168,6 +238,7 @@ const hasValidationErrors = () => {
   return Object.values(validationErrors.value).some((msg) => msg !== '')
 }
 
+// Watchers
 watch(name, (val) => {
   validationErrors.value.name = val.length > 100 ? 'Name too long (max 100 characters)' : ''
 })
@@ -193,39 +264,6 @@ watch(password, (val) => {
     ? 'Password must be 6+ characters with uppercase, lowercase, and number'
     : ''
 })
-
-async function register() {
-  try {
-    error.value = ''
-    isLoading.value = true
-
-    if (hasValidationErrors()) {
-      error.value = 'Please fix the validation errors before submitting.'
-      return
-    }
-
-    await authStore.register({
-      name: name.value,
-      email: email.value,
-      phone_number: phone.value,
-      password: password.value,
-    })
-
-    await Swal.fire({
-      title: 'Registration Successful!',
-      text: 'Please check your email to verify your account.',
-      icon: 'success',
-      confirmButtonText: 'OK',
-      confirmButtonColor: '#5C4033',
-    })
-
-    isRegister.value = false
-  } catch (err) {
-    error.value = err.response?.data?.message || 'Register failed'
-  } finally {
-    isLoading.value = false
-  }
-}
 </script>
 
 <style scoped>
@@ -542,5 +580,95 @@ input {
 
 .social-container a:hover {
   border: 1px solid #4bb6b7;
+}
+
+/* Sembunyikan link toggle di desktop */
+.mobile-text {
+  display: none;
+}
+
+/* KODE PERBAIKAN UNTUK MOBILE */
+@media (max-width: 768px) {
+  .container {
+    width: 90%;
+    min-height: 500px;
+    max-width: 400px;
+    box-shadow: none;
+  }
+
+  .overlay-container {
+    display: none;
+  }
+
+  .form-container {
+    width: 100%;
+    height: 100%;
+    padding: 0 20px;
+    position: absolute;
+    top: 0;
+    transition:
+      opacity 0.6s ease-in-out,
+      transform 0.6s ease-in-out;
+  }
+
+  .login-container {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .register-container {
+    opacity: 0;
+    z-index: 1;
+    /* Cegah interaksi saat tersembunyi */
+    pointer-events: none;
+  }
+
+  .container.right-panel-active .login-container {
+    transform: translateX(0); /* Batalkan pergerakan */
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .container.right-panel-active .register-container {
+    transform: translateX(0); /* Batalkan pergerakan */
+    opacity: 1;
+    z-index: 5;
+    pointer-events: auto; /* Izinkan interaksi saat terlihat */
+    animation: none;
+  }
+  .modal-close-button {
+    display: none; /* Sembunyikan tombol 'x' di mobile */
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    margin: 6px 0;
+    font-size: 14px;
+  }
+
+  button {
+    padding: 12px 40px;
+    font-size: 14px;
+    margin-top: 15px;
+  }
+
+  .mobile-text {
+    display: block;
+    font-size: 14px;
+    margin-top: 20px;
+  }
+
+  .mobile-text a {
+    font-weight: bold;
+    color: #5c4033;
+    margin: 0;
+    padding-left: 5px;
+  }
 }
 </style>
