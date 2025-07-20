@@ -125,7 +125,7 @@ function formatPrice(value) {
 @media (max-width: 768px) {
   .carousel {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Menampilkan 2 item per baris */
+    grid-template-columns: repeat(3, 1fr); /* Menampilkan 2 item per baris */
     gap: 16px;
     padding-bottom: 4rem;
   }
