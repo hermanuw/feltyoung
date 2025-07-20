@@ -1,9 +1,17 @@
 <template>
-  <section class="bg-cover relative h-screen" :style="{ backgroundImage: `url(${bgImage})` }">
-    <div class="absolute inset-0 bg-black opacity-25"></div>
-    <div class="relative flex items-center justify-center h-full text-black text-center px-4">
-      <div class="w-full md:w-3/5 content-wrapper" :class="{ 'animate-in': isVisible }">
-        <h1 class="text-5xl md:text-8xl font-extrabold uppercase leading-tight">
+  <section
+    class="relative w-full h-screen bg-center bg-cover"
+    :style="{ backgroundImage: `url(${bgImage})` }"
+  >
+    <!-- Overlay hitam -->
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <!-- Konten -->
+    <div class="relative z-10 flex items-center justify-center h-full px-6 text-center text-black">
+      <div class="w-full max-w-3xl content-wrapper" :class="{ 'animate-in': isVisible }">
+        <h1
+          class="text-4xl md:text-6xl lg:text-8xl font-extrabold uppercase leading-tight drop-shadow-lg"
+        >
           own the hype.<br />
           no limits.
         </h1>
@@ -24,8 +32,7 @@ onMounted(() => {
   }, 100)
 })
 </script>
-
-<style>
+<style scoped>
 .content-wrapper {
   transform: translateY(80px);
   opacity: 0;
@@ -35,5 +42,13 @@ onMounted(() => {
 .content-wrapper.animate-in {
   transform: translateY(0);
   opacity: 1;
+}
+
+@media (max-width: 768px) {
+  section {
+    background-size: contain; /* Menyesuaikan ukuran gambar agar terlihat sepenuhnya */
+    background-position: center center; /* Memastikan gambar tetap terpusat */
+    background-repeat: no-repeat; /* Menghindari pengulangan gambar */
+  }
 }
 </style>

@@ -1,179 +1,196 @@
 <template>
-  <div>
-    <!-- HEADER -->
-    <header
-      :class="headerClass"
-      :style="headerStyle"
-      class="flex justify-center px-6 z-50 fixed w-full top-0 drop-shadow-sm"
-    >
-      <div class="flex justify-between items-center w-full md:w-5/6 md:relative">
-        <PageLogo />
+  <header
+    :class="headerClass"
+    :style="headerStyle"
+    class="flex justify-center px-6 z-50 fixed w-full top-0 drop-shadow-sm"
+  >
+    <div class="flex justify-between items-center w-full max-w-7xl mx-auto">
+      <!-- SEARCH ICON MOBILE (Kiri) -->
+      <div class="flex md:hidden items-center gap-4">
+        <button @click="toggleSearch" aria-label="Search">
+          <BxSearch class="text-xl" />
+        </button>
+      </div>
 
-        <!-- SEARCH -->
-        <div class="hidden md:flex flex-1 mx-8">
-          <input
-            v-model="searchQuery"
-            @keyup.enter="handleSearch"
-            type="text"
-            placeholder="Search sneakers"
-            class="w-full px-4 py-2 border border-black rounded-full focus:outline-none focus:ring-2 focus:ring-black text-sm text-black"
-          />
+      <!-- PageLogo di tengah (Mobile dan Desktop) -->
+      <div class="flex items-center justify-center w-full md:w-auto md:mx-auto">
+        <PageLogo />
+      </div>
+
+      <!-- SEARCH BAR MOBILE -->
+      <div
+        v-if="searchVisible"
+        class="w-full absolute top-0 left-0 bg-white shadow-lg p-4 flex items-center z-50"
+      >
+        <input
+          v-model="searchQuery"
+          @keyup.enter="handleSearch"
+          type="text"
+          placeholder="Search sneakers"
+          class="w-full px-4 py-2 border border-black rounded-full focus:outline-none focus:ring-2 focus:ring-black text-sm text-black"
+        />
+        <button @click="toggleSearch" class="ml-2 text-xl text-gray-500">×</button>
+      </div>
+
+      <!-- SEARCH DESKTOP -->
+      <div class="hidden md:flex flex-1 mx-8">
+        <input
+          v-model="searchQuery"
+          @keyup.enter="handleSearch"
+          type="text"
+          placeholder="Search sneakers"
+          class="w-full px-4 py-2 border border-black rounded-full focus:outline-none focus:ring-2 focus:ring-black text-sm text-black"
+        />
+      </div>
+
+      <!-- NAV DESKTOP -->
+      <nav
+        :class="[
+          { 'scrolled-nav': isScrolled },
+          route.path !== '/' ? 'route-not-home' : '',
+          'space-x-6 hidden md:flex items-center',
+        ]"
+      >
+        <template v-for="link in links" :key="link.path">
+          <router-link
+            v-if="link.name !== 'Request Product'"
+            :to="link.path"
+            :class="{ 'active-link': route.path === link.path }"
+          >
+            {{ link.name }}
+          </router-link>
+          <a
+            v-else-if="!isAuthenticated"
+            href="#"
+            @click.prevent="alertLoginRequired"
+            class="text-gray-700 hover:text-blue-600"
+          >
+            Request Product
+          </a>
+          <router-link v-else :to="link.path" :class="{ 'active-link': route.path === link.path }">
+            Request Product
+          </router-link>
+        </template>
+
+        <!-- Cart & Profile for Authenticated Users -->
+        <router-link v-if="isAuthenticated" to="/cart" title="Cart">
+          <BsCart3 class="text-2xl text-[#5C4033] hover:text-[#402a1e]" />
+        </router-link>
+
+        <div v-if="isAuthenticated" ref="cartDropdownRef" class="relative">
+          <div class="cursor-pointer flex items-center" @click="toggleProfileDropdown">
+            <CgProfile class="text-2xl" />
+          </div>
+          <div
+            v-if="showProfileDropdown"
+            class="absolute right-0 mt-3 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50"
+          >
+            <div class="py-2">
+              <router-link to="/profile" class="dropdown-item" @click="closeProfileDropdown">
+                Manage Profile
+              </router-link>
+              <router-link to="/transactions" class="dropdown-item" @click="closeProfileDropdown">
+                Transactions
+              </router-link>
+            </div>
+          </div>
         </div>
 
-        <!-- NAV DESKTOP -->
-        <nav
-          :class="[
-            { 'scrolled-nav': isScrolled },
-            route.path !== '/' ? 'route-not-home' : '',
-            'space-x-6 hidden md:flex items-center',
-          ]"
+        <router-link
+          v-if="!isAuthenticated"
+          to="#"
+          @click.prevent="showAuthForm = true"
+          class="px-4 py-1 border border-[#5C4033] text-[#5C4033] hover:bg-[#5C4033] hover:text-white font-semibold rounded-full transition"
         >
-          <template v-for="link in links" :key="link.path">
-            <router-link
-              v-if="link.name !== 'Request Product'"
-              :to="link.path"
-              :class="{ 'active-link': route.path === link.path }"
-            >
-              {{ link.name }}
-            </router-link>
+          Login
+        </router-link>
 
-            <!-- Untuk Request Product, pakai <a> jika belum login -->
-            <a
-              v-else-if="!isAuthenticated"
-              href="#"
-              @click.prevent="alertLoginRequired"
-              class="text-gray-700 hover:text-blue-600"
-            >
-              Request Product
-            </a>
-            <router-link
-              v-else
-              :to="link.path"
-              :class="{ 'active-link': route.path === link.path }"
-            >
-              Request Product
-            </router-link>
-          </template>
-          <!-- Dropdown Cart -->
+        <button
+          v-else
+          @click="logout"
+          class="text-sm text-red-500 hover:text-red-700 font-semibold cursor-pointer transition"
+        >
+          Logout
+        </button>
+      </nav>
+
+      <!-- NAV MOBILE -->
+      <div class="flex md:hidden">
+        <button
+          @click="toggleMenu"
+          class="text-gray-800 focus:outline-none"
+          aria-label="Toggle mobile menu"
+        >
+          <FaBarsStaggered />
+        </button>
+
+        <div
+          v-if="menuVisible"
+          class="absolute top-16 left-0 bg-white shadow-lg w-full p-4 flex flex-col space-y-6 z-50"
+        >
+          <router-link v-for="link in links" :key="link.path" :to="link.path" @click="closeMenu">
+            {{ link.name }}
+          </router-link>
           <router-link
             v-if="isAuthenticated"
             to="/cart"
-            class="text-[#5C4033] hover:text-[#402a1e] transition"
-            title="Cart"
+            @click="closeMenu"
+            class="flex items-center gap-2 text-[#5C4033] hover:text-[#402a1e]"
           >
-            <BsCart3 class="text-2xl" />
+            <BsCart3 class="text-xl" />
+            <span>Cart</span>
           </router-link>
 
-          <div v-if="isAuthenticated" ref="cartDropdownRef" class="relative">
-            <div class="cursor-pointer flex items-center" @click="toggleProfileDropdown">
-              <CgProfile class="text-2xl" />
-            </div>
-
-            <!-- DROPDOWN MENU -->
-            <div
-              v-if="showProfileDropdown"
-              class="absolute right-0 mt-3 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 animate-fade"
-            >
-              <div class="py-2">
-                <router-link to="/profile" class="dropdown-item" @click="closeProfileDropdown">
-                  Manage Profile
-                </router-link>
-                <router-link to="/transactions" class="dropdown-item" @click="closeProfileDropdown">
-                  Transactions
-                </router-link>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tampilkan ikon profil jika sudah login -->
+          <router-link
+            v-if="isAuthenticated"
+            to="/profile"
+            @click="closeMenu"
+            class="flex items-center gap-2 text-gray-700 hover:text-black"
+          >
+            <CgProfile class="text-xl" />
+            <span>Profile</span>
+          </router-link>
 
           <router-link
             v-if="!isAuthenticated"
             to="#"
-            @click.prevent="showAuthForm = true"
-            class="px-4 py-1 border border-[#5C4033] text-[#5C4033] hover:bg-[#5C4033] hover:text-white font-semibold rounded-full transition"
+            @click.prevent="
+              () => {
+                showAuthForm = true
+                closeMenu()
+              }
+            "
+            class="px-4 py-2 border border-black text-[#5C4033] hover:bg-[#5C4033] hover:text-white font-semibold rounded-full text-center transition"
           >
             Login
           </router-link>
 
-          <button
-            v-else
-            @click="logout"
-            class="text-sm text-red-500 hover:text-red-700 font-semibold cursor-pointer transition"
-          >
+          <button v-else @click="logout" class="text-left text-red-500 font-semibold">
             Logout
           </button>
-        </nav>
-
-        <!-- NAV MOBILE -->
-        <div class="flex md:hidden">
-          <button
-            @click="toggleMenu"
-            class="text-gray-800 focus:outline-none"
-            aria-label="Toggle mobile menu"
-          >
-            <FaBarsStaggered />
-          </button>
-
-          <div
-            v-if="menuVisible"
-            class="absolute top-16 left-0 bg-white shadow-lg w-full p-4 flex flex-col space-y-6"
-          >
-            <router-link
-              v-for="link in links"
-              :key="link.path"
-              :to="link.path"
-              :class="{ 'active-link': route.path === link.path }"
-              @click="closeMenu"
-            >
-              {{ link.name }}
-            </router-link>
-
-            <router-link
-              v-if="!isAuthenticated"
-              to="#"
-              @click.prevent="
-                () => {
-                  showAuthForm = true
-                  closeMenu()
-                }
-              "
-              class="px-4 py-2 border border-black text-[#5C4033] hover:bg-[#5C4033] hover:text-white font-semibold rounded-full text-center transition"
-            >
-              Login
-            </router-link>
-
-            <button v-else @click="logout" class="text-left text-red-500 font-semibold">
-              Logout
-            </button>
-          </div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <!-- MODAL AUTH FORM -->
-    <transition name="slide-down">
-      <div
-        v-if="showAuthForm"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
-      >
-        <!-- WRAPPER tombol dan konten auth -->
-        <div class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]">
-          <!-- Tombol Close harus di sini, dalam wrapper -->
-          <button
-            class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999] cursor-pointer"
-            @click="showAuthForm = false"
-            aria-label="Close"
-          >
-            ×
-          </button>
-
-          <!-- AuthForm harus berada di bawah tombol -->
-          <AuthForm @close="showAuthForm = false" @login-success="handleLoginSuccess" />
-        </div>
+  <!-- MODAL AUTH FORM -->
+  <transition name="slide-down">
+    <div
+      v-if="showAuthForm"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+    >
+      <div class="relative w-[768px] max-w-full rounded-xl shadow-2xl overflow-hidden z-[999]">
+        <button
+          class="absolute top-3 right-4 text-gray-400 hover:text-black text-3xl font-bold z-[999] cursor-pointer"
+          @click="showAuthForm = false"
+          aria-label="Close"
+        >
+          ×
+        </button>
+        <AuthForm @close="showAuthForm = false" @login-success="handleLoginSuccess" />
       </div>
-    </transition>
-  </div>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -184,8 +201,9 @@ import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { FaBarsStaggered } from '@kalimahapps/vue-icons'
 import { CgProfile } from '@kalimahapps/vue-icons'
 import { BsCart3 } from '@kalimahapps/vue-icons'
-import Swal from 'sweetalert2'
+import { BxSearch } from '@kalimahapps/vue-icons'
 import bgNavbar from '@/assets/bg-navbar.png'
+import Swal from 'sweetalert2'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -195,6 +213,7 @@ const authStore = useAuthStore()
 const showAuthForm = ref(false)
 const searchQuery = ref('')
 const menuVisible = ref(false)
+const searchVisible = ref(false)
 const showProfileDropdown = ref(false)
 const profileDropdownRef = ref(null)
 const isScrolled = ref(false)
@@ -271,6 +290,13 @@ const toggleMenu = () => {
 }
 const closeMenu = () => {
   menuVisible.value = false
+}
+
+const toggleSearch = () => {
+  searchVisible.value = !searchVisible.value
+  if (searchVisible.value) {
+    searchQuery.value = ''
+  }
 }
 
 watch(

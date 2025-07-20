@@ -62,45 +62,28 @@ import { CaPreviousFilled, CaNextFilled } from '@kalimahapps/vue-icons'
 import axios from '@/axios'
 
 const products = ref([])
-const carousel = ref(null)
-let autoSlideInterval = null
 
 async function fetchProducts() {
   try {
     const res = await axios.get('/products/top-sellers')
     products.value = res.data
-    console.log(products.value)
   } catch (err) {
     console.error('Failed to fetch products:', err)
   }
 }
 
 function scrollLeft() {
-  carousel.value.scrollBy({ left: -300, behavior: 'smooth' })
+  const carousel = document.querySelector('.carousel')
+  carousel.scrollBy({ left: -300, behavior: 'smooth' })
 }
 
 function scrollRight() {
-  carousel.value.scrollBy({ left: 300, behavior: 'smooth' })
+  const carousel = document.querySelector('.carousel')
+  carousel.scrollBy({ left: 300, behavior: 'smooth' })
 }
 
 onMounted(() => {
   fetchProducts()
-  autoSlideInterval = setInterval(() => {
-    const el = carousel.value
-    if (!el) return
-
-    const maxScrollLeft = el.scrollWidth - el.clientWidth
-
-    if (el.scrollLeft >= maxScrollLeft - 5) {
-      el.scrollTo({ left: 0, behavior: 'smooth' })
-    } else {
-      scrollRight()
-    }
-  }, 2000)
-})
-
-onUnmounted(() => {
-  clearInterval(autoSlideInterval)
 })
 
 function formatPrice(value) {
@@ -121,5 +104,18 @@ function formatPrice(value) {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Responsif untuk mobile */
+@media (max-width: 768px) {
+  .carousel {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Menampilkan 2 item per baris */
+    gap: 16px;
+    padding-bottom: 4rem;
+  }
+  .carousel .product {
+    width: 100%; /* Menyesuaikan ukuran produk di mobile */
+  }
 }
 </style>
