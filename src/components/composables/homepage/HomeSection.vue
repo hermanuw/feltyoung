@@ -1,10 +1,11 @@
 <template>
-  <section class="bg-cover relative h-screen" :style="{ backgroundImage: `url(${bgImage})` }">
+  <section
+    class="bg-cover bg-center relative h-screen"
+    :style="{ backgroundImage: `url(${bgImage})` }"
+  >
     <div class="absolute inset-0 bg-black opacity-25"></div>
-    <div
-      class="relative flex items-center justify-center h-full text-black text-center px-4 pl-150"
-    >
-      <div class="w-full md:w-w-3/5 content-wrapper" :class="{ 'animate-in': isVisible }">
+    <div class="relative flex items-center justify-center h-full text-white text-center px-4">
+      <div class="w-full md:w-3/5 content-wrapper" :class="{ 'animate-in': isVisible }">
         <h1 class="text-5xl md:text-8xl font-extrabold uppercase leading-tight">
           own the hype.<br />
           no limits.
