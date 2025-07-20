@@ -9,7 +9,7 @@ require("dotenv").config();
 // Ambil semua order (khusus admin)
 async function getAllOrders(req, res) {
   try {
-    const orders = await Order.findAll(); // Pastikan model sudah punya method ini
+    const orders = await Order.findAll();
     res.json(orders);
   } catch (err) {
     console.error("Get all orders error:", err);
@@ -309,6 +309,28 @@ async function updateTrackingNumber(req, res) {
       .json({ message: "Failed to update tracking number" });
   }
 }
+// Di orderController.js
+async function getPaymentToken(req, res) {
+  const { order_id } = req.params;
+
+  try {
+    // Cari order berdasarkan ID
+    const order = await Order.findOrderById(order_id);
+    if (!order || order.status !== "pending") {
+      return res
+        .status(404)
+        .json({ message: "Order tidak ditemukan atau sudah diproses" });
+    }
+
+    // Ambil token pembayaran
+    return res.status(200).json({ token: order.payment_token });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Gagal mengambil token pembayaran" });
+  }
+}
 
 module.exports = {
   getTransactionStatus,
@@ -320,4 +342,5 @@ module.exports = {
   updateOrderStatus,
   getAllOrders,
   updateTrackingNumber,
+  getPaymentToken,
 };
