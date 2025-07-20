@@ -10,7 +10,7 @@
         <PageLogo />
 
         <!-- SEARCH -->
-        <div class="flex-1 mx-8">
+        <div class="hidden md:flex flex-1 mx-8">
           <input
             v-model="searchQuery"
             @keyup.enter="handleSearch"
