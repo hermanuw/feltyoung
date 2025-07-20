@@ -150,6 +150,14 @@
             <CgProfile class="text-xl" />
             <span>Profile</span>
           </router-link>
+          <router-link
+            v-if="isAuthenticated"
+            to="/transactions"
+            @click="closeMenu"
+            class="flex items-center gap-2 text-gray-700 hover:text-black"
+          >
+            <span>Transactions</span>
+          </router-link>
 
           <router-link
             v-if="!isAuthenticated"
