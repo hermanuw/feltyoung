@@ -1,17 +1,27 @@
 <script setup>
 import { shallowRef } from 'vue';
+import { useCustomizerStore } from '@/stores/customizer';
 import sidebarItems from './sidebarItem';
 
 import NavGroup from './NavGroup/NavGroup.vue';
 import NavItem from './NavItem/NavItem.vue';
 import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/LogoMain.vue';
-
+const customizer = useCustomizerStore();
 const sidebarMenu = shallowRef(sidebarItems);
 </script>
 
 <template>
-  <v-navigation-drawer>
+  <v-navigation-drawer
+    left
+    v-model="customizer.Sidebar_drawer"
+    elevation="0"
+    rail-width="75"
+    mobile-breakpoint="lg"
+    app
+    class="leftSidebar"
+    :rail="customizer.mini_sidebar"
+  >
     <div class="pa-4 d-flex align-center justify-center">
       <Logo />
     </div>

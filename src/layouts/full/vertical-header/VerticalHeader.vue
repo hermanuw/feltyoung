@@ -1,43 +1,39 @@
 <script setup>
 import { ref } from 'vue';
-
+import { useCustomizerStore } from '@/stores/customizer';
 // Icon Imports
-import { SettingsIcon } from 'vue-tabler-icons';
+import { SettingsIcon, Menu2Icon } from 'vue-tabler-icons';
 
 // Dropdown components
 import ProfileDD from './ProfileDD.vue';
 
-const showSearch = ref(false);
-
-function searchbox() {
-  showSearch.value = !showSearch.value;
-}
+const customizer = useCustomizerStore();
 </script>
 
 <template>
   <v-app-bar elevation="0" height="80">
-    <!-- Mobile Search Icon -->
-    <!-- <v-btn
-      class="hidden-lg-and-up text-secondary ml-3"
+    <v-btn
+      class="hidden-md-and-down text-secondary"
       color="lightsecondary"
       icon
       rounded="sm"
       variant="flat"
+      @click.stop="customizer.SET_SIDEBAR_DRAWER"
       size="small"
-      @click="searchbox"
     >
-      <SearchIcon size="17" stroke-width="1.5" />
-    </v-btn> -->
-
-    <!-- Mobile Search Bar -->
-    <!-- <v-sheet v-if="showSearch" class="search-sheet v-col-12">
-      <Searchbar :closesearch="searchbox" />
-    </v-sheet> -->
-
-    <!-- Desktop Search -->
-    <!-- <v-sheet class="mx-3 v-col-3 v-col-xl-2 v-col-lg-4 d-none d-lg-block">
-      <Searchbar />
-    </v-sheet> -->
+      <Menu2Icon size="20" stroke-width="1.5" />
+    </v-btn>
+    <v-btn
+      class="hidden-lg-and-up text-secondary ms-3"
+      color="lightsecondary"
+      icon
+      rounded="sm"
+      variant="flat"
+      @click.stop="customizer.SET_SIDEBAR_DRAWER"
+      size="small"
+    >
+      <Menu2Icon size="20" stroke-width="1.5" />
+    </v-btn>
 
     <v-spacer />
 

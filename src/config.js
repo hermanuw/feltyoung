@@ -1,5 +1,5 @@
 const config = {
-  Sidebar_drawer: true,
+  Sidebar_drawer: false,
   Customizer_drawer: false,
   mini_sidebar: false,
   fontTheme: 'Roboto',
