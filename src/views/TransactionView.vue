@@ -48,13 +48,13 @@
         <div class="text-right pt-3 mt-3 relative">
           <p class="text-sm text-gray-500">Total</p>
           <p class="text-lg font-semibold">Rp {{ formatPrice(order.total_amount) }}</p>
-          <button
+          <!-- <button
             v-if="order.status === 'pending'"
             class="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition"
             @click="handlePayNow(order)"
           >
             Pay Now
-          </button>
+          </button> -->
           <button
             class="absolute right-30 bottom-1 font-medium text-sm text-blue-500 hover:underline cursor-pointer"
             @click="openModal(order)"
