@@ -1,67 +1,124 @@
-#Feltyoung.kicks
-This is the repository for the Feltyoung.kicks web application, an e-commerce platform designed to help a shoe store manage sales and product catalogs more effectively. This project was developed as a final thesis, using the Extreme Programming (XP) methodology to ensure flexibility and collaboration.
 
+# Feltyoung.kicks
 
-#Key Features
-The application has two main user roles: Customer and Admin.
+Feltyoung.kicks is a web-based e-commerce application designed to help a shoe store manage product catalogs and sales more effectively. This project was developed as a final thesis using the Extreme Programming (XP) methodology to ensure flexibility, collaboration, and continuous development.
 
-#Customer Features
-1. Authentication: Customers can register and log in to their accounts. 
-2. Product Catalog: Browse all available products, view items by brand or category (Men, Women, Kids), and see detailed product information. 
-3. Search & Filter: Easily search for products by name and filter results. 
-4. Shopping Cart: Add multiple products to a shopping cart before purchasing. 
-5. Checkout Process: A smooth checkout process integrated with the Midtrans payment gateway for secure online payments. 
-6. Order History: View the status and history of all past transactions. 
-7. Request a Product: Customers can request products that are not currently available in the catalog. 
-8. Profile Management: Users can update their personal information and address. 
+## 1. Key Features
 
-#Admin Features
-1. Dashboard: An admin dashboard that shows key business metrics like total earnings, monthly orders, sales growth charts, and popular products. 
-2. Product Management: Full CRUD (Create, Read, Update, Delete) functionality for all products in the store. 
-3. Order Management: View all customer orders and update their status (e.g., from 'pending' to 'packing' or 'shipped'). 
-4. Request Management: View and manage product requests submitted by customers, with the ability to accept or decline them. 
+The application supports two main user roles:
 
-#Tech Stack
-Frontend: Vue.js 
-Backend: Express.js (Node.js) 
-Database: MySQL 
-Payment Gateway: Midtrans for handling online transactions. 
-Modeling: System design and workflows were modeled using UML (Unified Modeling Language). 
+- Customer
+- Admin
 
-#Getting Started
-To get a local copy up and running, follow these simple steps.
+### 1.1 Customer Features
 
-Prerequisites
-Node.js
-NPM or Yarn
-A running MySQL server
+1. Authentication  
+   Customers can register and log in securely.
 
-#Installation
-Clone the repo
+2. Product Catalog  
+   Browse all products by brand or category (Men, Women, Kids) and view product details.
 
-Bash
+3. Search and Filter  
+   Search for products by name and filter by category or brand.
 
+4. Shopping Cart  
+   Add multiple items to the cart before making a purchase.
+
+5. Checkout Process  
+   Seamless checkout process integrated with Midtrans for secure online payments.
+
+6. Order History  
+   View the status and history of all past transactions.
+
+7. Product Request  
+   Customers can request products that are currently unavailable.
+
+8. Profile Management  
+   Update personal information and shipping address.
+
+### 1.2 Admin Features
+
+1. Admin Dashboard  
+   Display key business metrics such as total earnings, monthly orders, sales charts, and most popular products.
+
+2. Product Management  
+   Full CRUD (Create, Read, Update, Delete) operations for all products.
+
+3. Order Management  
+   View all customer orders and update their statuses (e.g., pending, packing, shipped).
+
+4. Request Management  
+   Manage and respond to product requests submitted by customers.
+
+## 2. Tech Stack
+
+- Frontend: Vue.js  
+- Backend: Express.js (Node.js)  
+- Database: MySQL  
+- Payment Gateway: Midtrans  
+- Modeling: Unified Modeling Language (UML)
+
+## 3. Getting Started
+
+### 3.1 Prerequisites
+
+- Node.js  
+- NPM or Yarn  
+- Running MySQL server
+
+### 3.2 Installation Steps
+
+1. Clone the repository
+
+```bash
 git clone https://github.com/your_username/your_repository.git
-Install backend dependencies
+````
 
-Bash
+2. Install backend dependencies
 
+```bash
 cd backend-folder
 npm install
-Install frontend dependencies
+```
 
-Bash
+3. Install frontend dependencies
 
+```bash
 cd frontend-folder
 npm install
-Set up environment variables
+```
 
-Create a .env file in the backend folder.
+4. Set up environment variables
 
-Add your database credentials and any other required API keys (like Midtrans keys).
+Create a `.env` file inside the backend folder and add the following:
 
-Run the application
+```env
+DB_HOST=your_host
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_NAME=your_database
+MIDTRANS_SERVER_KEY=your_midtrans_key
+```
 
-Start the backend server.
+5. Run the application
 
-Start the frontend development server.
+Start the backend server:
+
+```bash
+npm run dev
+```
+
+Start the frontend development server:
+
+```bash
+npm run serve
+```
+
+## 4. Contact
+
+For questions, feedback, or collaboration, please contact \[your email or GitHub profile link].
+
+```
+
+Jika kamu ingin saya langsung ganti placeholder seperti `your_username`, `your_repository`, dan lainnya ke versi final, tinggal kirim nama repo dan info yang kamu mau tampilkan.
+```
