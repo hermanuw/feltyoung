@@ -1,116 +1,114 @@
-# Berry Free Vue Material Admin Template [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Get%20Berry%20React%20-%20The%20most%20beautiful%20Material%20designed%20Admin%20Dashboard%20Template%20&url=https://berrydashboard.io&via=codedthemes&hashtags=reactjs,webdev,developers,javascript)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Price](https://img.shields.io/badge/price-FREE-0098f7.svg)](https://github.com/codedthemes/berry-free-vue-admin-template/blob/main/LICENSE)
+# Feltyoung.kicks
 
-Berry is a free Material admin dashboard template built with Vue. It is meant to provide the best possible User Experience with highly customizable feature-rich pages. It is a complete Dashboard Template that has easy and intuitive responsive design whether it is viewed on retina screens or laptops.
+Feltyoung.kicks is a web-based e-commerce application designed to help a shoe store manage product catalogs and sales more effectively. This project was developed as a final thesis using the Extreme Programming (XP) methodology to ensure flexibility, collaboration, and continuous development.
 
-:star: :star: :star: Do not forget to star (Top right of this page) it if you like the theme :star: :star: :star:
+## 1. Key Features
 
-![IMG_8566.jpg](https://berrydashboard.io/imp-images/berry-github-free-vue-repo.jpg)
+The application supports two main user roles:
 
-[Pro version](https://berrydashboard.io/vue) of Berry vue template contains features like TypeScript, Apps, Authentication Methods (i.e. JWT), Advance Components, Form Plugins, Layouts, Widgets, and many more.
+- Customer
+- Admin
 
-| [Berry Free](https://berrydashboard.io/vue/free/) | [Berry](https://codedthemes.com/item/berry-vue-admin-dashboard/)     |
-| ------------------------------------------------- | :------------------------------------------------------------------- |
-| **9** Demo pages                                  | **45+** demo pages                                                   |
-| -                                                 | ✓ Multi-language                                                     |
-| -                                                 | ✓ Dark/Light Mode 🌓                                                 |
-| -                                                 | ✓ TypeScript version                                                 |
-| -                                                 | ✓ Design files (Figma)                                               |
-| -                                                 | ✓ 6+ color Options                                                   |
-| -                                                 | ✓ RTL                                                                |
-| -                                                 | ✓ JWT authentications                                                |
-| -                                                 | ✓ [More components](https://berrydashboard.io/vue/dashboard/default) |
+### 1.1 Customer Features
 
-## Why Berry?
+1. Authentication  
+   Customers can register and log in securely.
 
-Berry offers everything you need to create dashboards. We have included the following high-end features in our initial release:
+2. Product Catalog  
+   Browse all products by brand or category (Men, Women, Kids) and view product details.
 
-- Modern aesthetics UI design
-- Vuetify components
-- Fully Responsive, all modern browser supported
-- Easy to use code structure
-- Flexible & High-Performance code
-- Easy Documentation Guide
+3. Search and Filter  
+   Search for products by name and filter by category or brand.
 
-## Free Berry Vue version
+4. Shopping Cart  
+   Add multiple items to the cart before making a purchase.
 
-- [Preview](https://berrydashboard.io/vue/free/)
-- [Download from Github](https://github.com/codedthemes/berry-free-vue-admin-template)
+5. Checkout Process  
+   Seamless checkout process integrated with Midtrans for secure online payments.
 
-## Berry Pro version
+6. Order History  
+   View the status and history of all past transactions.
 
-- [Preview](https://berrydashboard.io/vue)
-- [Purchase from Store](https://codedthemes.com/item/berry-vue-admin-dashboard/)
+7. Product Request  
+   Customers can request products that are currently unavailable.
 
-## Table of contents
+8. Profile Management  
+   Update personal information and shipping address.
 
-- [Getting Started](#getting-started)
-- [Documentation](#documentation)
-- [Technology Stack](#technology-stack)
-- [Author](#author)
-- [Issues?](#issues)
-- [License](#license)
-- [More Products](#more-free-react-material-admin-templates)
-- [Follow us](#follow-us)
+### 1.2 Admin Features
 
-## Getting Started
+1. Admin Dashboard  
+   Display key business metrics such as total earnings, monthly orders, sales charts, and most popular products.
 
-Clone from Github
+2. Product Management  
+   Full CRUD (Create, Read, Update, Delete) operations for all products.
 
+3. Order Management  
+   View all customer orders and update their statuses (e.g., pending, packing, shipped).
+
+4. Request Management  
+   Manage and respond to product requests submitted by customers.
+
+## 2. Tech Stack
+
+- Frontend: Vue.js  
+- Backend: Express.js (Node.js)  
+- Database: MySQL  
+- Payment Gateway: Midtrans 
+
+## 3. Getting Started
+
+### 3.1 Prerequisites
+
+- Node.js  
+- NPM or Yarn  
+- Running MySQL server
+
+### 3.2 Installation Steps
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/hermanuw/feltyoung.git
+````
+
+2. Install backend dependencies
+
+```bash
+cd backend-folder
+npm install
 ```
-git clone https://github.com/codedthemes/berry-free-vue-admin-template.git
+
+3. Install frontend dependencies
+
+```bash
+cd frontend-folder
+npm install
 ```
 
-## Documentation
+4. Set up environment variables
 
-[Berry documentation](https://codedthemes.gitbook.io/berry/) helps you with installation, deployment, and troubleshooting.
+Create a `.env` file inside the backend folder and add the following:
 
-## Technology Stack
+```env
+DB_HOST=your_host
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_NAME=your_database
+MIDTRANS_SERVER_KEY=your_midtrans_key
+```
 
-- [Vuetify 3](https://vuetifyjs.com/)
-- Vite
-- Vue3
+5. Run the application
 
-## Author
+Start the backend server:
 
-Berry is developed by Team [CodedThemes](https://codedthemes.com).
+```bash
+npm run dev
+```
 
-## Issues
+Start the frontend development server:
 
-To report a bug, please submit an [issue](https://github.com/codedthemes/berry-free-vue-admin-template/issues) on Github. We will respond as soon as possible to resolve the issue.
-
-## License
-
-- Licensed cover under [MIT](https://github.com/codedthemes/datta-able-bootstrap-dashboard/blob/master/LICENSE)
-
-## Berry Free - Other Technologies
-
-- [React](https://codedthemes.com/item/berry-mui-free-react-admin-template/)
-- [Bootstrap](https://codedthemes.com/item/berry-bootstrap-free-admin-template/)
-- [Angular](https://codedthemes.com/item/berry-angular-free-admin-template/)
-
-## Berry Pro - Other Technologies
-
-- [React](https://codedthemes.com/item/berry-material-react-admin-template/)
-- [Bootstrap](https://codedthemes.com/item/berry-bootstrap-5-admin-template/)
-- [Angular](https://codedthemes.com/item/berry-angular-admin-dashboard-template/)
-- [.Net](https://codedthemes.com/item/berry-dotnet-bootstrap-dashboard-template/)
-- [CodeIgnitor](https://codedthemes.com/item/berry-codeigniter-admin-template/)
-- [Django](https://codedthemes.com/item/berry-django-react-admin-template/)
-- [NodeJS](https://codedthemes.com/item/berry-react-node-js-admin-template/)
-
-## More Premium Vue Material Admin Templates
-
-- [Mantis](https://codedthemes.com/item/mantis-vue-admin-template/)
-- [Able Pro](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiDpKWU6c-EAxWb1DgGHZrqBlwQFnoECBUQAQ&url=https%3A%2F%2Fthemeforest.net%2Fitem%2Fable-pro-vuejs-admin-dashboard-template%2F50804253&usg=AOvVaw1wWW-BC8ltIxIs-Rb1Mu8C&opi=89978449)
-
-## Follow us
-
-- [Website](https://berrydashboard.io)
-- [Blog](https://blog.berrydashboard.io)
-- [CodedThemes](https://codedthemes.com)
-- [Dribbble](https://dribbble.com/codedthemes)
-- [Facebook](https://www.facebook.com/codedthemes)
-- [Twitter](https://twitter.com/codedthemes)
+```bash
+npm run serve
+```
