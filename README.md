@@ -113,12 +113,3 @@ Start the frontend development server:
 ```bash
 npm run serve
 ```
-
-## 4. Contact
-
-For questions, feedback, or collaboration, please contact \[your email or GitHub profile link].
-
-```
-
-Jika kamu ingin saya langsung ganti placeholder seperti `your_username`, `your_repository`, dan lainnya ke versi final, tinggal kirim nama repo dan info yang kamu mau tampilkan.
-```
