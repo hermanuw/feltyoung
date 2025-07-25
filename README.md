@@ -55,8 +55,7 @@ The application supports two main user roles:
 - Frontend: Vue.js  
 - Backend: Express.js (Node.js)  
 - Database: MySQL  
-- Payment Gateway: Midtrans  
-- Modeling: Unified Modeling Language (UML)
+- Payment Gateway: Midtrans 
 
 ## 3. Getting Started
 
@@ -71,7 +70,7 @@ The application supports two main user roles:
 1. Clone the repository
 
 ```bash
-git clone https://github.com/your_username/your_repository.git
+git clone https://github.com/hermanuw/feltyoung.git
 ````
 
 2. Install backend dependencies
