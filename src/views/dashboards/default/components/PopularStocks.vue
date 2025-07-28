@@ -95,15 +95,6 @@ watch(selectedPeriod, fetchTopProducts);
               </v-list-item>
             </v-list>
           </perfect-scrollbar>
-
-          <div class="text-center mt-3">
-            <v-btn color="primary" variant="text">
-              View All
-              <template v-slot:append>
-                <ChevronRightIcon stroke-width="1.5" width="20" />
-              </template>
-            </v-btn>
-          </div>
         </div>
       </v-card-text>
     </v-card>
