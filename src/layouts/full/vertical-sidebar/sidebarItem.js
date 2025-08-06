@@ -1,14 +1,20 @@
-import { divide } from 'lodash';
 import { BuildingStoreIcon, DashboardIcon, ShoppingCartIcon, UserCircleIcon } from 'vue-tabler-icons';
 
 const sidebarItem = [
-  { header: 'Home' },
+  { 
+    header: 'Home',
+    meta: { requiredRoles: ['super admin'] },
+  },
   {
     title: 'Dashboard',
     icon: DashboardIcon,
+    meta: { requiredRoles: ['super admin'] },
     to: '/'
   },
-  { divider: true },
+  { 
+    divider: true,
+    meta: { requiredRoles: ['super admin'] },
+   },
   { header: 'Manage' },
   {
     title: 'Products',
@@ -16,19 +22,27 @@ const sidebarItem = [
     children: [
       {
         title: 'Products',
+        meta: { requiredRoles: ['super admin', 'admin'] },
         to: '/manage-product'
       },
       {
         title: 'Requests Products',
+        meta: { requiredRoles: ['super admin', 'admin'] },
         to: '/request-product'
       }
     ]
   },
   {
-    title: 'Manage Orders',
+    title: 'Orders',
     icon: ShoppingCartIcon,
-    to: '/manage-orders'
-  }
+    children: [
+      {
+        title: 'Manage Orders',
+        meta: { requiredRoles: ['super admin', 'admin'] },
+        to: '/manage-orders'
+      }
+    ]
+  },
   // {
   //   title: 'Manage Users',
   //   icon: UserCircleIcon,

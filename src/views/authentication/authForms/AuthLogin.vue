@@ -13,6 +13,12 @@ const email = ref('');
 const password = ref('');
 const errorMsg = ref('');
 const loading = ref(false);
+const defaultRoute = ref('');
+if (authStore.user?.role.includes('super admin')) {
+  defaultRoute.value = '/main/dashboard';
+} else if (authStore.user?.role.includes('admin')) {
+  defaultRoute.value = '/manage-product';
+}
 
 const passwordRules = ref([(v) => !!v || 'Password is required', (v) => (v && v.length <= 20) || 'Max 20 characters']);
 const emailRules = ref([(v) => !!v || 'E-mail is required', (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid']);
@@ -29,7 +35,7 @@ const login = async () => {
 
     const { accessToken, user } = res.data;
 
-    if (user.role !== 'admin') {
+    if (user.role === 'user') {
       errorMsg.value = 'Only Admin Can Access This Page';
       return;
     }
@@ -39,7 +45,11 @@ const login = async () => {
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('accessToken', accessToken);
 
-    router.push('/main/dashboard');
+    if (user.role.includes('super admin')) {
+      router.push('/main/dashboard');
+    } else if (user.role.includes('admin')) {
+      router.push('/manage-product');
+    }
   } catch (err) {
     errorMsg.value = 'Email atau password salah';
   } finally {
