@@ -85,7 +85,7 @@ async function comparePassword(password, hashPassword) {
   return await bcrypt.compare(password, hashPassword);
 }
 function issueAccessToken(payload) {
-  return jwt.sign(payload, config.SECRET, { expiresIn: 60 * 60 }); //5 mins validity
+  return jwt.sign(payload, config.SECRET, { expiresIn: 60 * 60 * 6 }); //5 mins validity
 }
 
 async function createRefreshToken(user_id) {
