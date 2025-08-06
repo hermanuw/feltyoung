@@ -108,6 +108,13 @@ async function addProducts(req, res) {
       is_top_seller: Number(is_top_seller),
     });
 
+    await Product.addVariant({
+      variant_id: await generateID('prd', 'var'),
+      product_id,
+      size: null,
+      stock,
+    })
+
     if (request_id) {
       await Product.updateRequestStatus(request_id, "accepted", product_id);
     }
@@ -206,8 +213,12 @@ async function deleteProducts(req, res) {
       await r2.send(new DeleteObjectCommand(deleteParams));
     }
 
+    // Hapus juga varian produk
+    await Product.removeVariantsByProductId(id);
     await Product.remove(id);
-    return res.json({ message: "Product deleted, including image if present" });
+    return res.json({
+      message: "Product deleted, including image and variants if present",
+    });
   } catch (err) {
     console.error("Delete product failed:", err);
     return res.status(500).json({ message: "Failed to delete product" });
