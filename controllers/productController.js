@@ -3,6 +3,7 @@ const { PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const r2 = require("../config/r2");
 const Product = require("../models/product");
 const upload = require("../middleware/multer");
+const { generateID } = require("../util/idGenerator");
 // GET all products
 async function getAllProducts(req, res) {
   try {
@@ -84,7 +85,7 @@ async function addProducts(req, res) {
       return res.status(400).json({ message: "Image file is required" });
     }
 
-    const fileName = `${uuidv4()}-${file.originalname}`;
+    const fileName = `${generateID('prd')}-${file.originalname}`;
     const uploadParams = {
       Bucket: process.env.R2_BUCKET_NAME,
       Key: fileName,
@@ -94,7 +95,7 @@ async function addProducts(req, res) {
     await r2.send(new PutObjectCommand(uploadParams));
     const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
 
-    const product_id = uuidv4();
+    const product_id = generateID('prd');
     await Product.create({
       product_id,
       name,
