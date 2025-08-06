@@ -12,6 +12,10 @@ async function generateID({
   prefix,
   categoryCode,
 }) {
+  if (!tableName || !tableId || !prefix) {
+    throw new Error("tableName, tableId, and prefix are required");
+  }
+
   const likePattern = categoryCode
     ? `${prefix}-${categoryCode}-%`
     : `${prefix}-%`;
@@ -21,7 +25,8 @@ async function generateID({
       SELECT COUNT(*) AS count
       FROM ${tableName}
       WHERE ${tableId} LIKE ?
-    `,[likePattern]
+    `,
+    [likePattern]
   );
 
   const count = rows[0]?.count || 0;

@@ -118,18 +118,6 @@ async function addProducts(req, res) {
       is_top_seller: Number(is_top_seller),
     });
 
-    await Product.addVariant({
-      variant_id: await generateID({
-        tableName: "product_variants",
-        tableId: "variant_id",
-        prefix: "var",
-        categoryCode: product_id.replace("prd-", ""),
-      }),
-      product_id,
-      size: null,
-      stock,
-    })
-
     if (request_id) {
       await Product.updateRequestStatus(request_id, "accepted", product_id);
     }
