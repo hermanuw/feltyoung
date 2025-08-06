@@ -35,7 +35,11 @@ async function register(req, res) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user_id = await generateID('usr'); // Generate unique user_id
+    const user_id = await generateID({
+      tableName: "users",
+      tableId: "user_id",
+      prefix: "usr",
+    }); // Generate unique user_id
 
     // Buat user baru
     const user = await User.createUser({
