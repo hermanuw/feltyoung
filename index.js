@@ -9,6 +9,7 @@ const bodyParser = require("body-parser");
 const allowedOrigins = [
   "https://feltyoung.up.railway.app",
   "https://feltyoung-admin.up.railway.app",
+  "http://localhost:5174"
 ];
 
 app.use(
