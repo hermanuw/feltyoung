@@ -1,7 +1,7 @@
 const MainRoutes = {
   path: '/main',
   meta: {
-    requiresAuth: true // semua di bawah ini butuh login
+    requiresAuth: true, // semua di bawah ini butuh login
   },
   redirect: '/main/dashboard',
   component: () => import('../layouts/full/FullLayout.vue'),
@@ -9,6 +9,9 @@ const MainRoutes = {
     {
       path: '/main/dashboard',
       name: 'Dashboard',
+      meta: {
+        requiredRoles: ['super admin']
+      },
       component: () => import('../views/dashboards/default/DefaultDashboard.vue')
     },
     {

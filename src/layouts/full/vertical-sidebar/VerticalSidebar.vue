@@ -1,6 +1,7 @@
 <script setup>
 import { shallowRef } from 'vue';
 import { useCustomizerStore } from '@/stores/customizer';
+import { useAuthStore } from '../../../stores/auth';
 import sidebarItems from './sidebarItem';
 
 import NavGroup from './NavGroup/NavGroup.vue';
@@ -9,6 +10,8 @@ import NavCollapse from './NavCollapse/NavCollapse.vue';
 import Logo from '../logo/LogoMain.vue';
 const customizer = useCustomizerStore();
 const sidebarMenu = shallowRef(sidebarItems);
+const auth = useAuthStore();
+
 </script>
 
 <template>
@@ -28,7 +31,13 @@ const sidebarMenu = shallowRef(sidebarItems);
     <!-- Navigation -->
     <perfect-scrollbar class="scrollnavbar">
       <v-list class="pa-4">
-        <template v-for="(item, i) in sidebarMenu" :key="i">
+        <template 
+          v-for="(item, i) in sidebarMenu.filter((item) => {
+            if (!item.meta || !item.meta.requiredRoles) return true;
+            return auth.user?.role?.includes(item.meta.requiredRoles);
+          })"
+          :key="i"
+        >
           <NavGroup :item="item" v-if="item.header" :key="item.title" />
           <v-divider class="my-3" v-else-if="item.divider" />
           <NavCollapse class="leftPadding" :item="item" :level="0" v-else-if="item.children" />
