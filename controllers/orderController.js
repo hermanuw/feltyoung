@@ -4,6 +4,7 @@ const Order = require("../models/order");
 const { snap, coreApi } = require("../config/midtrans");
 const crypto = require("crypto");
 const Product = require("../models/product");
+const { generateID } = require("../util/idGenerator");
 require("dotenv").config();
 
 // Ambil semua order (khusus admin)
@@ -64,7 +65,7 @@ async function createOrder(req, res) {
     recipient_phone,
     items,
   } = req.body;
-  const order_id = uuidv4();
+  const order_id = await generateID('ord');
   const order_date = new Date();
   const user_id = req.user.id;
 
@@ -114,7 +115,7 @@ async function createOrder(req, res) {
     // Simpan item-item order
     for (const item of items) {
       await Order.addOrderItem({
-        order_item_id: uuidv4(),
+        order_item_id: await generateID('ord', 'itm'),
         order_id,
         product_id: item.product_id,
         quantity: item.quantity,

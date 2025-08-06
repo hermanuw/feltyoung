@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
 // Fungsi bantu padding angka ke 3 digit
-function pad(number, size = 3) {
+function pad(number, size = 4) {
   return number.toString().padStart(size, '0');
 }
 

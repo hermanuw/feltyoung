@@ -7,6 +7,7 @@ const config = require("../util/config");
 const { v4: uuidv4 } = require("uuid");
 const helper = require("../util/helper");
 const { registerSchema } = require("../util/authSchema");
+const { generateID } = require("../util/idGenerator");
 
 // Register user
 async function register(req, res) {
@@ -34,7 +35,7 @@ async function register(req, res) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user_id = uuidv4(); // Generate unique user_id
+    const user_id = await generateID('usr'); // Generate unique user_id
 
     // Buat user baru
     const user = await User.createUser({
