@@ -54,14 +54,14 @@ async function register(req, res) {
     });
 
     // Hapus refresh token lama milik user sebelum membuat yang baru
-    await RefreshToken.deleteByUserId(user_id);
+    // await RefreshToken.deleteByUserId(user_id);
 
     // Buat token akses baru dan refresh token
     const token = jwt.sign({ user_id: user.user_id }, config.SECRET, {
       expiresIn: "1d", // Access token expires in 1 day
     });
 
-    const refreshToken = await helper.createRefreshToken(user.user_id); // Refresh token baru dibuat
+    // const refreshToken = await helper.createRefreshToken(user.user_id); // Refresh token baru dibuat
 
     // Kirim email verifikasi
     await helper.sendVerificationEmail(email, token);
@@ -70,7 +70,7 @@ async function register(req, res) {
     return res.status(201).json({
       message: "Check your email to verify account.",
       accessToken: token,
-      refreshToken: refreshToken,
+      // refreshToken: refreshToken,
     });
   } catch (err) {
     console.error(err);
@@ -99,11 +99,11 @@ async function login(req, res) {
       role: user.role,
     };
     const accessToken = helper.issueAccessToken(payload);
-    const refreshToken = await helper.createRefreshToken(user.user_id);
+    // const refreshToken = await helper.createRefreshToken(user.user_id);
 
     return res.status(200).json({
       accessToken,
-      refreshToken,
+      // refreshToken,
       user: payload,
     });
   } catch (err) {

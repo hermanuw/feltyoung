@@ -65,7 +65,11 @@ async function createOrder(req, res) {
     recipient_phone,
     items,
   } = req.body;
-  const order_id = await generateID('ord');
+  const order_id = await generateID({
+    tableName: "orders",
+    tableId: "order_id",
+    prefix: "ord",
+  });
   const order_date = new Date();
   const user_id = req.user.id;
 
@@ -115,7 +119,12 @@ async function createOrder(req, res) {
     // Simpan item-item order
     for (const item of items) {
       await Order.addOrderItem({
-        order_item_id: await generateID('ord', 'itm'),
+        order_item_id: await generateID({
+          tableName: "order_items",
+          tableId: "order_item_id",
+          prefix: "ot",
+          categoryCode: order_id.replace("ord-", ""),
+        }),
         order_id,
         product_id: item.product_id,
         quantity: item.quantity,
