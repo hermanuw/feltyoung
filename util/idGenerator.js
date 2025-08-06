@@ -1,20 +1,26 @@
 const db = require('../config/db');
 
-// Fungsi bantu padding nomor: 3 -> 003
+// Fungsi bantu padding angka ke 3 digit
 function pad(number, size = 3) {
   return number.toString().padStart(size, '0');
 }
 
-// Generator untuk produk
+// Generator ID produk custom
 async function generateID(prefix = 'PRD', categoryCode = '') {
   const sql = `
     SELECT COUNT(*) AS count
     FROM products
+    WHERE product_id LIKE ?
   `;
-  const [rows] = await db.promise().query(sql, [`${prefix}-${categoryCode}%`]);
+
+  const likePattern = categoryCode
+    ? `${prefix}-${categoryCode}-%`
+    : `${prefix}-%`;
+
+  const [rows] = await db.promise().query(sql, [likePattern]);
   const count = rows[0]?.count || 0;
 
-  const sequence = pad(count + 1); // urutan baru
+  const sequence = pad(count + 1); // urutan: 001, 002, dst
   const finalId = categoryCode
     ? `${prefix}-${categoryCode}-${sequence}`
     : `${prefix}-${sequence}`;
