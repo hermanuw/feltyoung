@@ -13,12 +13,6 @@ const email = ref('');
 const password = ref('');
 const errorMsg = ref('');
 const loading = ref(false);
-const defaultRoute = ref('');
-if (authStore.user?.role.includes('super admin')) {
-  defaultRoute.value = '/main/dashboard';
-} else if (authStore.user?.role.includes('admin')) {
-  defaultRoute.value = '/manage-product';
-}
 
 const passwordRules = ref([(v) => !!v || 'Password is required', (v) => (v && v.length <= 20) || 'Max 20 characters']);
 const emailRules = ref([(v) => !!v || 'E-mail is required', (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid']);
