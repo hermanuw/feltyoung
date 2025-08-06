@@ -85,7 +85,13 @@ async function addProducts(req, res) {
       return res.status(400).json({ message: "Image file is required" });
     }
 
-    const fileName = `${await generateID('prd')}-${file.originalname}`;
+    const fileName = `${
+      await generateID({
+      tableName: "products",
+      tableId: "product_id",
+      prefix: "prd",
+    })}-${file.originalname}`;
+
     const uploadParams = {
       Bucket: process.env.R2_BUCKET_NAME,
       Key: fileName,
@@ -95,7 +101,11 @@ async function addProducts(req, res) {
     await r2.send(new PutObjectCommand(uploadParams));
     const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
 
-    const product_id = await generateID('prd');
+    const product_id = await generateID({
+      tableName: "products",
+      tableId: "product_id",
+      prefix: "prd",
+    });
     await Product.create({
       product_id,
       name,
@@ -109,7 +119,12 @@ async function addProducts(req, res) {
     });
 
     await Product.addVariant({
-      variant_id: await generateID('prd', 'var'),
+      variant_id: await generateID({
+        tableName: "product_variants",
+        tableId: "variant_id",
+        prefix: "var",
+        categoryCode: product_id.replace("prd-", ""),
+      }),
       product_id,
       size: null,
       stock,
@@ -161,7 +176,13 @@ async function updateProducts(req, res) {
     let image_url = existing.image_url;
 
     if (req.file) {
-      const fileName = `${await generateID('prd')}-${req.file.originalname}`;
+      const fileName = `${
+        await generateID({
+          tableName: "products",
+          tableId: "product_id",
+          prefix: "prd",
+        })}
+        -${req.file.originalname}`;
       const uploadParams = {
         Bucket: process.env.R2_BUCKET_NAME,
         Key: fileName,
@@ -356,7 +377,12 @@ async function addVariant(req, res) {
       return res.status(400).json({ message: "Size and stock are required" });
     }
 
-    const variant_id = await generateID('prd', 'var');
+    const variant_id = await generateID({
+      tableName: "product_variants",
+      tableId: "variant_id",
+      prefix: "var",
+      categoryCode: product_id.replace("prd-", ""),
+    });
 
     await Product.addVariant({
       variant_id,
@@ -409,7 +435,12 @@ async function createProductRequests(req, res) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const fileName = `${await generateID('req')}-${file.originalname}`; // Membuat nama file unik
+      const fileName = `${
+        await generateID({
+        tableName: "product_requests",
+        tableId: "request_id",
+        prefix: "req",
+      })}-${file.originalname}`; // Membuat nama file unik
       const uploadParams = {
         Bucket: process.env.R2_BUCKET_NAME, // Nama bucket R2
         Key: fileName,
@@ -424,7 +455,11 @@ async function createProductRequests(req, res) {
       console.log("Generated Image URL:", imageUrl);
 
       // Simpan data produk request ke database
-      const request_id = await generateID('req');
+      const request_id = await generateID({
+        tableName: "product_requests",
+        tableId: "request_id",
+        prefix: "req",
+      });
       await Product.createRequest({
         request_id,
         user_id,
@@ -521,7 +556,13 @@ async function addProductFromRequest(req, res) {
 
     let finalImageUrl;
     if (req.file) {
-      const fileName = `${await generateID('prd', 'rq')}-${req.file.originalname}`;
+      const fileName = `${
+        await generateID({
+          tableName: "products",
+          tableId: "product_id",
+          prefix: "prd",
+        })
+      }-${req.file.originalname}`;
       const uploadParams = {
         Bucket: process.env.R2_BUCKET_NAME,
         Key: fileName,
@@ -536,7 +577,11 @@ async function addProductFromRequest(req, res) {
       return res.status(400).json({ message: "Image is required" });
     }
 
-    const product_id = await generateID('prd', 'rq');
+    const product_id = await generateID({
+      tableName: "products",
+      tableId: "product_id",
+      prefix: "prd",
+    });
     await Product.create({
       product_id,
       name,
@@ -580,7 +625,11 @@ async function updateStatusRequest(req, res) {
     }
 
     if (status === "accepted") {
-      const product_id = await generateID('prd', 'rq');
+      const product_id = await generateID({
+        tableName: "products",
+        tableId: "product_id",
+        prefix: "prd",
+      });
 
       await Product.create({
         product_id,

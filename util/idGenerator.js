@@ -6,21 +6,28 @@ function pad(number, size = 4) {
 }
 
 // Generator ID produk custom
-async function generateID(prefix = 'PRD', categoryCode = '') {
-  const sql = `
-    SELECT COUNT(*) AS count
-    FROM products
-    WHERE product_id LIKE ?
-  `;
-
+async function generateID({
+  tableName,
+  tableId,
+  prefix,
+  categoryCode,
+}) {
   const likePattern = categoryCode
     ? `${prefix}-${categoryCode}-%`
     : `${prefix}-%`;
 
-  const [rows] = await db.promise().query(sql, [likePattern]);
+  const [rows] = await db.promise().query(
+    `
+      SELECT COUNT(*) AS count
+      FROM ?
+      WHERE ? LIKE ?
+    `,
+    [tableName, tableId, likePattern]
+  );
+
   const count = rows[0]?.count || 0;
 
-  const sequence = pad(count + 1); // urutan: 001, 002, dst
+  const sequence = pad(count + 1);
   const finalId = categoryCode
     ? `${prefix}-${categoryCode}-${sequence}`
     : `${prefix}-${sequence}`;
