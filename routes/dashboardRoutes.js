@@ -1,47 +1,47 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../middleware/authenticate");
-const isAdmin = require("../middleware/isAdmin");
+const isSuperAdmin = require("../middleware/isSuperAdmin");
 const dashboardController = require("../controllers/dashboardController");
 
 router.get(
   "/earning",
   authenticate,
-  isAdmin,
+  isSuperAdmin,
   dashboardController.getTotalEarning
 );
-router.get("/orders", authenticate, isAdmin, dashboardController.getTotalOrder);
+router.get("/orders", authenticate, isSuperAdmin, dashboardController.getTotalOrder);
 router.get(
   "/orders/monthly",
   authenticate,
-  isAdmin,
+  isSuperAdmin,
   dashboardController.getMonthlyOrder
 );
 router.get(
   "/orders/yearly",
   authenticate,
-  isAdmin,
+  isSuperAdmin,
   dashboardController.getYearlyOrder
 );
 router.get(
   "/orders/chart",
   authenticate,
-  isAdmin,
+  isSuperAdmin,
   dashboardController.getOrderChartData
 );
 
-router.get("/users", authenticate, isAdmin, dashboardController.getUserStats);
+router.get("/users", authenticate, isSuperAdmin, dashboardController.getUserStats);
 router.get("/top-sellers", dashboardController.getTopSellerProducts);
 router.get(
   "/growth",
   authenticate,
-  isAdmin,
+  isSuperAdmin,
   dashboardController.getTotalGrowthByPeriod
 );
 router.get(
   "/top-sellers/period",
   authenticate,
-  isAdmin,
+  isSuperAdmin,
   dashboardController.getTopSellersByPeriod
 );
 
