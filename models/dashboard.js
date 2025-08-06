@@ -88,10 +88,10 @@ module.exports = {
   },
   async getTopSellers(limit = 5) {
     const sql = `
-    SELECT p.name, COUNT(oi.product_id) AS total_sold
+    SELECT p.product_id, p.name, p.brand, COUNT(oi.product_id) AS total_sold
     FROM order_items oi
     JOIN products p ON p.product_id = oi.product_id
-    GROUP BY oi.product_id
+    GROUP BY p.product_id, p.name, p.brand
     ORDER BY total_sold DESC
     LIMIT ?
   `;
@@ -180,12 +180,20 @@ module.exports = {
   },
   async getTopSellersToday() {
     const sql = `
-      SELECT p.product_id, p.name, SUM(oi.quantity) AS total_sold
+      SELECT 
+        p.product_id, 
+        p.name, 
+        p.brand, 
+        SUM(oi.quantity) AS total_sold
       FROM order_items oi
       JOIN orders o ON oi.order_id = o.order_id
       JOIN products p ON oi.product_id = p.product_id
-      WHERE DATE(o.order_date) = CURDATE() AND o.status != 'cancelled'
-      GROUP BY p.product_id ORDER BY total_sold DESC LIMIT 10
+      WHERE o.order_date >= CONVERT_TZ(CURDATE(), '+00:00', '+07:00')
+        AND o.order_date < CONVERT_TZ(CURDATE() + INTERVAL 1 DAY, '+00:00', '+07:00')
+        AND o.status IN ('paid', 'packing', 'shipped', 'done')
+      GROUP BY p.product_id, p.name, p.brand
+      ORDER BY total_sold DESC
+      LIMIT 10;
     `;
     const [rows] = await db.promise().query(sql);
     return rows;
@@ -193,14 +201,20 @@ module.exports = {
 
   async getTopSellersThisMonth() {
     const sql = `
-      SELECT p.product_id, p.name, SUM(oi.quantity) AS total_sold
+      SELECT 
+        p.product_id, 
+        p.name, 
+        p.brand, 
+        SUM(oi.quantity) AS total_sold
       FROM order_items oi
       JOIN orders o ON oi.order_id = o.order_id
       JOIN products p ON oi.product_id = p.product_id
       WHERE MONTH(o.order_date) = MONTH(CURDATE()) 
         AND YEAR(o.order_date) = YEAR(CURDATE()) 
-        AND o.status != 'cancelled'
-      GROUP BY p.product_id ORDER BY total_sold DESC LIMIT 10
+        AND o.status IN ('paid', 'packing', 'shipped', 'done')
+      GROUP BY p.product_id, p.name, p.brand
+      ORDER BY total_sold DESC
+      LIMIT 10;
     `;
     const [rows] = await db.promise().query(sql);
     return rows;
@@ -208,13 +222,19 @@ module.exports = {
 
   async getTopSellersThisYear() {
     const sql = `
-      SELECT p.product_id, p.name, SUM(oi.quantity) AS total_sold
+      SELECT 
+        p.product_id, 
+        p.name, 
+        p.brand, 
+        SUM(oi.quantity) AS total_sold
       FROM order_items oi
       JOIN orders o ON oi.order_id = o.order_id
       JOIN products p ON oi.product_id = p.product_id
       WHERE YEAR(o.order_date) = YEAR(CURDATE()) 
-        AND o.status != 'cancelled'
-      GROUP BY p.product_id ORDER BY total_sold DESC LIMIT 10
+        AND o.status IN ('paid', 'packing', 'shipped', 'done')
+      GROUP BY p.product_id, p.name, p.brand
+      ORDER BY total_sold DESC
+      LIMIT 10;
     `;
     const [rows] = await db.promise().query(sql);
     return rows;
