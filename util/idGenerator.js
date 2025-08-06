@@ -19,10 +19,9 @@ async function generateID({
   const [rows] = await db.promise().query(
     `
       SELECT COUNT(*) AS count
-      FROM ?
-      WHERE ? LIKE ?
-    `,
-    [tableName, tableId, likePattern]
+      FROM ${tableName}
+      WHERE ${tableId} LIKE ?
+    `,[likePattern]
   );
 
   const count = rows[0]?.count || 0;
