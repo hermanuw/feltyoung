@@ -85,7 +85,7 @@ async function addProducts(req, res) {
       return res.status(400).json({ message: "Image file is required" });
     }
 
-    const fileName = `${generateID('prd')}-${file.originalname}`;
+    const fileName = `${await generateID('prd')}-${file.originalname}`;
     const uploadParams = {
       Bucket: process.env.R2_BUCKET_NAME,
       Key: fileName,
@@ -95,7 +95,7 @@ async function addProducts(req, res) {
     await r2.send(new PutObjectCommand(uploadParams));
     const imageUrl = `https://pub-${process.env.R2_PUBLIC_HASH}.r2.dev/${fileName}`;
 
-    const product_id = generateID('prd');
+    const product_id = await generateID('prd');
     await Product.create({
       product_id,
       name,
